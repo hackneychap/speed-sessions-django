@@ -1,3 +1,4 @@
+{% load workout_filters %}
 <!--
 This is an HTML fragment, not a full page.
 It's designed to be the response from your API that HTMX will place into the #results-container.
@@ -53,39 +54,40 @@ It's designed to be the response from your API that HTMX will place into the #re
     </div>
 </div>
 
-<!-- Target Interval Times Card Updated -->
+<!-- Target Interval Times Card -->
 <div class="card bg-gray-800 border-gray-700 shadow-lg mt-4">
     <div class="card-body">
         <h5 class="card-title text-white font-semibold mb-3">Target Interval Times</h5>
-        <div class="row">
-            <!-- Column 1: Repetition Paces -->
-            <div class="col-md-6">
-                <h6 class="text-gray-400">Repetitions (Speed/Economy)</h6>
-                <ul class="list-group list-group-flush">
-                    {% for name, time in target_interval_times.items %}
-                        {% if 'Repetition' in name %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
-                                {{ name|replace:" Repetition"|safe }}
-                                <span class="badge bg-info rounded-pill">{{ time }}</span>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-            <!-- Column 2: Interval & Threshold Paces -->
-            <div class="col-md-6 mt-3 mt-md-0">
-                 <h6 class="text-gray-400">Intervals (Aerobic/Endurance)</h6>
-                 <ul class="list-group list-group-flush">
-                    {% for name, time in target_interval_times.items %}
-                        {% if 'Repetition' not in name %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
-                                {{ name|replace:" Interval"|replace:" Threshold"|safe }}
-                                <span class="badge bg-info rounded-pill">{{ time }}</span>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
+
+        <!-- Section 1: Repetition Paces -->
+        <div>
+            <h6 class="text-gray-400">Repetitions (Speed/Economy)</h6>
+            <ul class="list-group list-group-flush">
+                {% for name, time in target_interval_times.items %}
+                    {% if 'Repetition' in name %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
+                            {{ name|replace:" Repetition," }}
+                            <span class="badge bg-secondary rounded-pill">{{ time }}</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
         </div>
+
+        <!-- Section 2: Interval & Threshold Paces -->
+        <div class="mt-4">
+             <h6 class="text-gray-400">Intervals (Aerobic/Endurance)</h6>
+             <ul class="list-group list-group-flush">
+                {% for name, time in target_interval_times.items %}
+                    {% if 'Repetition' not in name %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
+                            {{ name|replace:" Interval,"|replace:" Threshold," }}
+                            <span class="badge bg-secondary rounded-pill">{{ time }}</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
     </div>
 </div>
