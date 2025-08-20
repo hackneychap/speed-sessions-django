@@ -1,0 +1,86 @@
+{% extends 'workouts/base.html' %}
+
+{% block title %}VDOT Calculator{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px;">
+    <!-- Added an ID here to make it easy to scroll to -->
+    <div id="calculator-card" class="card bg-gray-800 border-gray-700 shadow-lg">
+        <div class="card-body p-5">
+            <h1 class="text-center text-3xl font-bold text-white mb-2">VDOT Calculator</h1>
+            <p class="text-center text-gray-400 mb-4">Enter a recent race performance to calculate your VDOT score and training paces.</p>
+
+            <form id="vdot-form"
+                  hx-post="{% url 'calculate-vdot' %}"
+                  hx-target="#results-container"
+                  hx-swap="innerHTML"
+                  hx-indicator="#loading-spinner">
+
+                {% csrf_token %}
+
+                <!-- Distance Selection -->
+                <div class="mb-3">
+                    <label for="distance" class="form-label text-gray-300">Distance</label>
+                    <select class="form-select bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-0" id="distance" name="distance_meters" required>
+                        <option value="1609.34">1 Mile</option>
+                        <option value="5000">5k</option>
+                        <option value="10000">10k</option>
+                        <option value="21097.5">Half Marathon</option>
+                        <option value="42195">Marathon</option>
+                    </select>
+                </div>
+
+                <!-- Time Inputs -->
+                <div class="mb-4">
+                    <label class="form-label text-gray-300">Time</label>
+                    <div class="d-flex gap-2">
+                        <input type="number" class="form-control bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-0" id="hours" placeholder="HH" min="0">
+                        <input type="number" class="form-control bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-0" id="minutes" placeholder="MM" min="0" max="59" required>
+                        <input type="number" class="form-control bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-0" id="seconds" placeholder="SS" min="0" max="59" required>
+                    </div>
+                </div>
+
+                <input type="hidden" name="time_minutes" id="time_minutes">
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center">
+                        Calculate VDOT
+                        <div id="loading-spinner" class="spinner-border spinner-border-sm ms-2 htmx-indicator" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- This is the target container where the results will be displayed -->
+    <div id="results-container" class="mt-4 w-100"></div>
+
+    <script>
+        document.body.addEventListener('htmx:configRequest', function(event) {
+            if (event.detail.elt.id === 'vdot-form') {
+                const hours = parseFloat(document.getElementById('hours').value) || 0;
+                const minutes = parseFloat(document.getElementById('minutes').value) || 0;
+                const seconds = parseFloat(document.getElementById('seconds').value) || 0;
+                const totalMinutes = (hours * 60) + minutes + (seconds / 60);
+                event.detail.parameters['time_minutes'] = totalMinutes;
+            }
+        });
+
+        // --- THE FIX: Scroll back to the form after the results are loaded ---
+        document.body.addEventListener('htmx:afterOnLoad', function(event) {
+            // Check if the request that triggered this event came from our form
+            if (event.detail.elt.id === 'vdot-form') {
+                // Find the main calculator card
+                const card = document.getElementById('calculator-card');
+                if (card) {
+                    // Scroll the top of the card into view smoothly
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+    </script>
+</div>
+{% endblock %}

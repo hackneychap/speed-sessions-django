@@ -1,0 +1,62 @@
+<!--
+This is an HTML fragment, not a full page.
+It's designed to be the response from your API that HTMX will place into the #results-container.
+The leading underscore in the filename (_vdot_results.html) is a common convention for partial templates.
+-->
+<div class="card bg-gray-800 border-gray-700 shadow-lg mb-4">
+    <div class="card-body p-4 text-center">
+        <h2 class="text-lg text-gray-400 mb-1">Your VDOT Score</h2>
+        <p class="display-4 font-bold text-white">{{ vdot_score }}</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Equivalent Race Times Card -->
+    <div class="col-md-6">
+        <div class="card bg-gray-800 border-gray-700 shadow-lg h-100">
+            <div class="card-body">
+                <h5 class="card-title text-white font-semibold mb-3">Equivalent Race Times</h5>
+                <ul class="list-group list-group-flush">
+                    {% for name, time in equivalent_times.items %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
+                            {{ name }}
+                            <span class="badge bg-primary rounded-pill">{{ time }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Paces Card -->
+    <div class="col-md-6">
+        <div class="card bg-gray-800 border-gray-700 shadow-lg h-100">
+            <div class="card-body">
+                <h5 class="card-title text-white font-semibold mb-3">Training Paces (per km)</h5>
+                <ul class="list-group list-group-flush">
+                    {% for zone, pace in pace_targets.items %}
+                         <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
+                            {{ zone }}
+                            <span class="badge bg-secondary rounded-pill">{{ pace }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Target Interval Times Card -->
+<div class="card bg-gray-800 border-gray-700 shadow-lg mt-4">
+    <div class="card-body">
+        <h5 class="card-title text-white font-semibold mb-3">Target Interval Times</h5>
+        <ul class="list-group list-group-flush">
+             {% for name, time in target_interval_times.items %}
+                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
+                    {{ name }}
+                    <span class="badge bg-primary rounded-pill">{{ time }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
