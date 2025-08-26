@@ -1,6 +1,9 @@
 # speed_session/utils.py
 
 import math
+import logging
+
+logger = logging.getLogger(__name__)
 
 # --- Constants ---
 TRAINING_ZONES = {
@@ -115,6 +118,17 @@ def _solve_for_time(vdot_score: float, distance_meters: float) -> float:
 
     return (low_t + high_t) / 2
 
+def _get_velocity_from_vdot(vdot_score: float, intensity_percent: float) -> float:
+    """Calculates the velocity in m/min for a given VDOT and intensity."""
+    target_vo2 = vdot_score * (intensity_percent / 100.0)
+    a = 0.000104
+    b = 0.182258
+    c = -(4.60 + target_vo2)
+    discriminant = b**2 - 4 * a * c
+    if discriminant < 0:
+        return 0
+    return (-b + math.sqrt(discriminant)) / (2 * a)
+
 
 # --- Main Calculation Functions ---
 
@@ -226,3 +240,51 @@ def calculate_pace_from_vdot(vdot_score: float, target_intensity_percent: float,
             "seconds": round(km_seconds, 2)
         }
     }
+
+
+def calculate_tss(vdot_score: float, workout_segments: list) -> int:
+    """
+    Calculates the Training Stress Score (TSS) for a workout.
+    """
+    if vdot_score <= 0:
+        return 0
+
+    # 1. Determine the runner's Threshold Pace (velocity in m/s)
+    # T-Pace is the benchmark for TSS (Intensity Factor of 1.0)
+    threshold_intensity = TRAINING_ZONES["Threshold"]["max"]
+    threshold_velocity_mpm = _get_velocity_from_vdot(vdot_score, threshold_intensity)
+    if threshold_velocity_mpm <= 0:
+        return 0
+    threshold_velocity_mps = threshold_velocity_mpm / 60
+
+    total_tss = 0
+
+    # 2. Loop through each segment of the workout
+    for segment in workout_segments:
+        try:
+            reps = int(segment['reps'])
+            distance_m = float(segment['distance'])
+            intensity_zone = segment['intensity']
+
+            # 3. Calculate the velocity and duration for this segment
+            segment_intensity = TRAINING_ZONES[intensity_zone]['max']
+            segment_velocity_mpm = _get_velocity_from_vdot(vdot_score, segment_intensity)
+            if segment_velocity_mpm <= 0:
+                continue
+
+            segment_velocity_mps = segment_velocity_mpm / 60
+            time_per_rep_s = distance_m / segment_velocity_mps
+            total_duration_s = time_per_rep_s * reps
+
+            # 4. Calculate Intensity Factor (IF) and TSS for this segment
+            intensity_factor = segment_velocity_mps / threshold_velocity_mps
+            segment_tss = (total_duration_s * segment_velocity_mps * intensity_factor) / (
+                        threshold_velocity_mps * 3600) * 100
+
+            total_tss += segment_tss
+        except (ValueError, KeyError) as e:
+            logger.warning(f"Skipping segment in TSS calculation due to invalid data: {e}")
+            continue
+
+    return round(total_tss)
+

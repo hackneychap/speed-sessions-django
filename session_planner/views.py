@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 # Import your VDOT calculation function
-from workouts.utils  import calculate_vdot, calculate_pace_from_vdot, TRAINING_ZONES
+from workouts.utils  import calculate_vdot, calculate_pace_from_vdot, TRAINING_ZONES, calculate_tss
 logger = logging.getLogger(__name__)
 # Create your views here.
 # Add this new view to your existing views.py file
@@ -109,6 +109,10 @@ def differentiated_plan_view(request):
 
             total_time_inc_rest_s = total_active_time_s + total_rest_time_s
 
+            # Calculate the TSS for the workout
+            tss_score = calculate_tss(group_vdot, workout_segments)
+            logger.info(f"Calculated TSS for group {name}: {tss_score}")
+
             def format_seconds(seconds):
                 mins, secs = divmod(int(seconds), 60)
                 return f"{mins:02d}:{secs:02d}"
@@ -121,6 +125,7 @@ def differentiated_plan_view(request):
                     "distance": f"{total_active_dist_m / 1000:.2f} km",
                     "active_time": format_seconds(total_active_time_s),
                     "total_time": format_seconds(total_time_inc_rest_s),
+                    "tss": tss_score  # Add the TSS score to the summary
                 }
             })
 
