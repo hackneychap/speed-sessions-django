@@ -1,0 +1,42 @@
+<!--
+This HTML fragment represents a single row in your workout planner.
+It's loaded by HTMX when the user clicks the '+ Add Segment' button.
+-->
+<div class="segment-row row gx-2 gy-2 align-items-center mb-2">
+    <!-- Reps Input -->
+    <div class="col-md-2">
+        <input type="number" name="reps" class="form-control bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-0" placeholder="Reps" required>
+    </div>
+
+    <!-- Distance Selection (Updated) -->
+    <div class="col-md-3">
+        <select name="distance" class="form-select bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-0">
+            <option value="200">200m</option>
+            <option value="400">400m</option>
+            <option value="600">600m</option>
+            <option value="800">800m</option>
+            <option value="1000">1000m</option>
+            <option value="1200">1200m</option>
+            <option value="1600">1600m</option>
+        </select>
+    </div>
+
+    <!-- Intensity Selection -->
+    <div class="col-md-3">
+        <select name="intensity" class="form-select bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-0">
+            <option>Interval</option>
+            <option>Threshold</option>
+            <option>Repetition</option>
+        </select>
+    </div>
+
+    <!-- Rest Input -->
+    <div class="col-md-2">
+        <input type="number" name="rest" class="form-control bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-0" placeholder="Rest (s)" required>
+    </div>
+
+    <!-- Remove Button -->
+    <div class="col-md-2">
+        <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="this.closest('.segment-row').remove()">Remove</button>
+    </div>
+</div>

@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # My Apps
-    'workouts.apps.WorkoutsConfig', # Or just 'workouts'
+    'workouts.apps.WorkoutsConfig',
+    'session_planner.apps.SessionPlannerConfig',# Or just 'workouts'
 ]
 
 MIDDLEWARE = [

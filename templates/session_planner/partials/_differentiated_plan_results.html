@@ -1,0 +1,43 @@
+<div class="row g-4">
+    {% for group in groups %}
+        <div class="col-lg-4">
+            <div class="card bg-gray-800 border-gray-700 shadow-lg h-100 d-flex flex-column">
+                <div class="card-header bg-gray-700 border-gray-600">
+                    <h5 class="mb-0 text-white">{{ group.name }}</h5>
+                    <small class="text-gray-400">VDOT: {{ group.vdot }}</small>
+                </div>
+                <div class="card-body flex-grow-1">
+                    <ul class="list-group list-group-flush">
+                        {% for segment in group.workout %}
+                            <li class="list-group-item bg-transparent border-gray-700 text-gray-300 px-0">
+                                <div class="d-flex justify-content-between">
+                                    <span>{{ segment.reps }} x {{ segment.distance }}m w/ {{ segment.rest }}s rest</span>
+                                    <span class="fw-bold text-nowrap">{{ segment.target_pace }}</span>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item bg-transparent border-gray-700 text-gray-500 px-0">
+                                No valid workout segments.
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- Summary Footer -->
+                <div class="card-footer bg-gray-700 border-gray-600 text-sm">
+                    <div class="d-flex justify-content-between text-gray-400">
+                        <span>Total Distance:</span>
+                        <span class="fw-bold text-white">{{ group.summary.distance }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-gray-400">
+                        <span>Active Time:</span>
+                        <span class="fw-bold text-white">{{ group.summary.active_time }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-gray-400">
+                        <span>Total Time (inc. rest):</span>
+                        <span class="fw-bold text-white">{{ group.summary.total_time }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
