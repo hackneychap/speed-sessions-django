@@ -1,0 +1,74 @@
+{% comment %}
+This template represents a single, self-recalculating group card.
+It expects a 'group' object and a 'forloop' object from the parent loop.
+{% endcomment %}
+<div id="group-card-{{ forloop.counter }}" class="col-lg-4">
+    <form>
+        <div class="card bg-gray-800 border-gray-700 shadow-lg h-100 d-flex flex-column"
+             hx-post="{% url 'recalculate-plan' %}"
+             hx-trigger="change from:.recalc-trigger"
+             hx-target="#group-card-{{ forloop.counter }}"
+             hx-swap="outerHTML">
+
+            <div class="card-header bg-gray-700 border-gray-600">
+                <h5 class="mb-0 text-white">{{ group.name }}</h5>
+                <small class="text-gray-400">VDOT: {{ group.vdot }}</small>
+            </div>
+
+            <div class="card-body flex-grow-1">
+                {% for segment in group.workout %}
+                <div class="row gx-2 gy-2 align-items-center mb-3">
+                    <div class="col">
+                        <input type="number" name="reps" class="form-control form-control-sm bg-gray-700 border-gray-600 text-white focus:bg-gray-700 focus:border-blue-500 focus:ring-0 recalc-trigger" value="{{ segment.reps }}">
+                    </div>
+                    <div class="col">
+                         <select name="distance" class="form-select form-select-sm bg-gray-700 border-gray-600 text-white recalc-trigger">
+                            {% with current_dist=segment.distance|stringformat:"s" %}
+                            <option value="200" {% if current_dist == "200" %}selected{% endif %}>200m</option>
+                            <option value="400" {% if current_dist == "400" %}selected{% endif %}>400m</option>
+                            <option value="600" {% if current_dist == "600" %}selected{% endif %}>600m</option>
+                            <option value="800" {% if current_dist == "800" %}selected{% endif %}>800m</option>
+                            <option value="1000" {% if current_dist == "1000" %}selected{% endif %}>1000m</option>
+                            <option value="1200" {% if current_dist == "1200" %}selected{% endif %}>1200m</option>
+                            <option value="1600" {% if current_dist == "1600" %}selected{% endif %}>1600m</option>
+                            {% endwith %}
+                        </select>
+                    </div>
+                     <div class="col">
+                        <input type="number" name="rest" class="form-control form-control-sm bg-gray-700 border-gray-600 text-white recalc-trigger" value="{{ segment.rest }}">
+                    </div>
+                    <div class="col-auto">
+                        <span class="fw-bold text-nowrap text-gray-400">{{ segment.target_pace }}</span>
+                    </div>
+                    <!-- Hidden input to pass the intensity for each segment -->
+                    <input type="hidden" name="intensity" value="{{ segment.intensity }}">
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Summary Footer -->
+            <div class="card-footer bg-gray-700 border-gray-600 text-sm">
+                <div class="d-flex justify-content-between text-gray-400">
+                    <span>Total Distance:</span>
+                    <span class="fw-bold text-white">{{ group.summary.distance }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-gray-400">
+                    <span>Active Time:</span>
+                    <span class="fw-bold text-white">{{ group.summary.active_time }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-gray-400">
+                    <span>Total Time (inc. rest):</span>
+                    <span class="fw-bold text-white">{{ group.summary.total_time }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-gray-400 pt-2 mt-2 border-top border-gray-600">
+                    <span>Predicted TSS:</span>
+                    <span class="fw-bold text-white">{{ group.summary.tss }}</span>
+                </div>
+            </div>
+        </div>
+        <!-- Hidden inputs to pass data that doesn't change -->
+        <input type="hidden" name="group_name" value="{{ group.name }}">
+        <input type="hidden" name="group_vdot" value="{{ group.vdot }}">
+        <input type="hidden" name="forloop_counter" value="{{ forloop.counter }}">
+    </form>
+</div>
