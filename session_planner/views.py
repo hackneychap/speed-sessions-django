@@ -45,28 +45,45 @@ def _process_and_calculate_group_plan(post_data):
             distance_meters = float(segment['distance'])
             pace_data = calculate_pace_from_vdot(group_vdot, intensity_percent, distance_meters)
             if pace_data:
+                # Calculate 400m lap time from pace_per_km
+                pace_per_km_seconds = pace_data['pace_per_km']['minutes'] * 60 + pace_data['pace_per_km']['seconds']
+                time_for_400m_seconds = pace_per_km_seconds * 0.4
+                lap_minutes = int(time_for_400m_seconds // 60)
+                lap_seconds = time_for_400m_seconds % 60
+                lap_time_formatted = f"{lap_minutes}:{lap_seconds:05.2f}"
+
                 calculated_segments.append({
                     "reps": segment['reps'],
                     "distance": segment['distance'],
                     "rest": segment['rest'],
                     "intensity": segment['intensity'],
-                    "target_pace": f"{pace_data['target_pace']['minutes']}:{pace_data['target_pace']['seconds']:05.2f}"
+                    "target_pace": f"{pace_data['target_pace']['minutes']}:{pace_data['target_pace']['seconds']:05.2f}",
+                    "lap_time": lap_time_formatted,
                 })
 
-    # 3. RECALCULATE TOTALS AND TSS
-    total_active_dist_m, total_active_time_s, total_rest_time_s = 0, 0, 0
-    for segment in calculated_segments:
-        reps = int(segment['reps'])
-        distance = int(segment['distance'])
-        rest = int(segment['rest'])
+        # 3. RECALCULATE TOTALS AND TSS
+        total_active_dist_m, total_active_time_s, total_rest_time_s = 0, 0, 0
 
-        pace_min, pace_sec = map(float, segment['target_pace'].split(':'))
-        time_per_rep_s = (pace_min * 60) + pace_sec
+        num_segments = len(calculated_segments)
+        for i, segment in enumerate(calculated_segments):
+            reps = int(segment['reps'])
+            distance = int(segment['distance'])
+            rest = int(segment['rest'])
 
-        total_active_dist_m += reps * distance
-        total_active_time_s += reps * time_per_rep_s
-        if reps > 1:
-            total_rest_time_s += (reps - 1) * rest
+            pace_min, pace_sec = map(float, segment['target_pace'].split(':'))
+            time_per_rep_s = (pace_min * 60) + pace_sec
+
+            total_active_dist_m += reps * distance
+            total_active_time_s += reps * time_per_rep_s
+
+            # Calculate rest WITHIN the segment (e.g., for 10x400, this adds 9 rests)
+            if reps > 1:
+                total_rest_time_s += (reps - 1) * rest
+
+            # Add the rest AFTER the segment, but ONLY if it's not the last segment
+            is_last_segment = (i == num_segments - 1)
+            if not is_last_segment:
+                total_rest_time_s += rest
 
     total_time_s = total_active_time_s + total_rest_time_s
 

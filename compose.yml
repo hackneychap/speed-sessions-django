@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:17
+    # Since you have env_file, you don't strictly need to list them again 
+    # unless you want to rename them for Postgres.
+    env_file:
+      - .env
+    environment:
+      # Map your .env variable to the one Postgres requires
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_DB=${DATABASE_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  django-web:
+    build: .
+    container_name: django-docker
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    
+    env_file:
+      - .env
+    # Add a volume here so you can see code changes without rebuilding
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
