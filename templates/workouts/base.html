@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- The title block allows child templates to set their own title -->
+    {% load static %}
+    <link rel="shortcut icon" href="{% static 'favicon/favicon.ico' %}" >
+    <link rel="icon" type="image/png" href="{% static 'favicon/favicon-96x96.png' %}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon/favicon.svg' %}" />
+    <link rel="manifest" href="{% static 'favicon/site.webmanifest' %}" />
+
     <title>Speed Session | {% block title %}Welcome{% endblock %}</title>
 
     <!-- CSS and JS links go here -->
@@ -16,6 +22,22 @@
         .htmx-indicator { opacity: 0; transition: opacity 200ms ease-in; }
         .htmx-request .htmx-indicator { opacity: 1; }
         .htmx-request.htmx-indicator { opacity: 1; }
+        .form-control:focus,
+        .form-select:focus {
+            background-color: #374151 !important; /* gray-700 */
+            color: white !important;
+            border-color: #3b82f6 !important; /* blue-500 */
+            box-shadow: none !important;
+        }
+
+        /* Optional: also fix the background color for autofill (chrome) */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+            -webkit-text-fill-color: white;
+            -webkit-box-shadow: 0 0 0px 1000px #374151 inset;
+            transition: background-color 5000s ease-in-out 0s;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 d-flex align-items-center justify-content-center vh-100 p-4">

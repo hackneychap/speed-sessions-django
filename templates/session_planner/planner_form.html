@@ -1,7 +1,4 @@
 {% extends 'workouts/base.html' %}
-{% load static %} <!-- Assuming you might have static files later -->
-
-{% block title %}Workout Planner{% endblock %}
 
 {% block content %}
 <div class="container-fluid" style="max-width: 1200px;">
@@ -16,85 +13,59 @@
 
         <!-- SECTION 1: Base Workout Definition -->
         <div class="card bg-gray-800 border-gray-700 shadow-lg mb-4">
-            <div class="card-header bg-gray-700 border-gray-600 text-white font-semibold">
-                Step 1: Define the Base Workout
+            <div class="card-header bg-gray-700 border-gray-600 text-white d-flex justify-content-between align-items-center">
+                <span class="font-semibold">Step 1: Define the Base Workout</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-info"
+                            hx-get="{% url 'add-workout-segment' %}"
+                            hx-target="#workout-items"
+                            hx-swap="beforeend">
+                        + Add Single Segment
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-warning"
+                            hx-get="{% url 'add-repeat-block' %}"
+                            hx-target="#workout-items"
+                            hx-swap="beforeend">
+                        + Add Repeat Block
+                    </button>
+                </div>
             </div>
             <div class="card-body">
-                <div id="workout-segments">
-                    <!--
-                        The initial workout segment is now loaded from the partial.
-                        This keeps the code DRY and consistent.
-                    -->
+                <div id="workout-items" class="space-y-4">
                     {% include 'session_planner/partials/_workout_segment.html' %}
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-secondary mt-2"
-                        hx-get="{% url 'add-workout-segment' %}"
-                        hx-target="#workout-segments"
-                        hx-swap="beforeend">
-                    + Add Segment
-                </button>
             </div>
         </div>
 
-        <!-- SECTION 2: Training Group Definition -->
+        <!-- SECTION 2: Training Groups (A, B, C) -->
         <div class="card bg-gray-800 border-gray-700 shadow-lg mb-4">
             <div class="card-header bg-gray-700 border-gray-600 text-white font-semibold">
                 Step 2: Define Training Groups
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                    <!-- Group A -->
+                    {% for char in "abc"|make_list %}
                     <div class="col-md-4">
-                        <div class="p-3 bg-gray-700 rounded-lg">
-                            <h6 class="text-white">Group A</h6>
-                            <input type="text" name="group_a_name" class="form-control form-control-sm bg-gray-600 border-gray-500 text-white mb-2 focus:bg-gray-500 focus:border-blue-500 focus:ring-0" value="Group A">
-                            <select name="group_a_metric" class="form-select form-select-sm bg-gray-600 border-gray-500 text-white mb-2 focus:bg-gray-500 focus:border-blue-500 focus:ring-0">
+                        <div class="p-3 bg-gray-700 rounded-lg shadow-inner">
+                            <h6 class="text-white">Group {{ char|upper }}</h6>
+                            <input type="text" name="group_{{ char }}_name" class="form-control form-control-sm bg-gray-600 border-gray-500 text-white mb-2" value="Group {{ char|upper }}">
+                            <select name="group_{{ char }}_metric" class="form-select form-select-sm bg-gray-600 border-gray-500 text-white mb-2">
                                 <option value="vdot">VDOT</option>
                                 <option value="5k_time">5k Time</option>
                             </select>
-                            <input type="text" name="group_a_value" class="form-control form-control-sm bg-gray-600 border-gray-500 text-white focus:bg-gray-500 focus:border-blue-500 focus:ring-0" placeholder="Enter VDOT or MM:SS" required>
+                            <input type="text" name="group_{{ char }}_value" class="form-control form-control-sm bg-gray-600 border-gray-500 text-white" placeholder="VDOT or HH:MM:SS" required>
                         </div>
                     </div>
-                    <!-- Group B -->
-                    <div class="col-md-4">
-                        <div class="p-3 bg-gray-700 rounded-lg">
-                            <h6 class="text-white">Group B</h6>
-                            <input type="text" name="group_b_name" class="form-control form-control-sm bg-gray-600 border-gray-500 text-white mb-2 focus:bg-gray-500 focus:border-blue-500 focus:ring-0" value="Group B">
-                            <select name="group_b_metric" class="form-select form-select-sm bg-gray-600 border-gray-500 text-white mb-2 focus:bg-gray-500 focus:border-blue-500 focus:ring-0">
-                                <option value="vdot">VDOT</option>
-                                <option value="5k_time">5k Time</option>
-                            </select>
-                            <input type="text" name="group_b_value" class="form-control form-control-sm bg-gray-600 border-gray-500 text-white focus:bg-gray-500 focus:border-blue-500 focus:ring-0" placeholder="Enter VDOT or MM:SS">
-                        </div>
-                    </div>
-                    <!-- Group C -->
-                    <div class="col-md-4">
-                        <div class="p-3 bg-gray-700 rounded-lg">
-                            <h6 class="text-white">Group C</h6>
-                            <input type="text" name="group_c_name" class="form-control form-control-sm bg-gray-600 border-gray-500 text-white mb-2 focus:bg-gray-500 focus:border-blue-500 focus:ring-0" value="Group C">
-                            <select name="group_c_metric" class="form-select form-select-sm bg-gray-600 border-gray-500 text-white mb-2 focus:bg-gray-500 focus:border-blue-500 focus:ring-0">
-                                <option value="vdot">VDOT</option>
-                                <option value="5k_time">5k Time</option>
-                            </select>
-                            <input type="text" name="group_c_value" class="form-control form-control-sm bg-gray-600 border-gray-500 text-white focus:bg-gray-500 focus:border-blue-500 focus:ring-0" placeholder="Enter VDOT or MM:SS">
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- Submit Button -->
         <div class="d-grid">
-            <button type="submit" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center">
-                Generate Differentiated Plan
-                <div id="loading-spinner" class="spinner-border spinner-border-sm ms-2 htmx-indicator" role="status"></div>
-            </button>
+            <button type="submit" class="btn btn-primary btn-lg">Generate Differentiated Plan</button>
         </div>
     </form>
 
-    <!-- SECTION 3: Differentiated Workout Plan (Results) -->
-    <div id="results-container" class="mt-5">
-        <!-- This container will be filled by the HTMX response -->
-    </div>
+    <div id="results-container" class="mt-5"></div>
 </div>
 {% endblock %}
