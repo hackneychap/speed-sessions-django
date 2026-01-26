@@ -1,0 +1,67 @@
+<!--
+    CSS Fix: This ensures that in "Dark Mode", Bootstrap's focus state
+    doesn't turn the background white (which was hiding your white text).
+-->
+<style>
+    .segment-input-row .form-control:focus,
+    .segment-input-row .form-select:focus {
+        background-color: #374151 !important; /* gray-700 */
+        color: white !important;
+        border-color: #3b82f6 !important; /* blue-500 */
+        box-shadow: none !important;
+    }
+</style>
+
+<div class="segment-input-row bg-gray-800/40 p-2 rounded border border-gray-700 mb-2">
+    <!-- ITEM TYPE MARKER -->
+    <input type="hidden" name="item_type" value="segment">
+
+    <div class="row g-2 align-items-center">
+        <!-- LEFT SIDE: Inputs for Reps, Distance, and Intensity -->
+        <div class="col-8">
+            <!-- Row 1: Reps x Distance -->
+            <div class="d-flex align-items-center mb-1">
+                <input type="number" name="reps" value="{{ segment.reps }}"
+                       class="form-control form-control-sm bg-gray-700 text-white border-gray-600 text-center recalc-trigger"
+                       style="width: 60px;">
+
+                <span class="mx-1 text-gray-500 small">×</span>
+
+                <select name="distance" class="form-select form-select-sm bg-gray-700 text-white border-gray-600 recalc-trigger">
+                    <option value="200" {% if segment.distance|floatformat:0 == "200" %}selected{% endif %}>200m</option>
+                    <option value="400" {% if segment.distance|floatformat:0 == "400" or not segment.distance %}selected{% endif %}>400m</option>
+                    <option value="600" {% if segment.distance|floatformat:0 == "600" %}selected{% endif %}>600m</option>
+                    <option value="800" {% if segment.distance|floatformat:0 == "800" %}selected{% endif %}>800m</option>
+                    <option value="1000" {% if segment.distance|floatformat:0 == "1000" %}selected{% endif %}>1000m</option>
+                    <option value="1200" {% if segment.distance|floatformat:0 == "1200" %}selected{% endif %}>1200m</option>
+                    <option value="1600" {% if segment.distance|floatformat:0 == "1600" %}selected{% endif %}>1600m</option>
+                </select>
+            </div>
+
+            <!-- Row 2: Intensity and Rest -->
+            <div class="d-flex align-items-center">
+                <select name="intensity" class="form-select form-select-sm bg-gray-700 text-gray-400 border-gray-600 recalc-trigger small py-0 me-1" style="font-size: 0.75rem;">
+                    <option {% if segment.intensity == 'Interval' %}selected{% endif %}>Interval</option>
+                    <option {% if segment.intensity == 'Threshold' %}selected{% endif %}>Threshold</option>
+                    <option {% if segment.intensity == 'Repetition' %}selected{% endif %}>Repetition</option>
+                </select>
+
+                <div class="input-group input-group-sm" style="width: 110px;">
+                    <input type="number" name="rest" value="{{ segment.rest }}"
+                           class="form-control bg-gray-700 text-white border-gray-600 recalc-trigger text-center py-0">
+                    <span class="input-group-text bg-gray-700 text-gray-500 border-gray-600 px-1" style="font-size: 0.7rem;">s</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: Displaying calculated times (Key for the Pacer) -->
+        <div class="col-4 text-end border-start border-gray-700 ps-2">
+            <div class="text-blue-400 font-monospace fw-bold" style="font-size: 1rem;">
+                {{ segment.target_pace }}
+            </div>
+            <div class="text-gray-500 small font-monospace">
+                Lap: {{ segment.lap_time }}
+            </div>
+        </div>
+    </div>
+</div>

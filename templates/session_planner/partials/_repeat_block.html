@@ -1,0 +1,33 @@
+<div class="repeat-block border-2 border-dashed border-gray-600 rounded-lg p-3 bg-gray-900/50 mb-3 shadow-inner">
+    <div class="row align-items-center mb-2">
+        <div class="col-auto">
+            <div class="input-group input-group-sm" style="max-width: 150px;">
+                <input type="number" name="block_multiplier" class="form-control bg-gray-700 text-white border-gray-600 font-bold" value="2">
+                <span class="input-group-text bg-gray-700 text-gray-400 border-gray-600">Sets of:</span>
+            </div>
+        </div>
+        <div class="col text-end">
+            <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="this.closest('.repeat-block').remove()">Remove Block</button>
+        </div>
+    </div>
+
+    <!-- START MARKER -->
+    <input type="hidden" name="item_type" value="block_start">
+
+    <div class="block-segments ps-4 border-l-2 border-yellow-600/50 space-y-2">
+        <!-- Initial segment inside the block -->
+        {% include 'session_planner/partials/_workout_segment.html' %}
+    </div>
+
+    <div class="ps-4 mt-2">
+        <button type="button" class="btn btn-xs btn-link text-blue-400 p-0 text-decoration-none"
+                hx-get="{% url 'add-workout-segment' %}"
+                hx-target="previous .block-segments"
+                hx-swap="beforeend">
+            + Add segment to this block
+        </button>
+    </div>
+
+    <!-- END MARKER -->
+    <input type="hidden" name="item_type" value="block_end">
+</div>

@@ -1,10 +1,18 @@
+{% comment %}
+This template represents a single, self-recalculating group card.
+Updated with:
+1. TSS Spice (Intensity)
+2. Track Volume (Distance - Emoji: 👣)
+3. Session Duration (Time - Emoji: ⏳)
+{% endcomment %}
 <div id="group-card-{{ forloop.counter }}" class="col-md-4">
-    <div class="card bg-gray-800 border-gray-700 shadow-lg h-100">
+    <div class="card bg-gray-800 border-gray-700 shadow-lg h-100 d-flex flex-column">
         <div class="card-header bg-gray-700 border-gray-600">
             <h5 class="mb-0 text-white">{{ group.name }}</h5>
             <small class="text-gray-400">VDOT: {{ group.vdot }}</small>
         </div>
-        <div class="card-body">
+
+        <div class="card-body flex-grow-1">
             <form hx-post="{% url 'recalculate-plan' %}"
                   hx-trigger="change from:.recalc-trigger"
                   hx-target="#group-card-{{ forloop.counter }}"
@@ -14,59 +22,97 @@
                 <input type="hidden" name="group_vdot" value="{{ group.vdot }}">
                 <input type="hidden" name="forloop_counter" value="{{ forloop.counter }}">
 
-                <table class="table table-borderless table-sm text-gray-300 align-middle">
-                    <thead>
-                        <tr class="text-gray-400">
-                            <th scope="col">Segment</th>
-                            <th scope="col" class="text-center">Pace</th>
-                            <th scope="col" class="text-center">400m Lap</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for segment in group.workout %}
-                        <tr>
-                            <td class="w-50">
-                                <!-- Reps and Distance -->
-                                <div class="input-group input-group-sm">
-                                    <input type="number" name="reps" value="{{ segment.reps }}" class="form-control bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-blue-500 recalc-trigger" style="max-width: 55px;">
-                                    <span class="input-group-text bg-gray-700 border-gray-600 text-white">x</span>
-                                    <select name="distance" class="form-select bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-blue-500 recalc-trigger">
-                                        <option value="200" {% if segment.distance == '200' %}selected{% endif %}>200m</option>
-                                        <option value="400" {% if segment.distance == '400' %}selected{% endif %}>400m</option>
-                                        <option value="600" {% if segment.distance == '600' %}selected{% endif %}>600m</option>
-                                        <option value="800" {% if segment.distance == '800' %}selected{% endif %}>800m</option>
-                                        <option value="1000" {% if segment.distance == '1000' %}selected{% endif %}>1000m</option>
-                                        <option value="1200" {% if segment.distance == '1200' %}selected{% endif %}>1200m</option>
-                                        <option value="1600" {% if segment.distance == '1600' %}selected{% endif %}>1600m</option>
-                                    </select>
+                <div class="workout-items space-y-3">
+                    {% for item in group.workout_structure %}
+                        {% if item.type == 'block' %}
+                            <div class="p-2 border-l-4 border-yellow-600 bg-gray-900/30 rounded-r shadow-inner">
+                                <div class="d-flex align-items-center mb-2">
+                                    <input type="hidden" name="item_type" value="block_start">
+                                    <div class="input-group input-group-sm" style="max-width: 80px;">
+                                        <input type="number" name="block_multiplier" value="{{ item.multiplier }}"
+                                               class="form-control bg-gray-800 text-white border-gray-600 recalc-trigger px-2 text-center font-bold">
+                                        <span class="input-group-text bg-gray-800 text-gray-500 border-gray-600 px-1">x</span>
+                                    </div>
+                                    <span class="ms-2 text-[10px] font-black text-yellow-600 uppercase tracking-widest">Repeat Set</span>
                                 </div>
-                                <!-- Intensity and Rest -->
-                                <div class="input-group input-group-sm mt-1">
-                                    <select name="intensity" class="form-select bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-blue-500 recalc-trigger">
-                                        <option {% if segment.intensity == 'Repetition' %}selected{% endif %}>Repetition</option>
-                                        <option {% if segment.intensity == 'Interval' %}selected{% endif %}>Interval</option>
-                                        <option {% if segment.intensity == 'Threshold' %}selected{% endif %}>Threshold</option>
-                                    </select>
-                                    <input type="number" name="rest" value="{{ segment.rest }}" class="form-control bg-gray-700 border-gray-600 text-white focus:bg-gray-600 focus:border-blue-500 focus:ring-blue-500 recalc-trigger" placeholder="Rest (s)">
-                                    <span class="input-group-text bg-gray-700 border-gray-600 text-white">s</span>
+
+                                <div class="ps-2 space-y-2">
+                                    {% for seg in item.segments %}
+                                        {% include 'session_planner/partials/_card_segment_row.html' with segment=seg %}
+                                    {% endfor %}
                                 </div>
-                            </td>
-                            <td class="text-center font-monospace">{{ segment.target_pace }}</td>
-                            <td class="text-center font-monospace">{{ segment.lap_time }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                <input type="hidden" name="item_type" value="block_end">
+                            </div>
+                        {% else %}
+                            <div class="p-1">
+                                {% include 'session_planner/partials/_card_segment_row.html' with segment=item.segment %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </form>
         </div>
+
         <div class="card-footer bg-gray-700 border-gray-600">
             <ul class="list-unstyled mb-0 small text-gray-300">
-                <li class="d-flex justify-content-between"><span>Total Distance:</span> <strong>{{ group.summary.distance }}</strong></li>
-                <li class="d-flex justify-content-between"><span>Active Time:</span> <strong>{{ group.summary.active_time }}</strong></li>
-                <li class="d-flex justify-content-between"><span>Total Time (inc. rest):</span> <strong>{{ group.summary.total_time }}</strong></li>
-                <li class="d-flex justify-content-between"><span>Predicted TSS:</span> <strong>{{ group.summary.tss }}</strong></li>
+                <li class="d-flex justify-content-between mb-1">
+                    <span>Total Distance:</span>
+                    <strong class="text-white">{{ group.summary.distance }}</strong>
+                </li>
+                <li class="d-flex justify-content-between mb-1">
+                    <span>Active Time:</span>
+                    <strong class="text-white">{{ group.summary.active_time }}</strong>
+                </li>
+                <li class="d-flex justify-content-between mb-1">
+                    <span>Total Time:</span>
+                    <strong class="text-white">{{ group.summary.total_time }}</strong>
+                </li>
+                <li class="d-flex justify-content-between mb-1">
+                    <span class="text-blue-400">TSS Score:</span>
+                    <strong class="text-white">{{ group.summary.tss }}</strong>
+                </li>
+
+                <li class="pt-2 mt-2 border-top border-gray-600">
+                    <!-- TSS Spice Scale (Intensity) -->
+                    <div class="p-2 bg-gray-900 rounded d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-gray-400 text-[10px] uppercase font-bold tracking-tight">TSS Spice</span>
+                        <div class="text-end">
+                            <span class="fs-6">
+                                {% if group.summary.tss < 20 %}🌶️{% elif group.summary.tss <= 32 %}🌶️🌶️{% elif group.summary.tss <= 39 %}🌶️🌶️🌶️{% elif group.summary.tss <= 43 %}🌶️🌶️🌶️🌶️{% else %}🌶️🌶️🌶️🌶️🌶️{% endif %}
+                            </span>
+                            <div class="text-[9px] font-black uppercase mt-n1">
+                                {% if group.summary.tss <= 32 %}<span class="text-gray-500">Too Mild</span>{% elif group.summary.tss <= 39 %}<span class="text-success">Just Right</span>{% elif group.summary.tss <= 43 %}<span class="text-warning">Hot! Monthly</span>{% else %}<span class="text-danger">Too Spicy!</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Track Volume Scale (Distance - Emoji: Footprints) -->
+                    <div class="p-2 bg-gray-900 rounded d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-gray-400 text-[10px] uppercase font-bold tracking-tight">Track Volume</span>
+                        <div class="text-end">
+                            <span class="fs-6">
+                                {% if group.summary.raw_distance_km < 4 %}👣{% elif group.summary.raw_distance_km <= 6 %}👣👣👣{% else %}👣👣👣👣👣{% endif %}
+                            </span>
+                            <div class="text-[9px] font-black uppercase mt-n1">
+                                {% if group.summary.raw_distance_km < 4 %}<span class="text-gray-500">Short & Sweet</span>{% elif group.summary.raw_distance_km <= 6 %}<span class="text-success">The Sweet Spot</span>{% else %}<span class="text-warning">The Long Haul</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Session Duration Scale (Time - Emoji: Hourglass) -->
+                    <div class="p-2 bg-gray-900 rounded d-flex justify-content-between align-items-center">
+                        <span class="text-gray-400 text-[10px] uppercase font-bold tracking-tight">Session Time</span>
+                        <div class="text-end">
+                            <span class="fs-6">
+                                {% if group.summary.raw_total_time_min < 25 %}⏳{% elif group.summary.raw_total_time_min <= 35 %}⏳⏳⏳{% else %}⏳⏳⏳⏳⏳{% endif %}
+                            </span>
+                            <div class="text-[9px] font-black uppercase mt-n1">
+                                {% if group.summary.raw_total_time_min < 25 %}<span class="text-gray-500">Quick Blast</span>{% elif group.summary.raw_total_time_min <= 35 %}<span class="text-success">Perfect Timing</span>{% else %}<span class="text-danger">Long Shift</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </li>
             </ul>
         </div>
     </div>
 </div>
-
