@@ -1,0 +1,23 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+    <p>Generating draft invoices for the following orders:</p>
+    <ul>
+        {% for order in orders %}
+            <li>{{ order }} (Base Cost: ${{ order.base_cost }})</li>
+        {% endfor %}
+    </ul>
+    
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        {% for order in orders %}
+            <input type="hidden" name="{{ action_checkbox_name }}" value="{{ order.pk }}" />
+        {% endfor %}
+        
+        <input type="hidden" name="action" value="generate_draft_invoices" />
+        <input type="hidden" name="apply" value="True" />
+        
+        <input type="submit" value="Generate Invoices" />
+    </form>
+{% endblock %}

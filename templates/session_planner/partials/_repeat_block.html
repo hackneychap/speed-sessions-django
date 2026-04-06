@@ -2,7 +2,7 @@
     <div class="row align-items-center mb-2">
         <div class="col-auto">
             <div class="input-group input-group-sm" style="max-width: 150px;">
-                <input type="number" name="block_multiplier" class="form-control bg-gray-700 text-white border-gray-600 font-bold" value="2">
+                <input type="number" name="block_multiplier" class="form-control bg-gray-700 text-white border-gray-600 font-bold" value="{{ block.multiplier|default:2 }}">
                 <span class="input-group-text bg-gray-700 text-gray-400 border-gray-600">Sets of:</span>
             </div>
         </div>
@@ -15,8 +15,13 @@
     <input type="hidden" name="item_type" value="block_start">
 
     <div class="block-segments ps-4 border-l-2 border-yellow-600/50 space-y-2">
-        <!-- Initial segment inside the block -->
-        {% include 'session_planner/partials/_workout_segment.html' %}
+        {% if block.segments %}
+            {% for segment in block.segments %}
+                {% include 'session_planner/partials/_workout_segment.html' with segment=segment %}
+            {% endfor %}
+        {% else %}
+            {% include 'session_planner/partials/_workout_segment.html' %}
+        {% endif %}
     </div>
 
     <div class="ps-4 mt-2">

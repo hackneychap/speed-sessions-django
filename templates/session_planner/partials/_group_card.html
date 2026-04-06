@@ -13,13 +13,15 @@ Updated with:
         </div>
 
         <div class="card-body flex-grow-1">
-            <form hx-post="{% url 'recalculate-plan' %}"
+            <div hx-post="{% url 'recalculate-plan' %}"
                   hx-trigger="change from:.recalc-trigger"
                   hx-target="#group-card-{{ forloop.counter }}"
-                  hx-swap="outerHTML">
+                  hx-swap="outerHTML"
+                  hx-include="this">
 
                 <input type="hidden" name="group_name" value="{{ group.name }}">
                 <input type="hidden" name="group_vdot" value="{{ group.vdot }}">
+                <input type="hidden" name="group_prefix" value="{{ group.prefix }}">
                 <input type="hidden" name="forloop_counter" value="{{ forloop.counter }}">
 
                 <div class="workout-items space-y-3">
@@ -27,9 +29,9 @@ Updated with:
                         {% if item.type == 'block' %}
                             <div class="p-2 border-l-4 border-yellow-600 bg-gray-900/30 rounded-r shadow-inner">
                                 <div class="d-flex align-items-center mb-2">
-                                    <input type="hidden" name="item_type" value="block_start">
+                                    <input type="hidden" name="{{ group.prefix }}item_type" value="block_start">
                                     <div class="input-group input-group-sm" style="max-width: 80px;">
-                                        <input type="number" name="block_multiplier" value="{{ item.multiplier }}"
+                                        <input type="number" name="{{ group.prefix }}block_multiplier" value="{{ item.multiplier }}"
                                                class="form-control bg-gray-800 text-white border-gray-600 recalc-trigger px-2 text-center font-bold">
                                         <span class="input-group-text bg-gray-800 text-gray-500 border-gray-600 px-1">x</span>
                                     </div>
@@ -38,19 +40,19 @@ Updated with:
 
                                 <div class="ps-2 space-y-2">
                                     {% for seg in item.segments %}
-                                        {% include 'session_planner/partials/_card_segment_row.html' with segment=seg %}
+                                        {% include 'session_planner/partials/_card_segment_row.html' with segment=seg prefix=group.prefix %}
                                     {% endfor %}
                                 </div>
-                                <input type="hidden" name="item_type" value="block_end">
+                                <input type="hidden" name="{{ group.prefix }}item_type" value="block_end">
                             </div>
                         {% else %}
                             <div class="p-1">
-                                {% include 'session_planner/partials/_card_segment_row.html' with segment=item.segment %}
+                                {% include 'session_planner/partials/_card_segment_row.html' with segment=item.segment prefix=group.prefix %}
                             </div>
                         {% endif %}
                     {% endfor %}
                 </div>
-            </form>
+            </div>
         </div>
 
         <div class="card-footer bg-gray-700 border-gray-600">

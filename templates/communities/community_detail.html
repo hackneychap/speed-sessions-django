@@ -1,0 +1,82 @@
+{% extends 'workouts/base.html' %}
+
+{% block content %}
+<div class="container mx-auto py-10 px-4 max-w-[800px]">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
+        {% if community.image_url %}
+        <div class="h-64 bg-cover bg-center" style="background-image: url('{{ community.image_url }}')"></div>
+        {% endif %}
+        
+        <div class="p-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-4xl font-black text-white italic uppercase tracking-tighter">{{ community.name }}</h1>
+                {% if is_manager %}
+                    <div class="flex gap-2">
+                        <a href="{% url 'add-merch' community.slug %}" class="btn btn-sm btn-success">Add gear</a>
+                        <a href="{% url 'community-edit' community.slug %}" class="btn btn-sm btn-outline-info">Edit Community</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Community Gallery -->
+            {% if community.gallery_images.all %}
+                <div class="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+                    {% for img in community.gallery_images.all %}
+                        <img src="{{ img.image.url }}" alt="Community gallery" class="h-40 rounded-lg object-cover shadow-lg border border-slate-800 flex-shrink-0">
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <p class="text-slate-400 text-lg mb-6">{{ community.description }}</p>
+            
+            <div class="bg-slate-950 p-4 rounded border border-slate-800 mb-8">
+                <span class="text-slate-500 font-bold uppercase text-xs tracking-widest block mb-2">Community Manager</span>
+                <span class="text-white font-mono">{{ community.manager.username }}</span>
+            </div>
+
+            <!-- Merch Listing -->
+            <h3 class="text-2xl font-black text-white italic uppercase tracking-tighter mb-4">Community Gear</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+                {% for item in merch_items %}
+                    <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 flex flex-column">
+                        {% if item.images.all %}
+                            <div class="flex gap-1 overflow-x-auto mb-3">
+                                {% for img in item.images.all %}
+                                    <img src="{{ img.image.url }}" alt="{{ item.name }}" class="h-32 rounded object-cover shadow-sm">
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <h4 class="text-white font-bold">{{ item.name }}</h4>
+                        <p class="text-slate-400 text-sm mb-2">{{ item.description }}</p>
+                        <p class="text-blue-400 font-black mb-4">${{ item.price }}</p>
+                        
+                        <form method="post" action="{% url 'add-to-cart' %}" class="mt-auto">
+                            {% csrf_token %}
+                            <input type="hidden" name="item_id" value="{{ item.id }}">
+                            <div class="space-y-2">
+                                <select name="size" class="w-full p-2 bg-slate-950 border border-slate-700 rounded text-sm text-white">
+                                    {% for size in item.size_list %}<option value="{{ size }}">{{ size }}</option>{% endfor %}
+                                </select>
+                                <select name="color" class="w-full p-2 bg-slate-950 border border-slate-700 rounded text-sm text-white">
+                                    {% for color in item.color_list %}<option value="{{ color }}">{{ color }}</option>{% endfor %}
+                                    <option value="other">Other (specify)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full mt-3 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded text-sm uppercase italic">Add to Order</button>
+                        </form>
+                    </div>
+                {% empty %}
+                    <p class="text-slate-500 italic">No gear available for this community yet.</p>
+                {% endfor %}
+            </div>
+            
+            <div class="mt-8 border-t border-slate-800 pt-6">
+                <a href="{% url 'checkout' %}" class="btn btn-outline-success font-black uppercase italic tracking-wider">
+                    🛒 Review My Pooled Order
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

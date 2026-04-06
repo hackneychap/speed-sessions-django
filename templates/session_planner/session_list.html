@@ -1,0 +1,82 @@
+{% extends 'workouts/base.html' %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1200px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="text-blue-500 font-black uppercase tracking-[0.2em] text-xs mb-1">{{ community.name }}</div>
+            <h1 class="text-3xl font-bold text-white mb-0">{{ month_name }} {{ year }}</h1>
+            <div class="btn-group mt-2">
+                <a href="?year={{ prev_year }}&month={{ prev_month }}" class="btn btn-sm btn-outline-secondary">&laquo; Previous</a>
+                <a href="?year={{ today.year }}&month={{ today.month }}" class="btn btn-sm btn-outline-secondary">Today</a>
+                <a href="?year={{ next_year }}&month={{ next_month }}" class="btn btn-sm btn-outline-secondary">Next &raquo;</a>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'block-list' %}" class="btn btn-outline-secondary">Training Blocks</a>
+            <a href="{% url 'planner-page' %}" class="btn btn-primary">Create New Session</a>
+        </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="card bg-gray-800 border-gray-700 shadow-lg overflow-hidden">
+        <div class="grid grid-cols-7 bg-gray-700 text-white font-bold text-center py-2 uppercase tracking-wider text-[10px]">
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+            <div>Sun</div>
+        </div>
+        
+        <div class="grid grid-cols-7 border-t border-gray-700">
+            {% for week in month_days %}
+                {% for day in week %}
+                    <div class="min-h-[120px] border-r border-b border-gray-700 p-2 {% if day == 0 %}bg-gray-900/50{% else %}bg-gray-800{% endif %}">
+                        {% if day != 0 %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="{% if day == today.day and month == today.month and year == today.year %}bg-blue-600 rounded-full w-6 h-6 d-flex align-items-center justify-content-center text-white{% else %}text-gray-400{% endif %} font-bold">
+                                    {{ day }}
+                                </span>
+                            </div>
+                            
+                            <!-- Sessions for this day -->
+                            <div class="space-y-1">
+                                {% for session in sessions_by_day.items %}
+                                    {% if session.0 == day %}
+                                        {% for s in session.1 %}
+                                            <a href="{% url 'session-detail' s.pk %}" class="d-block bg-blue-900/40 border-l-2 border-blue-500 p-1 rounded text-[10px] text-white cursor-pointer hover:bg-blue-800/60 transition-colors text-decoration-none">
+                                                <strong>{{ s.title }}</strong>
+                                            </a>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Legend / Stats -->
+    <div class="mt-4 row g-3">
+        <div class="col-md-4">
+            <div class="card bg-gray-800 border-gray-700 p-3">
+                <h6 class="text-white small uppercase font-bold tracking-wider mb-2">Stats This Month</h6>
+                <div class="text-3xl font-black text-blue-400">{{ sessions.count }}</div>
+                <div class="text-gray-500 text-[10px] uppercase font-bold">Planned Sessions</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Since we're using Tailwind-like classes but maybe only have Bootstrap */
+    .grid { display: grid; }
+    .grid-cols-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.25rem; }
+    .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+</style>
+{% endblock %}

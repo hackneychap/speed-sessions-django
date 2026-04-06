@@ -1,0 +1,60 @@
+{% extends 'workouts/base.html' %}
+
+{% block content %}
+<div class="container mx-auto py-10 px-4 max-w-[600px]" id="checkout-container">
+    <h2 class="text-3xl font-black text-white mb-8 italic uppercase tracking-tighter">Checkout</h2>
+    
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-lg mb-6">
+        <h4 class="text-white font-bold mb-4">Order Summary</h4>
+        <ul class="space-y-2 mb-6">
+            {% for entry in items %}
+            <li class="d-flex justify-content-between text-slate-300">
+                <span>{{ entry.item.name }} ({{ entry.size }}, {{ entry.color }})</span>
+                <span>${{ entry.item.price }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="border-t border-slate-700 pt-4 d-flex justify-content-between font-black text-xl text-white">
+            <span>Subtotal:</span>
+            <span>${{ total_price }}</span>
+        </div>
+        <p class="text-[10px] text-slate-500 uppercase mt-2 italic">Note: Shipping will be calculated and invoiced in about two weeks.</p>
+    </div>
+
+    <form hx-post="{% url 'checkout' %}" hx-target="#checkout-container" hx-swap="innerHTML" class="bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-4">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div>
+            <label class="block text-slate-500 font-bold uppercase text-[10px] tracking-widest mb-1">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <div class="text-red-500 text-[10px] uppercase font-bold mt-1">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-black rounded shadow-lg shadow-blue-900/20 transition-all uppercase italic">
+            Submit Order to Pool
+        </button>
+    </form>
+</div>
+
+<style>
+    input, textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: #0f172a !important;
+        border: 1px solid #334155 !important;
+        border-radius: 0.5rem;
+        color: #f8fafc !important;
+        font-family: 'JetBrains+Mono', monospace;
+        font-size: 0.875rem;
+    }
+    input:focus, textarea:focus {
+        outline: none !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+    }
+</style>
+{% endblock %}

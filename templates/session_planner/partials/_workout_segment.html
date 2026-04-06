@@ -3,29 +3,29 @@
     <input type="hidden" name="item_type" value="segment">
 
     <div class="col-md-2">
-        <input type="number" name="reps" class="form-control form-control-sm bg-gray-700 border-gray-600 text-white" placeholder="Reps" value="1" required>
+        <input type="number" name="reps" class="form-control form-control-sm bg-gray-700 border-gray-600 text-white" placeholder="Reps" value="{{ segment.reps|default:1 }}" required>
     </div>
     <div class="col-md-3">
         <select name="distance" class="form-select bg-gray-700 text-white border-gray-600 recalc-trigger px-1 text-[10px]">
-                    <option value="200" {% if segment.distance|stringformat:"s" == "200" %}selected{% endif %}>200m</option>
-                    <option value="400" {% if segment.distance|stringformat:"s" == "400" or not segment.distance %}selected{% endif %}>400m</option>
-                    <option value="600" {% if segment.distance|stringformat:"s" == "600" %}selected{% endif %}>600m</option>
-                    <option value="800" {% if segment.distance|stringformat:"s" == "800" %}selected{% endif %}>800m</option>
-                    <option value="1000" {% if segment.distance|stringformat:"s" == "1000" %}selected{% endif %}>1000m</option>
-                    <option value="1200" {% if segment.distance|stringformat:"s" == "1200" %}selected{% endif %}>1200m</option>
-                    <option value="1600" {% if segment.distance|stringformat:"s" == "1600" %}selected{% endif %}>1600m</option>
+            <option value="200" {% if segment.distance|stringformat:"s" == "200" %}selected{% endif %}>200m</option>
+            <option value="400" {% if segment.distance|stringformat:"s" == "400" or not segment.distance %}selected{% endif %}>400m</option>
+            <option value="600" {% if segment.distance|stringformat:"s" == "600" %}selected{% endif %}>600m</option>
+            <option value="800" {% if segment.distance|stringformat:"s" == "800" %}selected{% endif %}>800m</option>
+            <option value="1000" {% if segment.distance|stringformat:"s" == "1000" %}selected{% endif %}>1000m</option>
+            <option value="1200" {% if segment.distance|stringformat:"s" == "1200" %}selected{% endif %}>1200m</option>
+            <option value="1600" {% if segment.distance|stringformat:"s" == "1600" %}selected{% endif %}>1600m</option>
         </select>
     </div>
     <div class="col-md-3">
         <select name="intensity" class="form-select form-select-sm bg-gray-700 border-gray-600 text-white">
-            <option>Interval</option>
-            <option>Threshold</option>
-            <option>Repetition</option>
+            <option {% if segment.intensity == 'Threshold' or not segment.intensity %}selected{% endif %}>Threshold</option>
+            <option {% if segment.intensity == 'Interval' %}selected{% endif %}>Interval</option>
+            <option {% if segment.intensity == 'Repetition' %}selected{% endif %}>Repetition</option>
         </select>
     </div>
     <div class="col-md-2">
         <div class="input-group input-group-sm">
-            <input type="number" name="rest" class="form-control bg-gray-700 border-gray-600 text-white" value="60">
+            <input type="number" name="rest" class="form-control bg-gray-700 border-gray-600 text-white" value="{{ segment.rest|default:60 }}">
             <span class="input-group-text bg-gray-700 border-gray-600 text-xs">s</span>
         </div>
     </div>

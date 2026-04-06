@@ -1,0 +1,145 @@
+{% extends 'workouts/base.html' %}
+
+{% block content %}
+<div class="flex items-center justify-center py-20 px-4">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 p-8 rounded-xl shadow-2xl relative">
+        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-blue-600 px-4 py-1 rounded text-white font-black italic uppercase tracking-widest shadow-lg">
+            Join the Community
+        </div>
+        
+        <h2 class="text-3xl font-black text-white text-center mb-8 italic uppercase tracking-tighter">Sign Up</h2>
+        
+        <form method="post" class="space-y-6" id="signup-form">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="p-3 bg-red-900/40 border border-red-800 rounded text-red-200 text-sm mb-4">
+                {{ form.non_field_errors }}
+                Please check the details below.
+            </div>
+            {% endif %}
+
+            {# Custom rendering to group passwords #}
+            {% for field in form %}
+                {% if field.name == "password1" %}
+                    <div class="form-field-container">
+                        <label for="{{ field.id_for_label }}" class="block text-slate-500 font-bold uppercase text-xs mb-2 tracking-widest">
+                            {{ field.label }}
+                        </label>
+                        <div class="field-container">{{ field }}</div>
+                    </div>
+                {% elif field.name == "password2" %}
+                    <div class="form-field-container">
+                        <label for="{{ field.id_for_label }}" class="block text-slate-500 font-bold uppercase text-xs mb-2 tracking-widest">
+                            {{ field.label }}
+                        </label>
+                        <div class="field-container">{{ field }}</div>
+                    </div>
+                    
+                    <!-- Password Validation UI -->
+                    <div id="password-validation" class="text-[10px] space-y-1 mt-2 hidden">
+                        <p id="val-len" class="text-red-500">❌ At least 8 characters</p>
+                        <p id="val-non-num" class="text-red-500">❌ Must contain non-numeric characters</p>
+                        <p id="val-match" class="text-red-500">❌ Passwords must match</p>
+                    </div>
+                {% else %}
+                    <div class="form-field-container">
+                        <label for="{{ field.id_for_label }}" class="block text-slate-500 font-bold uppercase text-xs mb-2 tracking-widest">
+                            {{ field.label }}
+                        </label>
+                        <div class="field-container">{{ field }}</div>
+                        {% if field.help_text %}
+                        <p class="text-[10px] text-slate-600 mt-1 uppercase leading-tight">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% if field.errors %}
+                        <p class="text-[10px] text-red-500 mt-1 uppercase font-bold">{{ field.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="border-t border-slate-800 pt-6">
+                <label class="block text-slate-500 font-bold uppercase text-xs mb-4 tracking-widest">
+                    Community Membership
+                </label>
+
+                <div class="space-y-4">
+                    <div>
+                        <select name="community_id" class="w-full p-3 bg-slate-950 border border-slate-800 rounded text-white font-mono text-sm focus:outline-none focus:border-blue-500">
+                            <option value="">Join an existing community...</option>
+                            {% for comm in communities %}
+                                <option value="{{ comm.id }}">{{ comm.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="text-center text-xs font-black text-slate-700 uppercase italic">
+                        — OR CREATE NEW —
+                    </div>
+
+                    <input type="text" name="community_name" placeholder="Name your new community..." 
+                           class="w-full p-3 bg-slate-950 border border-slate-800 rounded text-white font-mono text-sm focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+
+            <div class="pt-4">
+                <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-xl rounded shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all uppercase italic">
+                    Create My Account
+                </button>
+            </div>
+        </form>
+        
+        <div class="mt-8 text-center border-t border-slate-800 pt-6">
+            <p class="text-slate-500 text-sm">Already running with us? <a href="{% url 'login' %}" class="text-blue-400 font-bold hover:underline">Login</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('signup-form');
+    const pass1 = form.querySelector('input[name="password1"]');
+    const pass2 = form.querySelector('input[name="password2"]');
+    const valDiv = document.getElementById('password-validation');
+
+    function validate() {
+        if (!pass1.value && !pass2.value) {
+            valDiv.classList.add('hidden');
+            return;
+        }
+        valDiv.classList.remove('hidden');
+
+        const lenValid = pass1.value.length >= 8;
+        const nonNumValid = /[a-zA-Z!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass1.value);
+        const matchValid = pass1.value === pass2.value && pass1.value.length > 0;
+
+        document.getElementById('val-len').className = lenValid ? 'text-green-500' : 'text-red-500';
+        document.getElementById('val-len').innerHTML = lenValid ? '✅ At least 8 characters' : '❌ At least 8 characters';
+
+        document.getElementById('val-non-num').className = nonNumValid ? 'text-green-500' : 'text-red-500';
+        document.getElementById('val-non-num').innerHTML = nonNumValid ? '✅ Must contain non-numeric characters' : '❌ Must contain non-numeric characters';
+
+        document.getElementById('val-match').className = matchValid ? 'text-green-500' : 'text-red-500';
+        document.getElementById('val-match').innerHTML = matchValid ? '✅ Passwords match' : '❌ Passwords must match';
+    }
+
+    [pass1, pass2].forEach(el => el.addEventListener('input', validate));
+</script>
+
+<style>
+    .field-container input, input[type="text"], input[type="password"], input[type="email"] {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: #0f172a !important;
+        border: 1px solid #334155 !important;
+        border-radius: 0.5rem;
+        color: #f8fafc !important;
+        font-family: 'JetBrains+Mono', monospace;
+    }
+    input:focus {
+        outline: none !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+    }
+</style>
+{% endblock %}

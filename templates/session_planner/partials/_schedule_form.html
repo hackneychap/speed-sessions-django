@@ -1,0 +1,21 @@
+<form hx-post="{% url 'apply-block-to-calendar' %}" hx-swap="outerHTML" class="bg-slate-950 p-4 rounded-lg border border-blue-500/30">
+    {% csrf_token %}
+    <input type="hidden" name="block_id" value="{{ block.id }}">
+    
+    <div class="mb-4">
+        <label for="start_date" class="block text-xs font-bold text-blue-500 uppercase tracking-widest mb-2">Start Date</label>
+        <input type="date" id="start_date" name="start_date" required
+               class="w-full bg-slate-900 border border-slate-700 text-white rounded px-3 py-2 focus:outline-none focus:border-blue-500">
+    </div>
+    
+    <div class="flex gap-2">
+        <button type="submit" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded uppercase text-sm tracking-wider transition-colors">
+            Confirm
+        </button>
+        <button type="button" 
+                onclick="this.closest('form').outerHTML = '<button hx-get=\'{% url 'get-schedule-form' block.id %}\' hx-target=\'#schedule-container-{{ block.id }}\' hx-swap=\'innerHTML\' class=\'w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded uppercase tracking-wider transition-colors border border-slate-700\'>Schedule Block</button>'"
+                class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded uppercase text-xs font-bold">
+            Cancel
+        </button>
+    </div>
+</form>

@@ -1,0 +1,39 @@
+{% extends 'workouts/base.html' %}
+
+{% block content %}
+<div class="container mx-auto py-10 px-4" style="max-width: 1000px;">
+    <h1 class="text-4xl font-black italic uppercase tracking-tighter text-white mb-8">
+        Training <span class="text-blue-500">Blocks</span>
+    </h1>
+
+    <div class="grid md:grid-cols-2 gap-6">
+        {% for block in blocks %}
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-xl hover:border-blue-500/50 transition-all">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 class="text-2xl font-bold text-white uppercase">{{ block.title }}</h2>
+                    <span class="bg-blue-600/20 text-blue-400 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">
+                        {{ block.target_distance }}
+                    </span>
+                </div>
+                <p class="text-slate-400 mb-6 text-sm leading-relaxed">
+                    {{ block.description }}
+                </p>
+                
+                <div id="schedule-container-{{ block.id }}">
+                    <button 
+                        hx-get="{% url 'get-schedule-form' block.id %}"
+                        hx-target="#schedule-container-{{ block.id }}"
+                        hx-swap="innerHTML"
+                        class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded uppercase tracking-wider transition-colors border border-slate-700">
+                        Schedule Block
+                    </button>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-span-2 text-center py-20 bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-800">
+                <p class="text-slate-500 font-bold uppercase tracking-widest">No training blocks found.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

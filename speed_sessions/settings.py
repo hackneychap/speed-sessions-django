@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env_path = BASE_DIR / '.env'
-load_dotenv(dotenv_path=env_path)
+load_dotenv(dotenv_path=env_path, override=True)
 
 
 # Quick-start development settings - unsuitable for production
@@ -46,8 +46,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # My Apps
     'workouts.apps.WorkoutsConfig',
-    'session_planner.apps.SessionPlannerConfig',# Or just 'workouts'
+    'session_planner.apps.SessionPlannerConfig',
+    'communities.apps.CommunitiesConfig',
+    'merch.apps.MerchConfig',
+    'djstripe',
 ]
+
+STRIPE_LIVE_PUBLIC_KEY = os.getenv("STRIPE_LIVE_PUBLIC_KEY", "")
+STRIPE_LIVE_SECRET_KEY = os.getenv("STRIPE_LIVE_SECRET_KEY", "")
+STRIPE_TEST_PUBLIC_KEY = os.getenv("STRIPE_TEST_PUBLIC_KEY", "pk_test_...")
+STRIPE_TEST_SECRET_KEY = os.getenv("STRIPE_TEST_SECRET_KEY", "sk_test_...")
+STRIPE_LIVE_MODE = False  # Change to True in production
+DJSTRIPE_WEBHOOK_SECRET = os.getenv("DJSTRIPE_WEBHOOK_SECRET", "whsec_...")
+DJSTRIPE_USE_NATIVE_JSONFIELD = True # Standard for newer Django
+DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -84,14 +96,18 @@ WSGI_APPLICATION = 'speed_sessions.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+db_engine = os.getenv('DATABASE_ENGINE', 'sqlite3')
+if db_engine == 'postgresql':
+    engine_path = 'django.db.backends.postgresql'
+else:
+    engine_path = 'django.db.backends.sqlite3'
+
 DATABASES = {
      'default': {
-         'ENGINE': 'django.db.backends.{}'.format(
-             os.getenv('DATABASE_ENGINE', 'sqlite3')
-         ),
-         'NAME': os.getenv('DATABASE_NAME', 'polls'),
-         'USER': os.getenv('DATABASE_USERNAME', 'myprojectuser'),
-         'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
+         'ENGINE': engine_path,
+         'NAME': os.getenv('DATABASE_NAME', 'db.sqlite3'),
+         'USER': os.getenv('DATABASE_USERNAME', ''),
+         'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
          'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
          'PORT': os.getenv('DATABASE_PORT', '5432'),
      }
@@ -125,13 +141,18 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-gb'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'
 
 USE_I18N = True
 
 USE_TZ = True
+
+USE_L10N = True
+
+DATE_FORMAT = 'd/m/Y'
+SHORT_DATE_FORMAT = 'd/m/Y'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -163,3 +184,8 @@ LOGGING = {
         "level": "INFO",
     },
 }
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+FORMS_URLFIELD_ASSUME_HTTPS = True

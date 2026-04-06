@@ -1,0 +1,237 @@
+{% extends 'workouts/base.html' %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1200px;">
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'session-list' %}" class="text-blue-400">Calendar</a></li>
+                    <li class="breadcrumb-item active text-gray-400" aria-current="page">{{ session.date|date:"j F Y" }}</li>
+                </ol>
+            </nav>
+            <h1 class="text-4xl font-black text-white mb-0">{{ session.title }}</h1>
+            <p class="text-gray-500 mt-1">{{ session.description }}</p>
+        </div>
+        <div class="text-end">
+             <div class="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-center">
+                 <div class="text-[10px] font-black uppercase text-gray-500 tracking-widest">Training Date</div>
+                 <div class="text-xl font-bold text-white">{{ session.date|date:"l" }}</div>
+             </div>
+             <div class="mt-2 flex gap-2 justify-end">
+                {% if is_manager %}
+                    <a href="{% url 'edit-session' session.id %}" class="btn btn-sm btn-outline-warning">Edit Session</a>
+                {% endif %}
+                <a href="{% url 'planner-page' %}" class="btn btn-sm btn-outline-info">New Workout</a>
+             </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
+        {% for group in groups %}
+            <div class="col-md-4 group-card-container">
+                <div id="group-card-{{ forloop.counter }}" class="card bg-gray-800 border-gray-700 shadow-xl h-100 d-flex flex-column">
+                    <div class="card-header bg-gray-700 border-gray-600 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 text-white">{{ group.name }}</h5>
+                            <small class="text-gray-400">VDOT: {{ group.vdot }}</small>
+                        </div>
+                        <div class="no-print">
+                            <button class="btn btn-xs btn-outline-success p-1" title="Copy to WhatsApp" 
+                                    onclick="copyWorkoutToWhatsApp('{{ group.name }}', {{ forloop.counter }})">
+                                <i class="bi bi-whatsapp"></i> 📋
+                            </button>
+                            <button class="btn btn-xs btn-outline-info p-1" title="Download Image"
+                                    onclick="downloadCardAsImage('group-card-{{ forloop.counter }}', '{{ session.title|slugify }}_{{ group.name|slugify }}')">
+                                🖼️
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body flex-grow-1">
+                        <div class="workout-items space-y-3" id="workout-items-{{ forloop.counter }}">
+                            {% for item in group.workout_structure %}
+                                {% if item.type == 'block' %}
+                                    <div class="p-2 border-l-4 border-yellow-600 bg-gray-900/30 rounded-r workout-item" data-type="block" data-multiplier="{{ item.multiplier }}">
+                                        <div class="mb-2">
+                                            <span class="text-[10px] font-black text-yellow-600 uppercase tracking-widest">{{ item.multiplier }}x Sets of:</span>
+                                        </div>
+                                        <div class="ps-2 space-y-2 block-segments">
+                                            {% for seg in item.segments %}
+                                                <div class="bg-gray-800/40 p-2 rounded border border-gray-700 segment-data" 
+                                                     data-reps="{{ seg.reps }}" data-dist="{{ seg.distance }}" data-intensity="{{ seg.intensity }}" 
+                                                     data-pace="{{ seg.target_pace }}" data-rest="{{ seg.rest }}">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-8">
+                                                            <div class="text-white font-bold">{{ seg.reps }} x {{ seg.distance }}m</div>
+                                                            <div class="text-gray-400 small">{{ seg.intensity }} @ {{ seg.rest }}s rest</div>
+                                                        </div>
+                                                        <div class="col-4 text-end border-start border-gray-700">
+                                                            <div class="text-blue-400 font-monospace fw-bold">{{ seg.target_pace }}</div>
+                                                            <div class="text-gray-500 text-[10px] font-monospace">Lap: {{ seg.lap_time }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="p-2 bg-gray-800/40 rounded border border-gray-700 workout-item segment-data" 
+                                         data-type="single" data-reps="{{ item.segment.reps }}" data-dist="{{ item.segment.distance }}" 
+                                         data-intensity="{{ item.segment.intensity }}" data-pace="{{ item.segment.target_pace }}" data-rest="{{ item.segment.rest }}">
+                                        <div class="row align-items-center">
+                                            <div class="col-8">
+                                                <div class="text-white font-bold">{{ item.segment.reps }} x {{ item.segment.distance }}m</div>
+                                                <div class="text-gray-400 small">{{ item.segment.intensity }} @ {{ item.segment.rest }}s rest</div>
+                                            </div>
+                                            <div class="col-4 text-end border-start border-gray-700">
+                                                <div class="text-blue-400 font-monospace fw-bold">{{ item.segment.target_pace }}</div>
+                                                <div class="text-gray-500 text-[10px] font-monospace">Lap: {{ item.segment.lap_time }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-gray-700 border-gray-600">
+                        <ul class="list-unstyled mb-0 small text-gray-300">
+                            <li class="d-flex justify-content-between mb-1">
+                                <span>Total Distance:</span>
+                                <strong class="text-white">{{ group.summary.distance }}</strong>
+                            </li>
+                            <li class="d-flex justify-content-between mb-1">
+                                <span>Active Time:</span>
+                                <strong class="text-white">{{ group.summary.active_time }}</strong>
+                            </li>
+                            <li class="d-flex justify-content-between mb-1">
+                                <span>Total Time:</span>
+                                <strong class="text-white">{{ group.summary.total_time }}</strong>
+                            </li>
+                            <li class="d-flex justify-content-between mb-1">
+                                <span class="text-blue-400">TSS Score:</span>
+                                <strong class="text-white">{{ group.summary.tss }}</strong>
+                            </li>
+                            
+                            <li class="pt-2 mt-2 border-top border-gray-600">
+                                <!-- TSS Spice Scale -->
+                                <div class="p-2 bg-gray-900 rounded d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-gray-400 text-[10px] uppercase font-bold tracking-tight">TSS Spice</span>
+                                    <div class="text-end">
+                                        <span class="fs-6">
+                                            {% if group.summary.tss < 20 %}🌶️{% elif group.summary.tss <= 32 %}🌶️🌶️{% elif group.summary.tss <= 39 %}🌶️🌶️🌶️{% elif group.summary.tss <= 43 %}🌶️🌶️🌶️🌶️{% else %}🌶️🌶️🌶️🌶️🌶️{% endif %}
+                                        </span>
+                                        <div class="text-[9px] font-black uppercase mt-n1">
+                                            {% if group.summary.tss <= 32 %}<span class="text-gray-500">Too Mild</span>{% elif group.summary.tss <= 39 %}<span class="text-success">Just Right</span>{% elif group.summary.tss <= 43 %}<span class="text-warning">Hot! Monthly</span>{% else %}<span class="text-danger">Too Spicy!</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Track Volume Scale -->
+                                <div class="p-2 bg-gray-900 rounded d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-gray-400 text-[10px] uppercase font-bold tracking-tight">Track Volume</span>
+                                    <div class="text-end">
+                                        <span class="fs-6">
+                                            {% if group.summary.raw_distance_km < 4 %}👣{% elif group.summary.raw_distance_km <= 6 %}👣👣👣{% else %}👣👣👣👣👣{% endif %}
+                                        </span>
+                                        <div class="text-[9px] font-black uppercase mt-n1">
+                                            {% if group.summary.raw_distance_km < 4 %}<span class="text-gray-500">Short & Sweet</span>{% elif group.summary.raw_distance_km <= 6 %}<span class="text-success">The Sweet Spot</span>{% else %}<span class="text-warning">The Long Haul</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Session Duration Scale -->
+                                <div class="p-2 bg-gray-900 rounded d-flex justify-content-between align-items-center">
+                                    <span class="text-gray-400 text-[10px] uppercase font-bold tracking-tight">Session Time</span>
+                                    <div class="text-end">
+                                        <span class="fs-6">
+                                            {% if group.summary.raw_total_time_min < 25 %}⏳{% elif group.summary.raw_total_time_min <= 35 %}⏳⏳⏳{% else %}⏳⏳⏳⏳⏳{% endif %}
+                                        </span>
+                                        <div class="text-[9px] font-black uppercase mt-n1">
+                                            {% if group.summary.raw_total_time_min < 25 %}<span class="text-gray-500">Quick Blast</span>{% elif group.summary.raw_total_time_min <= 35 %}<span class="text-success">Perfect Timing</span>{% else %}<span class="text-danger">Long Shift</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Scripts for Image Download and WhatsApp Copy -->
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+    function downloadCardAsImage(elementId, filename) {
+        const element = document.getElementById(elementId);
+        
+        // Temporarily hide buttons for the screenshot
+        const buttons = element.querySelectorAll('.no-print');
+        buttons.forEach(b => b.style.display = 'none');
+        
+        html2canvas(element, {
+            backgroundColor: '#1f2937', // gray-800
+            scale: 2, // Higher quality
+            logging: false,
+            useCORS: true
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `${filename}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // Restore buttons
+            buttons.forEach(b => b.style.display = '');
+        });
+    }
+
+    function copyWorkoutToWhatsApp(groupName, counter) {
+        const itemsContainer = document.getElementById(`workout-items-${counter}`);
+        const items = itemsContainer.querySelectorAll('.workout-item');
+        
+        let text = `*${groupName} Session*\n`;
+        
+        items.forEach(item => {
+            if (item.getAttribute('data-type') === 'block') {
+                const multiplier = item.getAttribute('data-multiplier');
+                text += `\n*${multiplier} sets of:*\n`;
+                const segments = item.querySelectorAll('.segment-data');
+                segments.forEach(seg => {
+                    text += ` - ${formatSegment(seg)}\n`;
+                });
+            } else {
+                text += `${formatSegment(item)}\n`;
+            }
+        });
+
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Workout copied to clipboard for WhatsApp!');
+        });
+    }
+
+    function formatSegment(el) {
+        const reps = el.getAttribute('data-reps');
+        const dist = el.getAttribute('data-dist');
+        const intensity = el.getAttribute('data-intensity');
+        const pace = el.getAttribute('data-pace');
+        const rest = el.getAttribute('data-rest');
+        
+        return `${reps}x${dist}m @ ${intensity} (${pace}) [${rest}s rest]`;
+    }
+</script>
+
+<style>
+    @media print {
+        .no-print { display: none !important; }
+    }
+    .btn-xs {
+        padding: 1px 5px;
+        font-size: 12px;
+        line-height: 1.5;
+        border-radius: 3px;
+    }
+</style>
+{% endblock %}
