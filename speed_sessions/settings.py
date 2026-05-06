@@ -17,6 +17,9 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Detect if running on Vercel
+IS_VERCEL = os.environ.get('VERCEL') == '1'
+
 env_path = BASE_DIR / '.env'
 load_dotenv(dotenv_path=env_path, override=True)
 
@@ -31,6 +34,18 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(',')
+if IS_VERCEL:
+    ALLOWED_HOSTS.append('.vercel.app')
+
+if IS_VERCEL:
+    # Vercel handles SSL termination at the proxy level
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    
+    # Trust Vercel's domain for CSRF
+    CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS if host and host != '127.0.0.1']
 
 
 
@@ -189,3 +204,13 @@ LOGOUT_REDIRECT_URL = 'home'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 FORMS_URLFIELD_ASSUME_HTTPS = True
+
+if IS_VERCEL:
+    # Vercel filesystem is ephemeral. Media uploads will be lost on redeploy.
+    # Consider using django-storages with S3 or Cloudinary.
+    import warnings
+    warnings.warn(
+        "Running on Vercel with local FileSystemStorage. Media uploads will NOT persist. "
+        "Set up a cloud storage provider (e.g., S3, Cloudinary) for production.",
+        UserWarning
+    )
