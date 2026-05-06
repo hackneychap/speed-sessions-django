@@ -21,6 +21,26 @@ def block_list_view(request):
     return render(request, 'session_planner/block_list.html', {'blocks': blocks})
 
 @login_required
+def create_training_block_view(request):
+    """View to create a new training block."""
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        target_distance = request.POST.get('target_distance')
+        
+        if title and target_distance:
+            TrainingBlock.objects.create(
+                title=title,
+                description=description,
+                target_distance=target_distance,
+                created_by=request.user
+            )
+            # Redirect back to block list or planner if specified
+            return redirect('block-list')
+            
+    return render(request, 'session_planner/block_form.html')
+
+@login_required
 def get_schedule_form_view(request, block_id):
     """HTMX view to return the scheduling form for a specific block."""
     block = get_object_or_404(TrainingBlock, id=block_id)
@@ -58,6 +78,7 @@ def apply_block_to_calendar_view(request):
         Session.objects.create(
             title=template.title,
             date=session_date,
+            description=template.description,
             community=community,
             creator=request.user,
             structure_json=template.structure_json
@@ -351,6 +372,8 @@ def recalculate_group_plan_view(request):
 @login_required
 def save_workout_view(request):
     """Save or update the session and its groups"""
+    from django.db import transaction
+    
     try:
         community = request.user.profile.community
         if not community:
@@ -361,83 +384,91 @@ def save_workout_view(request):
     session_id = request.POST.get('session_id')
     title = request.POST.get('title')
     date = request.POST.get('date')
+    description = request.POST.get('description', '')
     base_structure = _extract_workout_structure(request.POST)
     
-    if session_id:
-        # Update existing session
-        session = get_object_or_404(Session, id=session_id)
-        # Security check
-        if session.community != community or session.community.manager != request.user:
-            return HttpResponse("Unauthorized", status=403)
-        
-        session.title = title
-        session.date = date
-        session.structure_json = base_structure
-        session.save()
-        
-        # Clear existing groups and recreate
-        session.groups.all().delete()
-    else:
-        # Create new session
-        session = Session.objects.create(
-            title=title,
-            date=date,
-            structure_json=base_structure,
-            community=community,
-            creator=request.user
-        )
-    
-    for char in ['a', 'b', 'c']:
-        name = request.POST.get(f'group_{char}_name')
-        metric = request.POST.get(f'group_{char}_metric')
-        val = request.POST.get(f'group_{char}_value')
-
-        if name and val:
-            vdot = 0
-            if metric == 'vdot':
-                try:
-                    vdot = float(val)
-                except:
-                    continue
-            else:
-                try:
-                    p = [int(x) for x in val.split(':')]
-                    m = p[0] + p[1] / 60 if len(p) == 2 else p[0] * 60 + p[1] + p[2] / 60
-                    vdot_res = calculate_vdot(5000, m)
-                    vdot = vdot_res['vdot_score'] if isinstance(vdot_res, dict) else vdot_res
-                except:
-                    continue
+    with transaction.atomic():
+        if session_id:
+            # Update existing session
+            session = get_object_or_404(Session, id=session_id)
+            # Security check
+            if session.community != community or session.community.manager != request.user:
+                return HttpResponse("Unauthorized", status=403)
             
-            # Extract group-specific structure if it exists
-            group_prefix = f'group_{char}_'
-            group_structure = _extract_workout_structure(request.POST, prefix=group_prefix)
+            session.title = title
+            session.date = date
+            session.description = description
+            session.structure_json = base_structure
+            session.save()
             
-            # If group structure is empty (e.g., results container not included), fallback to base
-            if not group_structure:
-                group_structure = base_structure
-
-            SessionGroup.objects.create(
-                session=session,
-                name=name,
-                vdot=vdot,
-                structure_json=group_structure 
+            # Map existing group structures to preserve them if not provided in POST
+            existing_group_structures = {g.name: g.structure_json for g in session.groups.all()}
+            
+            # Clear existing groups and recreate
+            session.groups.all().delete()
+        else:
+            session = Session.objects.create(
+                title=title,
+                date=date,
+                description=description,
+                structure_json=base_structure,
+                community=community,
+                creator=request.user
             )
+            existing_group_structures = {}
+        
+        for char in ['a', 'b', 'c']:
+            name = request.POST.get(f'group_{char}_name')
+            metric = request.POST.get(f'group_{char}_metric')
+            val = request.POST.get(f'group_{char}_value')
 
-    # --- Save as Training Block Template ---
-    if request.POST.get('save_as_template') == 'on':
-        block_id = request.POST.get('block_id')
-        week_num = request.POST.get('template_week_number')
-        if block_id and week_num:
-            block = get_object_or_404(TrainingBlock, id=block_id, created_by=request.user)
-            from .models import BlockSessionTemplate
-            BlockSessionTemplate.objects.update_or_create(
-                block=block,
-                week_number=week_num,
-                defaults={
-                    'title': title,
-                    'structure_json': base_structure
-                }
-            )
+            if name and val:
+                vdot = 0
+                if metric == 'vdot':
+                    try:
+                        vdot = float(val)
+                    except:
+                        continue
+                else:
+                    try:
+                        p = [int(x) for x in val.split(':')]
+                        m = p[0] + p[1] / 60 if len(p) == 2 else p[0] * 60 + p[1] + p[2] / 60
+                        vdot_res = calculate_vdot(5000, m)
+                        vdot = vdot_res['vdot_score'] if isinstance(vdot_res, dict) else vdot_res
+                    except:
+                        continue
+                
+                # Extract group-specific structure if it exists
+                group_prefix = f'group_{char}_'
+                group_structure = _extract_workout_structure(request.POST, prefix=group_prefix)
+                
+                # If group structure is empty, try to preserve existing or fallback to base
+                if not group_structure:
+                    group_structure = existing_group_structures.get(name, base_structure)
+
+                SessionGroup.objects.create(
+                    session=session,
+                    name=name,
+                    vdot=vdot,
+                    structure_json=group_structure 
+                )
+
+        # --- Save as Training Block Template ---
+        if request.POST.get('save_as_template') == 'on':
+            block_id = request.POST.get('block_id')
+            week_num = request.POST.get('template_week_number')
+            if block_id and week_num:
+                block = get_object_or_404(TrainingBlock, id=block_id, created_by=request.user)
+                from .models import BlockSessionTemplate
+                BlockSessionTemplate.objects.update_or_create(
+                    block=block,
+                    week_number=int(week_num),
+                    defaults={
+                        'title': title,
+                        'description': description,
+                        'structure_json': base_structure
+                    }
+                )
 
     response = HttpResponse()
     response['HX-Redirect'] = reverse('session-detail', kwargs={'pk': session.id})
@@ -445,7 +476,12 @@ def save_workout_view(request):
 
 @login_required
 def session_list_view(request):
-    """View to list all sessions in a calendar format, filtered by community"""
+    """View to list all upcoming sessions and events in an agenda/timeline format."""
+    from communities.models import CalendarEvent
+    from django.utils import timezone
+    from datetime import timedelta
+    from collections import defaultdict
+
     try:
         profile = request.user.profile
     except:
@@ -455,40 +491,54 @@ def session_list_view(request):
     if not community:
         return redirect('home')
 
-    year = int(request.GET.get('year', datetime.now().year))
-    month = int(request.GET.get('month', datetime.now().month))
+    today = timezone.now().date()
+    is_manager = (request.user == community.manager)
 
-    cal = calendar.Calendar(firstweekday=0) # Monday start
-    month_days = cal.monthdayscalendar(year, month)
+    # 1. Fetch upcoming Sessions
+    sessions = Session.objects.filter(community=community, date__gte=today).order_by('date')
+    
+    # 2. Fetch upcoming CalendarEvents
+    event_qs = CalendarEvent.objects.filter(community=community, date__gte=today).order_by('date')
+    if not is_manager:
+        event_qs = event_qs.filter(is_public=True)
+    events = list(event_qs)
 
-    sessions = Session.objects.filter(community=community, date__year=year, date__month=month)
-    sessions_by_day = {}
-    for session in sessions:
-        day = session.date.day
-        if day not in sessions_by_day:
-            sessions_by_day[day] = []
-        sessions_by_day[day].append(session)
+    # 3. Combine and Sort
+    timeline_items = []
+    for s in sessions:
+        s.item_type = 'session'
+        timeline_items.append(s)
+    for e in events:
+        e.item_type = 'event'
+        timeline_items.append(e)
+    
+    timeline_items.sort(key=lambda x: x.date)
 
-    prev_month = month - 1 if month > 1 else 12
-    prev_year = year if month > 1 else year - 1
-    next_month = month + 1 if month < 12 else 1
-    next_year = year if month < 12 else year + 1
+    # 4. Identify Hero Items
+    next_session = next((item for item in timeline_items if item.item_type == 'session'), None)
+    next_event = next((item for item in timeline_items if item.item_type == 'event'), None)
+    
+    # 5. Identify Horizon (Workouts only)
+    horizon_date = sessions.last().date if sessions.exists() else None
 
-    month_name = calendar.month_name[month]
+    # 6. Group by Week (Monday-indexed)
+    grouped_weeks = defaultdict(list)
+    for item in timeline_items:
+        # Find the Monday of the item's week
+        monday = item.date - timedelta(days=item.date.weekday())
+        grouped_weeks[monday].append(item)
+    
+    # Sort weeks chronologically
+    sorted_weeks = sorted(grouped_weeks.items())
 
     return render(request, 'session_planner/session_list.html', {
-        'sessions': sessions,
-        'month_days': month_days,
-        'year': year,
-        'month': month,
-        'month_name': month_name,
-        'sessions_by_day': sessions_by_day,
-        'prev_month': prev_month,
-        'prev_year': prev_year,
-        'next_month': next_month,
-        'next_year': next_year,
-        'today': datetime.now().date(),
-        'community': community
+        'sorted_weeks': sorted_weeks,
+        'next_session': next_session,
+        'next_event': next_event,
+        'horizon_date': horizon_date,
+        'today': today,
+        'community': community,
+        'is_manager': is_manager
     })
 
 @login_required
@@ -515,4 +565,25 @@ def session_detail_view(request, pk):
         'session': session,
         'groups': groups_data,
         'is_manager': is_manager
+    })
+
+
+@login_required
+def edit_training_block_view(request, block_id):
+    block = get_object_or_404(TrainingBlock, id=block_id, created_by=request.user)
+    
+    if request.method == 'POST':
+        template_order = request.POST.get('template_order')
+        if template_order:
+            template_ids = [int(tid) for tid in template_order.split(',') if tid.strip().isdigit()]
+            for index, tid in enumerate(template_ids):
+                # Update week_number based on 1-indexed position
+                from .models import BlockSessionTemplate
+                BlockSessionTemplate.objects.filter(id=tid, block=block).update(week_number=index + 1)
+        return redirect('block-list')
+        
+    templates = block.templates.all().order_by('week_number')
+    return render(request, 'session_planner/block_edit.html', {
+        'training_block': block,
+        'templates': templates
     })

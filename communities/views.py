@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Community, CommunityImage
-from .forms import CommunityForm
+from django.utils import timezone
+from .models import Community, CommunityImage, CalendarEvent
+from .forms import CommunityForm, CalendarEventForm
 from merch.models import MerchItem
+from session_planner.models import Session
 
 def community_list_view(request):
     communities = Community.objects.all()
@@ -18,11 +20,45 @@ def community_detail_view(request, slug):
         item.color_list = [c.strip() for c in item.available_colors.split(',')]
         
     is_manager = (request.user == community.manager)
+    
+    # Get the next scheduled workout
+    next_session = community.sessions.filter(date__gte=timezone.now().date()).order_by('date').first()
+    
+    # Get the next calendar event
+    event_qs = community.calendar_events.filter(date__gte=timezone.now().date()).order_by('date')
+    if not is_manager:
+        event_qs = event_qs.filter(is_public=True)
+    next_event = event_qs.first()
+    
     return render(request, 'communities/community_detail.html', {
         'community': community,
         'merch_items': merch_items,
-        'is_manager': is_manager
+        'is_manager': is_manager,
+        'next_session': next_session,
+        'next_event': next_event
     })
+
+@login_required
+def create_calendar_event_view(request, slug):
+    community = get_object_or_404(Community, slug=slug)
+    if community.manager != request.user:
+        return redirect('community-detail', slug=slug)
+
+    if request.method == 'POST':
+        form = CalendarEventForm(request.POST)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.community = community
+            event.save()
+            return redirect('session-list')
+    else:
+        # Pre-fill date if provided in GET
+        initial = {}
+        if 'date' in request.GET:
+            initial['date'] = request.GET['date']
+        form = CalendarEventForm(initial=initial)
+    
+    return render(request, 'communities/create_event.html', {'form': form, 'community': community})
 
 @login_required
 def community_edit_view(request, slug):

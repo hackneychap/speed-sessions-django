@@ -1,5 +1,14 @@
 from django import forms
-from .models import Community, CommunityImage
+from .models import Community, CommunityImage, CalendarEvent
+
+class CalendarEventForm(forms.ModelForm):
+    class Meta:
+        model = CalendarEvent
+        fields = ['title', 'date', 'description', 'is_public']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True

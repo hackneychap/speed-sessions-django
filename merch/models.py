@@ -28,6 +28,10 @@ class Order(models.Model):
         ('PENDING_INVOICE', 'Pending Invoice Calculation'),
         ('DRAFT_GENERATED', 'Draft Invoice Generated'),
         ('PAID_AWAITING_PRINT', 'Paid - Awaiting Print'),
+        ('SENT_TO_MANUFACTURER', 'Sent to Manufacturer'),
+        ('RECEIVED_FROM_MANUFACTURER', 'Received from Manufacturer'),
+        ('DELIVERED', 'Delivered'),
+        ('PAYMENT_FAILED', 'Payment Failed'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='merch_orders')

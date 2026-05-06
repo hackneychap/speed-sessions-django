@@ -1,22 +1,39 @@
 {% extends 'workouts/base.html' %}
 
 {% block content %}
-<div class="container mx-auto py-10 px-4 max-w-[600px]" id="checkout-container">
+<div class="container mx-auto py-10 px-4 max-w-[600px]" id="checkout-container" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <h2 class="text-3xl font-black text-white mb-8 italic uppercase tracking-tighter">Checkout</h2>
     
     <div class="bg-slate-900 border border-slate-800 p-6 rounded-lg mb-6">
         <h4 class="text-white font-bold mb-4">Order Summary</h4>
-        <ul class="space-y-2 mb-6">
+        <ul class="space-y-4 mb-6">
             {% for entry in items %}
-            <li class="d-flex justify-content-between text-slate-300">
-                <span>{{ entry.item.name }} ({{ entry.size }}, {{ entry.color }})</span>
-                <span>${{ entry.item.price }}</span>
+            <li class="d-flex justify-content-between text-slate-300 items-center">
+                <div>
+                    <span class="block font-bold">{{ entry.item.name }}</span>
+                    <span class="text-[10px] text-slate-500 uppercase tracking-widest">{{ entry.size }}, {{ entry.color }}</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="font-mono text-sm text-blue-400">£{{ entry.item.price }}</span>
+                    <button hx-post="{% url 'remove-from-cart' forloop.counter0 %}" 
+                            hx-target="#checkout-container" 
+                            hx-select="#checkout-container"
+                            hx-swap="outerHTML"
+                            class="text-red-500 hover:text-red-400 font-bold uppercase text-[10px] tracking-widest transition-colors">
+                        Remove
+                    </button>
+                </div>
             </li>
             {% endfor %}
+            {% if not items %}
+            <li class="text-center py-4 text-slate-500 uppercase tracking-widest text-xs font-bold">
+                Your order is empty. <a href="{% url 'community-list' %}" class="text-blue-500 hover:underline">Go back to gear</a>
+            </li>
+            {% endif %}
         </ul>
         <div class="border-t border-slate-700 pt-4 d-flex justify-content-between font-black text-xl text-white">
             <span>Subtotal:</span>
-            <span>${{ total_price }}</span>
+            <span>£{{ total_price }}</span>
         </div>
         <p class="text-[10px] text-slate-500 uppercase mt-2 italic">Note: Shipping will be calculated and invoiced in about two weeks.</p>
     </div>

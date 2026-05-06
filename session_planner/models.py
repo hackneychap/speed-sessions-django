@@ -55,6 +55,7 @@ class BlockSessionTemplate(models.Model):
     block = models.ForeignKey(TrainingBlock, related_name='templates', on_delete=models.CASCADE)
     week_number = models.IntegerField()
     title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
     structure_json = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
 

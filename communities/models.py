@@ -48,3 +48,17 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     if hasattr(instance, 'profile'):
         instance.profile.save()
+
+class CalendarEvent(models.Model):
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='calendar_events')
+    title = models.CharField(max_length=200)
+    date = models.DateField()
+    description = models.TextField(blank=True)
+    is_public = models.BooleanField(default=False, help_text="If checked, regular community members can see this event.")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['date']
+
+    def __str__(self):
+        return f"{self.title} on {self.date}"

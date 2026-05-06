@@ -30,6 +30,11 @@
                                value="{{ session.date|date:'Y-m-d'|default:'' }}" required>
                     </div>
                 </div>
+                <div class="col-12 mt-3">
+                    <label class="form-label text-white small uppercase font-bold tracking-wider">Workout Description (Optional)</label>
+                    <textarea name="description" class="form-control bg-gray-700 border-gray-600 text-white" rows="3" 
+                              placeholder="Describe the workout to the group, things to consider while running, etc.">{{ session.description|default:'' }}</textarea>
+                </div>
             </div>
         </div>
 
@@ -113,13 +118,40 @@
                     
                     <div id="block-selection-details" class="row g-3 d-none">
                         <div class="col-md-8">
-                            <label class="form-label text-white small uppercase font-bold tracking-wider">Select Training Block</label>
-                            <select name="block_id" class="form-select bg-gray-700 border-gray-600 text-white">
+                            <div class="d-flex justify-content-between align-items-end mb-2">
+                                <label class="form-label text-white small uppercase font-bold tracking-wider mb-0">Select Training Block</label>
+                                <a href="#" id="edit-selected-block-link" class="text-info small font-bold uppercase tracking-wider text-decoration-none hover:text-white" target="_blank">
+                                    Edit Selected Block
+                                </a>
+                            </div>
+                            <select name="block_id" id="training_block_selector" class="form-select bg-gray-700 border-gray-600 text-white" 
+                                    onchange="updateEditLink(this.value)">
                                 {% for block in training_blocks %}
                                     <option value="{{ block.id }}">{{ block.title }}</option>
                                 {% endfor %}
                             </select>
                         </div>
+
+<script>
+    function updateEditLink(blockId) {
+        const link = document.getElementById('edit-selected-block-link');
+        if (blockId) {
+            // Since we don't have a template tag for dynamic IDs in JS easily without a reverse URL template,
+            // we'll assume the URL structure or use a data-url-template.
+            // But here we can just hardcode or use a trick.
+            link.href = "/planner/blocks/" + blockId + "/edit/";
+            link.classList.remove('d-none');
+        } else {
+            link.classList.add('d-none');
+        }
+    }
+    
+    // Initial update
+    document.addEventListener('DOMContentLoaded', function() {
+        const selector = document.getElementById('training_block_selector');
+        if (selector) updateEditLink(selector.value);
+    });
+</script>
                         <div class="col-md-4">
                             <label class="form-label text-white small uppercase font-bold tracking-wider">Week Number</label>
                             <input type="number" name="template_week_number" class="form-control bg-gray-700 border-gray-600 text-white" value="1" min="1">
@@ -151,7 +183,7 @@
                 </button>
             </div>
             <div class="col-md-6 d-grid">
-                <button hx-post="{% url 'save-workout' %}" class="btn btn-success btn-lg"
+                <button type="button" hx-post="{% url 'save-workout' %}" class="btn btn-success btn-lg"
                         hx-include="#workout-form, #results-container">
                     {% if session %}Update Workout{% else %}Save Workout to Database{% endif %}
                 </button>

@@ -100,10 +100,17 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end bg-slate-800 border-slate-700 mt-2">
                                 <li><a class="dropdown-item text-slate-200 hover:bg-slate-700" href="{% url 'profile' %}">Edit Profile</a></li>
+                                <li><a class="dropdown-item text-slate-200 hover:bg-slate-700" href="{% url 'user-orders' %}">My Orders</a></li>
+                                {% if user.managed_communities.exists %}
+                                    <li><hr class="dropdown-divider border-slate-700"></li>
+                                    <li class="dropdown-header text-slate-500 font-bold uppercase text-[10px] tracking-widest px-3 py-1">Management</li>
+                                    {% for community in user.managed_communities.all %}
+                                        <li><a class="dropdown-item text-blue-400 hover:bg-slate-700" href="{% url 'manage-orders' community.slug %}">Manage {{ community.name }} Orders</a></li>
+                                    {% endfor %}
+                                {% endif %}
                                 <li><hr class="dropdown-divider border-slate-700"></li>
                                 <li>
-                                    <form action="{% url 'logout' %}" method="post">
-                                        {% csrf_token %}
+                                    <form action="{% url 'logout' %}" method="post">                                        {% csrf_token %}
                                         <button type="submit" class="dropdown-item text-red-400 hover:bg-slate-700">Logout</button>
                                     </form>
                                 </li>

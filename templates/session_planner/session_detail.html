@@ -11,7 +11,11 @@
                 </ol>
             </nav>
             <h1 class="text-4xl font-black text-white mb-0">{{ session.title }}</h1>
-            <p class="text-gray-500 mt-1">{{ session.description }}</p>
+            {% if session.description %}
+                <div class="mt-3 p-4 bg-slate-900/50 border-l-4 border-blue-500 rounded-r text-slate-300 italic whitespace-pre-line">
+                    {{ session.description }}
+                </div>
+            {% endif %}
         </div>
         <div class="text-end">
              <div class="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-center">

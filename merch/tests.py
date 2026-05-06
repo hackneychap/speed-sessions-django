@@ -95,3 +95,58 @@ class MerchManagementTest(TestCase):
         response = self.client.post(url, data)
         self.assertContains(response, "Image file too large (limit 1MB)")
         self.assertEqual(MerchItem.objects.count(), 0)
+
+class OrderFulfillmentTest(TestCase):
+    def setUp(self):
+        from merch.models import Order, OrderItem, MerchItem
+        from communities.models import Community
+        
+        self.manager = User.objects.create_user(username='manager_fulfillment', password='password123')
+        self.user = User.objects.create_user(username='customer', password='password123')
+        self.community = Community.objects.create(name='Fulfillment Comm', manager=self.manager)
+        
+        self.item = MerchItem.objects.create(
+            community=self.community,
+            name='Jersey',
+            price=50.00,
+            available_sizes='M',
+            available_colors='White'
+        )
+        
+        self.order = Order.objects.create(
+            user=self.user,
+            customer_name='Customer',
+            customer_email='customer@example.com',
+            base_cost=50.00,
+            status='PAID_AWAITING_PRINT'
+        )
+        OrderItem.objects.create(
+            order=self.order,
+            item=self.item,
+            size='M',
+            color='White',
+            price_at_order=50.00
+        )
+        
+        self.client = Client()
+
+    def test_manager_can_update_status_to_ordered(self):
+        self.client.login(username='manager_fulfillment', password='password123')
+        url = reverse('update-order-status', kwargs={'order_id': self.order.id})
+        
+        # Advance to SENT_TO_MANUFACTURER
+        response = self.client.post(url, {'status': 'SENT_TO_MANUFACTURER'})
+        
+        self.assertEqual(response.status_code, 302)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, 'SENT_TO_MANUFACTURER')
+
+    def test_non_manager_cannot_update_status(self):
+        self.client.login(username='customer', password='password123')
+        url = reverse('update-order-status', kwargs={'order_id': self.order.id})
+        
+        response = self.client.post(url, {'status': 'SENT_TO_MANUFACTURER'})
+        self.assertEqual(response.status_code, 403)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, 'PAID_AWAITING_PRINT')
+

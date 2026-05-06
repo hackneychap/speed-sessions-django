@@ -30,6 +30,12 @@
                 <a href="{% url 'home' %}" class="py-3 px-6 bg-slate-800 text-slate-400 font-bold rounded transition-all">Back</a>
             </div>
         </form>
+
+        <div class="mt-6">
+            <a href="{% url 'user-orders' %}" class="block w-full text-center py-3 bg-slate-800 hover:bg-slate-700 text-blue-400 font-bold rounded uppercase tracking-widest text-sm transition-colors border border-slate-700">
+                📦 View My Order History
+            </a>
+        </div>
         
         <div class="mt-8 border-t border-slate-800 pt-6 text-center">
             <form action="{% url 'logout' %}" method="post">
