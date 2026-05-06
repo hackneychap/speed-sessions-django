@@ -1,0 +1,66 @@
+{% extends 'workouts/base.html' %}
+
+{% block content %}
+<div class="container mx-auto py-10 px-4 max-w-lg">
+    <div class="bg-slate-900 border border-slate-800 p-8 rounded-xl shadow-2xl">
+        <h2 class="text-3xl font-black text-white mb-2 italic uppercase tracking-tighter">Create Calendar <span class="text-purple-500">Event</span></h2>
+        <p class="text-slate-500 text-sm mb-8 uppercase tracking-widest font-bold">Add non-workout items to the community calendar.</p>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="{% if field.name == 'is_public' %}flex items-center gap-3 bg-slate-950 p-4 rounded border border-slate-800{% endif %}">
+                    {% if field.name == 'is_public' %}
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}" class="text-slate-300 font-bold uppercase text-xs tracking-widest cursor-pointer mb-0">
+                            {{ field.label }}
+                        </label>
+                    {% else %}
+                        <label for="{{ field.id_for_label }}" class="block text-slate-500 font-bold uppercase text-xs mb-2 tracking-widest">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                    {% endif %}
+                    
+                    {% if field.help_text %}
+                        <p class="text-[10px] text-slate-600 mt-1 uppercase">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="text-red-500 text-[10px] uppercase font-bold mt-1">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="pt-4 flex gap-4">
+                <button type="submit" class="flex-grow py-3 bg-purple-600 hover:bg-purple-500 text-white font-black text-xl rounded transition-all uppercase italic shadow-lg shadow-purple-900/20">
+                    Save Event
+                </button>
+                <a href="{% url 'session-list' %}" class="py-3 px-6 bg-slate-800 text-slate-400 font-bold rounded transition-all flex items-center">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    input[type="text"], input[type="date"], textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: #0f172a !important;
+        border: 1px solid #334155 !important;
+        border-radius: 0.5rem;
+        color: #f8fafc !important;
+        font-family: 'JetBrains+Mono', monospace;
+    }
+    input:focus, textarea:focus {
+        outline: none !important;
+        border-color: #a855f7 !important; /* purple-500 */
+        box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.5) !important;
+    }
+    input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        accent-color: #a855f7;
+    }
+</style>
+{% endblock %}
