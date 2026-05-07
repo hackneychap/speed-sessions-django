@@ -9,6 +9,9 @@
     <link rel="icon" type="image/png" href="{% static 'favicon/favicon-96x96.png' %}" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="{% static 'favicon/favicon.svg' %}" />
     <link rel="manifest" href="{% static 'favicon/site.webmanifest' %}" />
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <title>RunTRASH | {% block title %}Welcome{% endblock %}</title>
 
@@ -94,9 +97,39 @@
         .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; display: flex; flex-direction: column; }
         .card-body { flex: 1 1 auto; padding: 1rem; }
         .card-header { padding: 0.75rem 1rem; background-color: #334155; border-bottom: 1px solid #475569; }
+
+        /* HTMX Loading Indicator */
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: block;
+        }
+        .htmx-request.htmx-indicator {
+            display: block;
+        }
+        .progress-bar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            z-index: 10000;
+            background: transparent;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0;
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 min-h-screen relative overflow-x-hidden">
+    <!-- Global HTMX Progress Bar -->
+    <div class="progress-bar-container">
+        <div id="htmx-progress" class="progress-bar-fill"></div>
+    </div>
     <div class="retro-crt fixed inset-0 pointer-events-none z-50 h-full w-full opacity-30"></div>
 
     <div class="drawer">
@@ -110,7 +143,7 @@
                     </label>
                 </div>
                 <div class="flex-1 px-2 mx-2">
-                    <a class="font-black tracking-tighter text-blue-500 text-2xl italic no-underline" href="/">
+                    <a class="font-black tracking-tighter text-blue-500 text-2xl italic no-underline" href="{% if user.is_authenticated %}{% url 'session-list' %}{% else %}/{% endif %}">
                         <span class="text-white">TRACK</span>SESH <span class="text-xs text-blue-400 font-bold uppercase tracking-widest align-middle ml-1">(TRASH)</span>
                     </a>
                 </div>
@@ -185,7 +218,7 @@
             <ul class="menu p-4 w-80 min-h-full bg-slate-900 text-slate-200 font-bold uppercase tracking-widest">
                 <!-- Sidebar content here -->
                 <li class="mb-4">
-                    <a class="text-2xl italic font-black text-blue-500 tracking-tighter hover:bg-transparent" href="/">
+                    <a class="text-2xl italic font-black text-blue-500 tracking-tighter hover:bg-transparent" href="{% if user.is_authenticated %}{% url 'session-list' %}{% else %}/{% endif %}">
                         <span class="text-white">TRACK</span>SESH
                     </a>
                 </li>
@@ -227,6 +260,21 @@
     <!-- Vercel Web Analytics -->
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+
+        // HTMX Global Loading Bar
+        document.addEventListener('htmx:beforeRequest', function() {
+            document.getElementById('htmx-progress').style.width = '30%';
+            document.getElementById('htmx-progress').style.opacity = '1';
+        });
+        document.addEventListener('htmx:afterRequest', function() {
+            document.getElementById('htmx-progress').style.width = '100%';
+            setTimeout(function() {
+                document.getElementById('htmx-progress').style.opacity = '0';
+                setTimeout(function() {
+                    document.getElementById('htmx-progress').style.width = '0';
+                }, 300);
+            }, 300);
+        });
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
 </body>

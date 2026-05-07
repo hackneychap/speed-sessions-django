@@ -234,31 +234,46 @@
         const checkboxes = document.querySelectorAll('.accordion-checkbox');
         const previousStates = Array.from(checkboxes).map(cb => cb.checked);
         
-        // Force all open for capture
+        // Force all open for capture and DISABLE TRANSITIONS
+        const style = document.createElement('style');
+        style.innerHTML = `* { transition: none !important; animation: none !important; }`;
+        document.head.appendChild(style);
+
         checkboxes.forEach(cb => cb.checked = true);
 
         // Temporarily hide buttons
         const buttons = container.querySelectorAll('.no-print');
         buttons.forEach(b => b.style.display = 'none');
 
-        // Wait for accordion transitions
+        // Wait a bit for layout to settle even without transitions
         setTimeout(() => {
             html2canvas(container, {
                 backgroundColor: '#020617', // slate-950
                 scale: 2,
-                logging: false,
-                useCORS: true
+                logging: true, // Enable logging to debug
+                useCORS: true,
+                allowTaint: true
             }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `${filename}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                
-                // Restore original state
-                buttons.forEach(b => b.style.display = '');
-                checkboxes.forEach((cb, i) => cb.checked = previousStates[i]);
+                try {
+                    const link = document.createElement('a');
+                    link.download = `${filename}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } catch (e) {
+                    console.error("Download failed", e);
+                    alert("Image capture failed. Try expanding all accordions manually first.");
+                } finally {
+                    // Restore original state
+                    buttons.forEach(b => b.style.display = '');
+                    checkboxes.forEach((cb, i) => cb.checked = previousStates[i]);
+                    document.head.removeChild(style);
+                }
+            }).catch(err => {
+                console.error("html2canvas error", err);
+                alert("Error capturing image: " + err.message);
+                document.head.removeChild(style);
             });
-        }, 300);
+        }, 500);
     }
 
     function getWorkoutText(groupName, counter) {

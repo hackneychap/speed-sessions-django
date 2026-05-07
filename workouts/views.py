@@ -71,6 +71,8 @@ class UserRegistrationForm(UserCreationForm):
         fields = UserCreationForm.Meta.fields + ('email',)
 
 def home_view(request):
+    if request.user.is_authenticated:
+        return redirect('session-list')
     return render(request, 'home.html')
 
 def signup_view(request):
@@ -88,7 +90,7 @@ def signup_view(request):
                 user.profile.community = community
             user.profile.save()
             login(request, user)
-            return redirect('home')
+            return redirect('session-list')
     else:
         form = UserRegistrationForm()
     return render(request, 'registration/signup.html', {
