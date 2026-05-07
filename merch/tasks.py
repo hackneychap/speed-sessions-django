@@ -8,7 +8,7 @@ def send_order_status_email(order_id):
         order = Order.objects.get(id=order_id)
         status_display = order.get_status_display()
         
-        subject = f"Update on your Speed Sessions Gear Order #{order.id}"
+        subject = f"Update on your RunTRASH Gear Order #{order.id}"
         message = f"Hi {order.customer_name},\n\nYour order status has been updated to: {status_display}.\n\nThank you for being part of the community!"
         
         send_mail(
