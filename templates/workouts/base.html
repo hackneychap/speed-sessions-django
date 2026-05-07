@@ -70,6 +70,17 @@
         /* Minimal Bootstrap Compatibility for Grid */
         .row { display: flex; flex-wrap: wrap; margin-right: -0.75rem; margin-left: -0.75rem; }
         .row > * { flex-shrink: 0; width: 100%; max-width: 100%; padding-right: 0.75rem; padding-left: 0.75rem; margin-top: 0; }
+        
+        /* Mobile-First Input Improvements */
+        input, select, textarea {
+            width: 100% !important;
+            min-height: 44px !important;
+            border-radius: 0.5rem !important;
+        }
+        @media (max-width: 768px) {
+            .btn { width: 100% !important; }
+            .navbar .btn { width: auto !important; }
+        }
         .g-4 { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; }
         .g-4 > * { padding-right: calc(var(--bs-gutter-x) * 0.5); padding-left: calc(var(--bs-gutter-x) * 0.5); margin-top: var(--bs-gutter-y); }
         @media (min-width: 768px) {
