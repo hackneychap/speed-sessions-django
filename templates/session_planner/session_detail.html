@@ -206,18 +206,9 @@
     function downloadAllCardsAsImage(containerId, filename) {
         const container = document.getElementById(containerId);
         
-        // Store original classes to restore later
-        const originalClasses = container.className;
-        const cards = container.querySelectorAll('.group-card-container');
-        const originalCardClasses = Array.from(cards).map(c => c.className);
-        
         // Temporarily hide buttons
         const buttons = container.querySelectorAll('.no-print');
         buttons.forEach(b => b.style.display = 'none');
-
-        // Force vertical stacking for the snapshot
-        container.className = 'd-flex flex-column gap-4 bg-slate-950 p-4';
-        cards.forEach(c => c.className = 'w-100');
 
         html2canvas(container, {
             backgroundColor: '#020617', // slate-950
@@ -230,9 +221,7 @@
             link.href = canvas.toDataURL('image/png');
             link.click();
             
-            // Restore original state
-            container.className = originalClasses;
-            cards.forEach((c, i) => c.className = originalCardClasses[i]);
+            // Restore buttons
             buttons.forEach(b => b.style.display = '');
         });
     }
