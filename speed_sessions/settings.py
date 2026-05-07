@@ -130,7 +130,7 @@ DATABASES = {
 
 #overwrite on render
 db_url = os.getenv('DATABASE_URL')
-if db_url and db_url.startswith('postgresql://'):
+if db_url and (db_url.startswith('postgresql://') or db_url.startswith('postgres://')):
     DATABASES['default'] = dj_database_url.config(conn_max_age=600)
 
 
