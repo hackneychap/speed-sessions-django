@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 # --- VDOT/Pace Views ---
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def calculate_vdot_view(request):
     logger.info("Received request for VDOT calculation.")
@@ -37,7 +36,6 @@ def calculate_vdot_view(request):
         return JsonResponse({"error": "Calculation failed."}, status=400)
     return render(request, 'workouts/_vdot_results.html', vdot_data)
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def calculate_pace_view(request):
     logger.info("Received request for pace calculation.")

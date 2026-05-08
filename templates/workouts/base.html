@@ -170,7 +170,7 @@
         }
     </style>
 </head>
-<body class="bg-white text-black min-h-screen relative overflow-x-hidden">
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="bg-white text-black min-h-screen relative overflow-x-hidden">
     <!-- Global HTMX Progress Bar -->
     <div class="progress-bar-container">
         <div id="htmx-progress" class="progress-bar-fill"></div>

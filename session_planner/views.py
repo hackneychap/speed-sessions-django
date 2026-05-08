@@ -46,7 +46,6 @@ def get_schedule_form_view(request, block_id):
     block = get_object_or_404(TrainingBlock, id=block_id)
     return render(request, 'session_planner/partials/_schedule_form.html', {'block': block})
 
-@csrf_exempt
 @require_http_methods(["POST"])
 @login_required
 def apply_block_to_calendar_view(request):
@@ -313,7 +312,6 @@ def add_workout_segment(request):
 def add_repeat_block(request):
     return render(request, 'session_planner/partials/_repeat_block.html')
 
-@csrf_exempt
 @require_http_methods(["POST"])
 @login_required
 def generate_plan_view(request):
@@ -346,7 +344,6 @@ def generate_plan_view(request):
 
     return render(request, 'session_planner/partials/_differentiated_plan_results.html', {'groups': groups_data})
 
-@csrf_exempt
 @require_http_methods(["POST"])
 @login_required
 def recalculate_group_plan_view(request):
@@ -367,7 +364,6 @@ def recalculate_group_plan_view(request):
         'forloop': {'counter': forloop_counter}
     })
 
-@csrf_exempt
 @require_http_methods(["POST"])
 @login_required
 def save_workout_view(request):
