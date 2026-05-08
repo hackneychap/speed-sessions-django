@@ -49,20 +49,20 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6" id="all-groups-grid">
         {% for group in groups %}
-            <div id="group-card-{{ forloop.counter }}" class="collapse collapse-arrow bg-white border-2 border-black rounded-none h-full group">
-                <input type="checkbox" class="accordion-checkbox" checked /> 
+            <div id="group-card-{{ forloop.counter }}" class="collapse collapse-arrow bg-white border-2 border-black rounded-none h-full group relative">
+                <input type="checkbox" class="accordion-checkbox z-10" checked /> 
                 
-                <div class="collapse-title bg-black text-white p-4 flex flex-col justify-center !pr-12">
+                <div class="collapse-title bg-black text-white p-4 flex flex-col justify-center !pr-12 relative">
                     <h5 class="mb-0 font-black italic uppercase tracking-widest text-xl">{{ group.name }}</h5>
                     <span class="font-mono text-xs font-black uppercase tracking-widest mt-1">VDOT: {{ group.vdot }}</span>
                     
-                    <div class="no-print pointer-events-auto flex gap-2 mt-3">
+                    <div class="no-print pointer-events-auto flex gap-2 mt-3 relative z-30">
                         <button class="px-2 py-1 border-2 border-white text-white bg-black hover:bg-white hover:text-black rounded-none text-[10px] font-black uppercase transition-all" title="Copy to WhatsApp" 
-                                onclick="event.stopPropagation(); copyWorkoutToWhatsApp('{{ group.name }}', {{ forloop.counter }})">
+                                onclick="event.preventDefault(); event.stopPropagation(); copyWorkoutToWhatsApp('{{ group.name }}', {{ forloop.counter }})">
                             📋 COPY
                         </button>
                         <button class="px-2 py-1 border-2 border-white text-white bg-black hover:bg-white hover:text-black rounded-none text-[10px] font-black uppercase transition-all" title="Download Image"
-                                onclick="event.stopPropagation(); downloadCardAsImage('group-card-{{ forloop.counter }}', '{{ session.title|slugify }}_{{ group.name|slugify }}')">
+                                onclick="event.preventDefault(); event.stopPropagation(); downloadCardAsImage('group-card-{{ forloop.counter }}', '{{ session.title|slugify }}_{{ group.name|slugify }}')">
                             🖼️ IMG
                         </button>
                     </div>
@@ -197,36 +197,63 @@
         btn.innerText = anyClosed ? '↔️ Collapse All' : '↔️ Expand All';
     }
 
+    function prepareForCapture(element) {
+        // Force Standard Colors to bypass oklch parsing errors in html2canvas
+        const style = document.createElement('style');
+        style.id = 'capture-overrides';
+        style.innerHTML = `
+            .bg-black { background-color: #000000 !important; }
+            .bg-white { background-color: #ffffff !important; }
+            .text-white { color: #ffffff !important; }
+            .text-black { color: #000000 !important; }
+            .border-black { border-color: #000000 !important; }
+            .border-white { border-color: #ffffff !important; }
+            .collapse-title { background-color: #000000 !important; color: #ffffff !important; }
+            .collapse-content { background-color: #ffffff !important; }
+            * { transition: none !important; animation: none !important; }
+        `;
+        document.head.appendChild(style);
+        return style;
+    }
+
+    function cleanupAfterCapture(styleElement) {
+        if (styleElement) {
+            document.head.removeChild(styleElement);
+        }
+    }
+
     function downloadCardAsImage(elementId, filename) {
         const element = document.getElementById(elementId);
         const checkbox = element.querySelector('.accordion-checkbox');
         const wasChecked = checkbox.checked;
         
-        // Ensure accordion is open for capture
         checkbox.checked = true;
+        const styleOverride = prepareForCapture(element);
         
-        // Temporarily hide buttons for the screenshot
         const buttons = element.querySelectorAll('.no-print');
         buttons.forEach(b => b.style.display = 'none');
         
-        // Wait for accordion transition
         setTimeout(() => {
             html2canvas(element, {
                 backgroundColor: '#ffffff',
-                scale: 2, // Higher quality
+                scale: 2,
                 logging: false,
-                useCORS: true
+                useCORS: true,
+                allowTaint: true
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `${filename}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
                 
-                // Restore state
                 buttons.forEach(b => b.style.display = '');
                 checkbox.checked = wasChecked;
+                cleanupAfterCapture(styleOverride);
+            }).catch(err => {
+                console.error("Capture failed", err);
+                cleanupAfterCapture(styleOverride);
             });
-        }, 150);
+        }, 200);
     }
 
     function downloadAllCardsAsImage(containerId, filename) {
@@ -234,23 +261,17 @@
         const checkboxes = document.querySelectorAll('.accordion-checkbox');
         const previousStates = Array.from(checkboxes).map(cb => cb.checked);
         
-        // Force all open for capture and DISABLE TRANSITIONS
-        const style = document.createElement('style');
-        style.innerHTML = `* { transition: none !important; animation: none !important; }`;
-        document.head.appendChild(style);
-
+        const styleOverride = prepareForCapture(container);
         checkboxes.forEach(cb => cb.checked = true);
 
-        // Temporarily hide buttons
         const buttons = container.querySelectorAll('.no-print');
         buttons.forEach(b => b.style.display = 'none');
 
-        // Wait a bit for layout to settle even without transitions
         setTimeout(() => {
             html2canvas(container, {
                 backgroundColor: '#ffffff',
                 scale: 2,
-                logging: true, // Enable logging to debug
+                logging: false,
                 useCORS: true,
                 allowTaint: true
             }).then(canvas => {
@@ -263,17 +284,16 @@
                     console.error("Download failed", e);
                     alert("Image capture failed. Try expanding all accordions manually first.");
                 } finally {
-                    // Restore original state
                     buttons.forEach(b => b.style.display = '');
                     checkboxes.forEach((cb, i) => cb.checked = previousStates[i]);
-                    document.head.removeChild(style);
+                    cleanupAfterCapture(styleOverride);
                 }
             }).catch(err => {
                 console.error("html2canvas error", err);
                 alert("Error capturing image: " + err.message);
-                document.head.removeChild(style);
+                cleanupAfterCapture(styleOverride);
             });
-        }, 500);
+        }, 600);
     }
 
     function getWorkoutText(groupName, counter) {
@@ -307,7 +327,6 @@
     function copyAllWorkoutsToWhatsApp(sessionTitle, sessionDate) {
         let fullText = `*${sessionTitle}*\n_${sessionDate}_\n\n`;
         
-        // Find all workout item containers
         const containers = document.querySelectorAll('[id^="workout-items-"]');
         containers.forEach((container) => {
             const counter = container.id.split('-').pop();
@@ -335,9 +354,20 @@
     @media print {
         .no-print { display: none !important; }
     }
-    /* Fix for daisyUI collapse-title padding */
     .collapse-title {
         min-height: 0 !important;
+    }
+    /* Ensure action buttons sit above the invisible accordion checkbox */
+    .accordion-checkbox {
+        pointer-events: none;
+    }
+    .group:hover .accordion-checkbox {
+        pointer-events: auto;
+    }
+    /* Direct click fix for Safari/Chrome where pointer-events logic might be finicky */
+    .no-print.pointer-events-auto {
+        z-index: 50 !important;
+        pointer-events: auto !important;
     }
 </style>
 {% endblock %}
