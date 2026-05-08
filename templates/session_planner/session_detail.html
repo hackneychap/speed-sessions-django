@@ -236,7 +236,15 @@
         setTimeout(() => {
             htmlToImage.toPng(element, {
                 backgroundColor: '#ffffff',
-                pixelRatio: 2
+                pixelRatio: 2,
+                skipFonts: true,
+                filter: (node) => {
+                    // Filter out external stylesheets/iframes/scripts to speed up rendering
+                    if (node.tagName === 'LINK' || node.tagName === 'SCRIPT' || node.tagName === 'IFRAME') {
+                        return false;
+                    }
+                    return true;
+                }
             }).then(dataUrl => {
                 const link = document.createElement('a');
                 link.download = `${filename}.png`;
@@ -267,7 +275,15 @@
         setTimeout(() => {
             htmlToImage.toPng(container, {
                 backgroundColor: '#ffffff',
-                pixelRatio: 2
+                pixelRatio: 2,
+                skipFonts: true,
+                filter: (node) => {
+                    // Filter out external stylesheets/iframes/scripts to speed up rendering
+                    if (node.tagName === 'LINK' || node.tagName === 'SCRIPT' || node.tagName === 'IFRAME') {
+                        return false;
+                    }
+                    return true;
+                }
             }).then(dataUrl => {
                 const link = document.createElement('a');
                 link.download = `${filename}.png`;
