@@ -1,4 +1,4 @@
-<div class="row g-4">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     {% for group in groups %}
         {% include 'session_planner/partials/_group_card.html' with group=group forloop=forloop %}
     {% endfor %}

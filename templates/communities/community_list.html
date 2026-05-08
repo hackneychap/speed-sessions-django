@@ -2,19 +2,19 @@
 
 {% block content %}
 <div class="container mx-auto py-10 px-4 max-w-[800px]">
-    <h2 class="text-4xl font-black text-white italic uppercase tracking-tighter mb-8">Training Communities</h2>
+    <h2 class="text-4xl font-black text-black italic uppercase tracking-tighter mb-8">Training Communities</h2>
     
     <div class="grid gap-4">
         {% for community in communities %}
-            <div class="bg-slate-900 p-6 rounded border border-slate-700 flex justify-between items-center">
+            <div class="bg-white p-6 rounded-none border border-black border-2 flex justify-between items-center">
                 <div>
-                    <h4 class="text-white font-bold text-lg">{{ community.name }}</h4>
-                    <p class="text-slate-400 text-sm">{{ community.description|truncatewords:20 }}</p>
+                    <h4 class="text-black font-bold text-lg">{{ community.name }}</h4>
+                    <p class="text-black text-sm">{{ community.description|truncatewords:20 }}</p>
                 </div>
                 <a href="{% url 'community-detail' community.slug %}" class="btn btn-outline-primary">View</a>
             </div>
         {% empty %}
-            <p class="text-slate-500 italic">No communities found.</p>
+            <p class="text-black italic">No communities found.</p>
         {% endfor %}
     </div>
 </div>

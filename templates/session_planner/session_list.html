@@ -5,19 +5,19 @@
     <!-- Header & Controls -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div>
-            <div class="text-blue-500 font-black uppercase tracking-[0.2em] text-xs mb-1">{{ community.name }}</div>
-            <h1 class="text-4xl font-black text-white italic uppercase tracking-tighter mb-0">Community Schedule</h1>
+            <div class="text-black font-black uppercase tracking-[0.2em] text-xs mb-1">{{ community.name }}</div>
+            <h1 class="text-4xl font-black text-black italic uppercase tracking-tighter mb-0">Community Schedule</h1>
         </div>
         <div class="flex flex-wrap gap-2">
-            <a href="{% url 'block-list' %}" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-bold uppercase tracking-wider text-xs border border-slate-700 transition-colors">
+            <a href="{% url 'block-list' %}" class="px-4 py-2 bg-white hover:bg-white text-black rounded-none font-bold uppercase tracking-wider text-xs border border-black border-2 transition-colors">
                 Training Blocks
             </a>
             {% if is_manager %}
-                <a href="{% url 'create-calendar-event' community.slug %}" class="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/40 text-purple-400 rounded font-bold uppercase tracking-wider text-xs border border-purple-500/30 transition-colors">
+                <a href="{% url 'create-calendar-event' community.slug %}" class="px-4 py-2 bg-white hover:bg-white text-black rounded-none font-bold uppercase tracking-wider text-xs border border-black border-2 transition-colors">
                     Create Event
                 </a>
             {% endif %}
-            <a href="{% url 'planner-page' %}" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold uppercase tracking-wider text-xs shadow-lg shadow-blue-900/20 transition-all">
+            <a href="{% url 'planner-page' %}" class="px-4 py-2 bg-black hover:bg-white text-white rounded-none font-bold uppercase tracking-wider text-xs shadow-none shadow-none-900/20 transition-all">
                 Create New Session
             </a>
         </div>
@@ -26,23 +26,23 @@
     <!-- Hero Section: Next Up -->
     <div class="grid md:grid-cols-2 gap-6 mb-12">
         {% if next_session %}
-            <div class="bg-blue-900/20 border border-blue-500/30 p-6 rounded-2xl shadow-xl">
-                <span class="text-blue-400 font-black uppercase text-[10px] tracking-[0.2em] block mb-2">Next Workout</span>
-                <h3 class="text-2xl font-black text-white italic uppercase tracking-tight mb-1">{{ next_session.title }}</h3>
-                <div class="text-white font-bold text-lg mb-4">{{ next_session.date|date:"l, M d" }}</div>
-                <a href="{% url 'session-detail' next_session.id %}" class="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded uppercase tracking-widest text-xs transition-all italic">
+            <div class="bg-white border border-black border-2 p-6 rounded-none shadow-none">
+                <span class="text-black font-black uppercase text-[10px] tracking-[0.2em] block mb-2">Next Workout</span>
+                <h3 class="text-2xl font-black text-black italic uppercase tracking-tight mb-1">{{ next_session.title }}</h3>
+                <div class="text-black font-bold text-lg mb-4">{{ next_session.date|date:"l, M d" }}</div>
+                <a href="{% url 'session-detail' next_session.id %}" class="inline-block px-6 py-2 bg-black hover:bg-white text-white font-bold rounded-none uppercase tracking-widest text-xs transition-all italic">
                     View Workout
                 </a>
             </div>
         {% endif %}
 
         {% if next_event %}
-            <div class="bg-purple-900/20 border border-purple-500/30 p-6 rounded-2xl shadow-xl">
-                <span class="text-purple-400 font-black uppercase text-[10px] tracking-[0.2em] block mb-2">Next Group Event</span>
-                <h3 class="text-2xl font-black text-white italic uppercase tracking-tight mb-1">{{ next_event.title }}</h3>
-                <div class="text-white font-bold text-lg mb-4">{{ next_event.date|date:"l, M d" }}</div>
+            <div class="bg-white border border-black border-2 p-6 rounded-none shadow-none">
+                <span class="text-black font-black uppercase text-[10px] tracking-[0.2em] block mb-2">Next Group Event</span>
+                <h3 class="text-2xl font-black text-black italic uppercase tracking-tight mb-1">{{ next_event.title }}</h3>
+                <div class="text-black font-bold text-lg mb-4">{{ next_event.date|date:"l, M d" }}</div>
                 {% if next_event.description %}
-                    <p class="text-slate-400 text-xs italic mb-0 line-clamp-1">{{ next_event.description }}</p>
+                    <p class="text-black text-xs italic mb-0 line-clamp-1">{{ next_event.description }}</p>
                 {% endif %}
             </div>
         {% endif %}
@@ -50,8 +50,8 @@
 
     <!-- Horizon Indicator -->
     {% if horizon_date %}
-        <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-3 mb-8 text-center">
-            <span class="text-slate-500 font-bold uppercase text-[10px] tracking-[0.3em]">
+        <div class="bg-white border border-black border-2 rounded-none p-3 mb-8 text-center">
+            <span class="text-black font-bold uppercase text-[10px] tracking-[0.3em]">
                 Schedule planned through {{ horizon_date|date:"M d, Y" }}
             </span>
         </div>
@@ -61,23 +61,23 @@
     <div class="space-y-12">
         {% for monday, items in sorted_weeks %}
             <div>
-                <h2 class="text-slate-500 font-black uppercase tracking-[0.3em] text-xs mb-6 border-b border-slate-800 pb-2">
+                <h2 class="text-black font-black uppercase tracking-[0.3em] text-xs mb-6 border-b border-black border-2 pb-2">
                     Week of {{ monday|date:"M d" }}
                 </h2>
                 
-                <div class="space-y-4 ps-4 border-l-2 border-slate-800 ml-2">
+                <div class="space-y-4 ps-4 border-l-2 border-black border-2 ml-2">
                     {% for item in items %}
                         {% if item.item_type == 'session' %}
                             <!-- Workout Card -->
                             <a href="{% url 'session-detail' item.id %}" class="block group text-decoration-none">
-                                <div class="bg-slate-900 border border-slate-800 hover:border-blue-500/50 rounded-xl p-5 transition-all relative">
-                                    <div class="absolute -left-[25px] top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full border-4 border-slate-950"></div>
+                                <div class="bg-white border border-black border-2 hover:border-black rounded-none p-5 transition-all relative">
+                                    <div class="absolute -left-[25px] top-1/2 -translate-y-1/2 w-4 h-4 bg-black rounded-none border-4 border-black border-2"></div>
                                     <div class="flex justify-between items-center">
                                         <div>
-                                            <div class="text-blue-400 font-bold text-[10px] uppercase tracking-widest mb-1">{{ item.date|date:"l, M d" }}</div>
-                                            <h4 class="text-white font-bold group-hover:text-blue-400 transition-colors">{{ item.title }}</h4>
+                                            <div class="text-black font-bold text-[10px] uppercase tracking-widest mb-1">{{ item.date|date:"l, M d" }}</div>
+                                            <h4 class="text-black font-bold group-hover:text-black transition-colors">{{ item.title }}</h4>
                                         </div>
-                                        <div class="text-slate-500 text-xs font-bold uppercase italic tracking-widest">
+                                        <div class="text-black text-xs font-bold uppercase italic tracking-widest">
                                             Workout &raquo;
                                         </div>
                                     </div>
@@ -85,22 +85,22 @@
                             </a>
                         {% else %}
                             <!-- Event Card -->
-                            <div class="bg-slate-900 border border-slate-800 hover:border-purple-500/50 rounded-xl p-5 transition-all relative">
-                                <div class="absolute -left-[25px] top-1/2 -translate-y-1/2 w-4 h-4 bg-purple-600 rounded-full border-4 border-slate-950"></div>
+                            <div class="bg-white border border-black border-2 hover:border-black rounded-none p-5 transition-all relative">
+                                <div class="absolute -left-[25px] top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-none border-4 border-black border-2"></div>
                                 <div class="flex justify-between items-start">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2 mb-1">
-                                            <div class="text-purple-400 font-bold text-[10px] uppercase tracking-widest">{{ item.date|date:"l, M d" }}</div>
+                                            <div class="text-black font-bold text-[10px] uppercase tracking-widest">{{ item.date|date:"l, M d" }}</div>
                                             {% if not item.is_public %}
                                                 <span class="text-[10px] opacity-50" title="Private to Managers">🔒</span>
                                             {% endif %}
                                         </div>
-                                        <h4 class="text-white font-bold">{{ item.title }}</h4>
+                                        <h4 class="text-black font-bold">{{ item.title }}</h4>
                                         {% if item.description %}
-                                            <p class="text-slate-400 text-sm italic mt-2 whitespace-pre-line border-l border-slate-700 ps-3">{{ item.description }}</p>
+                                            <p class="text-black text-sm italic mt-2 whitespace-pre-line border-l border-black border-2 ps-3">{{ item.description }}</p>
                                         {% endif %}
                                     </div>
-                                    <div class="text-purple-500/50 text-xs font-bold uppercase italic tracking-widest">
+                                    <div class="text-black text-xs font-bold uppercase italic tracking-widest">
                                         Event
                                     </div>
                                 </div>
@@ -110,10 +110,10 @@
                 </div>
             </div>
         {% empty %}
-            <div class="py-20 text-center bg-slate-900/30 rounded-3xl border-2 border-dashed border-slate-800">
-                <p class="text-slate-500 font-black uppercase tracking-widest mb-4">No upcoming sessions scheduled.</p>
+            <div class="py-20 text-center bg-white rounded-none border-2 border-dashed border-black">
+                <p class="text-black font-black uppercase tracking-widest mb-4">No upcoming sessions scheduled.</p>
                 {% if is_manager %}
-                    <a href="{% url 'planner-page' %}" class="btn btn-outline-info uppercase font-bold tracking-widest text-xs">
+                    <a href="{% url 'planner-page' %}" class="btn border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none uppercase font-bold tracking-widest text-xs">
                         Start Planning Now
                     </a>
                 {% endif %}

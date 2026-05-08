@@ -2,19 +2,19 @@
 
 {% block content %}
 <div class="container mx-auto py-10 px-4 max-w-[800px]">
-    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
+    <div class="bg-white border-2 border-black rounded-none overflow-hidden">
         {% if community.image_url %}
-        <div class="h-64 bg-cover bg-center" style="background-image: url('{{ community.image_url }}')"></div>
+        <div class="h-64 bg-cover bg-center border-b-2 border-black" style="background-image: url('{{ community.image_url }}')"></div>
         {% endif %}
         
         <div class="p-8">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="text-4xl font-black text-white italic uppercase tracking-tighter">{{ community.name }}</h1>
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-4xl font-black text-black italic uppercase tracking-tighter">{{ community.name }}</h1>
                 {% if is_manager %}
                     <div class="flex gap-2">
-                        <a href="{% url 'manage-orders' community.slug %}" class="btn btn-sm btn-primary">Manage Orders</a>
-                        <a href="{% url 'add-merch' community.slug %}" class="btn btn-sm btn-success">Add gear</a>
-                        <a href="{% url 'community-edit' community.slug %}" class="btn btn-sm btn-outline-info">Edit Community</a>
+                        <a href="{% url 'manage-orders' community.slug %}" class="btn btn-sm bg-black hover:bg-gray-800 text-white border-2 border-black rounded-none">Manage Orders</a>
+                        <a href="{% url 'add-merch' community.slug %}" class="btn btn-sm bg-black hover:bg-gray-800 text-white border-2 border-black rounded-none">Add gear</a>
+                        <a href="{% url 'community-edit' community.slug %}" class="btn btn-sm border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none">Edit Community</a>
                     </div>
                 {% endif %}
             </div>
@@ -23,27 +23,27 @@
             {% if community.gallery_images.all %}
                 <div class="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
                     {% for img in community.gallery_images.all %}
-                        <img src="{{ img.image.url }}" alt="Community gallery" class="h-40 rounded-lg object-cover shadow-lg border border-slate-800 flex-shrink-0">
+                        <img src="{{ img.image.url }}" alt="Community gallery" class="h-40 rounded-none object-cover border-2 border-black flex-shrink-0">
                     {% endfor %}
                 </div>
             {% endif %}
             
-            <p class="text-slate-400 text-lg mb-6">{{ community.description }}</p>
+            <p class="text-black text-lg mb-6">{{ community.description }}</p>
             
             <!-- Next Scheduled Workout -->
             {% if next_session %}
-                <div class="bg-blue-900/20 border border-blue-500/30 p-6 rounded-xl mb-8 shadow-lg shadow-blue-900/10">
+                <div class="bg-white border-2 border-black p-6 rounded-none mb-8">
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <span class="text-blue-400 font-bold uppercase text-xs tracking-widest block mb-1">Next Scheduled Workout</span>
-                            <h2 class="text-2xl font-black text-white italic uppercase tracking-tighter">{{ next_session.title }}</h2>
+                            <span class="text-black font-mono font-bold uppercase text-xs tracking-widest block mb-1">Next Scheduled Workout</span>
+                            <h2 class="text-2xl font-black text-black italic uppercase tracking-tighter">{{ next_session.title }}</h2>
                         </div>
                         <div class="text-right">
-                            <span class="text-white font-black text-xl block">{{ next_session.date|date:"D, M d" }}</span>
-                            <span class="text-slate-500 text-[10px] font-bold uppercase tracking-widest italic">Upcoming</span>
+                            <span class="text-black font-black text-xl block">{{ next_session.date|date:"D, M d" }}</span>
+                            <span class="text-black text-[10px] font-bold uppercase tracking-widest italic">Upcoming</span>
                         </div>
                     </div>
-                    <a href="{% url 'session-detail' next_session.id %}" class="block w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-center rounded uppercase tracking-wider transition-all italic">
+                    <a href="{% url 'session-detail' next_session.id %}" class="block w-full py-3 bg-black hover:bg-gray-800 text-white font-black text-center rounded-none uppercase tracking-wider transition-all italic border-2 border-black">
                         View Workout Details
                     </a>
                 </div>
@@ -51,73 +51,73 @@
 
             <!-- Next Calendar Event -->
             {% if next_event %}
-                <div class="bg-purple-900/20 border border-purple-500/30 p-6 rounded-xl mb-8 shadow-lg shadow-purple-900/10">
+                <div class="bg-white border-2 border-black p-6 rounded-none mb-8">
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <span class="text-purple-400 font-bold uppercase text-xs tracking-widest block mb-1">Upcoming Event</span>
-                            <h2 class="text-2xl font-black text-white italic uppercase tracking-tighter">{{ next_event.title }}</h2>
+                            <span class="text-black font-mono font-bold uppercase text-xs tracking-widest block mb-1">Upcoming Event</span>
+                            <h2 class="text-2xl font-black text-black italic uppercase tracking-tighter">{{ next_event.title }}</h2>
                         </div>
                         <div class="text-right">
-                            <span class="text-white font-black text-xl block">{{ next_event.date|date:"D, M d" }}</span>
+                            <span class="text-black font-black text-xl block">{{ next_event.date|date:"D, M d" }}</span>
                             {% if next_event.is_public %}
-                                <span class="text-slate-500 text-[10px] font-bold uppercase tracking-widest italic">Public</span>
+                                <span class="text-black text-[10px] font-bold uppercase tracking-widest italic">Public</span>
                             {% else %}
-                                <span class="text-slate-500 text-[10px] font-bold uppercase tracking-widest italic">Private</span>
+                                <span class="text-black text-[10px] font-bold uppercase tracking-widest italic">Private</span>
                             {% endif %}
                         </div>
                     </div>
                     {% if next_event.description %}
-                        <div class="p-3 bg-slate-900/50 border-l-2 border-purple-500 rounded-r text-slate-300 text-sm italic mb-4 whitespace-pre-line">
+                        <div class="p-3 bg-white border-l-4 border-black text-black text-sm italic mb-4 whitespace-pre-line">
                             {{ next_event.description }}
                         </div>
                     {% endif %}
                 </div>
             {% endif %}
             
-            <div class="bg-slate-950 p-4 rounded border border-slate-800 mb-8">
-                <span class="text-slate-500 font-bold uppercase text-xs tracking-widest block mb-2">Community Manager</span>
-                <span class="text-white font-mono">{{ community.manager.username }}</span>
+            <div class="bg-white p-4 rounded-none border-2 border-black mb-8">
+                <span class="text-black font-bold uppercase text-xs tracking-widest block mb-2">Community Manager</span>
+                <span class="text-black font-mono">{{ community.manager.username }}</span>
             </div>
 
             <!-- Merch Listing -->
-            <h3 class="text-2xl font-black text-white italic uppercase tracking-tighter mb-4">Community Gear</h3>
+            <h3 class="text-2xl font-black text-black italic uppercase tracking-tighter mb-4">Community Gear</h3>
             <div class="grid md:grid-cols-2 gap-4">
                 {% for item in merch_items %}
-                    <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 flex flex-column">
+                    <div class="bg-white p-4 rounded-none border-2 border-black flex flex-col">
                         {% if item.images.all %}
                             <div class="flex gap-1 overflow-x-auto mb-3">
                                 {% for img in item.images.all %}
-                                    <img src="{{ img.image.url }}" alt="{{ item.name }}" class="h-32 rounded object-cover shadow-sm">
+                                    <img src="{{ img.image.url }}" alt="{{ item.name }}" class="h-32 rounded-none object-cover border border-black">
                                 {% endfor %}
                             </div>
                         {% endif %}
                         
-                        <h4 class="text-white font-bold">{{ item.name }}</h4>
-                        <p class="text-slate-400 text-sm mb-2">{{ item.description }}</p>
-                        <p class="text-blue-400 font-black mb-4">£{{ item.price }}</p>
+                        <h4 class="text-black font-bold">{{ item.name }}</h4>
+                        <p class="text-black text-sm mb-2">{{ item.description }}</p>
+                        <p class="text-black font-black font-mono mb-4">£{{ item.price }}</p>
                         
                         <form method="post" action="{% url 'add-to-cart' %}" class="mt-auto">
                             {% csrf_token %}
                             <input type="hidden" name="item_id" value="{{ item.id }}">
                             <div class="space-y-2">
-                                <select name="size" class="w-full p-2 bg-slate-950 border border-slate-700 rounded text-sm text-white">
+                                <select name="size" class="w-full p-2 bg-white border-2 border-black rounded-none text-sm text-black">
                                     {% for size in item.size_list %}<option value="{{ size }}">{{ size }}</option>{% endfor %}
                                 </select>
-                                <select name="color" class="w-full p-2 bg-slate-950 border border-slate-700 rounded text-sm text-white">
+                                <select name="color" class="w-full p-2 bg-white border-2 border-black rounded-none text-sm text-black">
                                     {% for color in item.color_list %}<option value="{{ color }}">{{ color }}</option>{% endfor %}
                                     <option value="other">Other (specify)</option>
                                 </select>
                             </div>
-                            <button type="submit" class="w-full mt-3 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded text-sm uppercase italic">Add to Order</button>
+                            <button type="submit" class="w-full mt-3 py-2 bg-black hover:bg-gray-800 text-white font-bold rounded-none text-sm uppercase italic border-2 border-black">Add to Order</button>
                         </form>
                     </div>
                 {% empty %}
-                    <p class="text-slate-500 italic">No gear available for this community yet.</p>
+                    <p class="text-black italic">No gear available for this community yet.</p>
                 {% endfor %}
             </div>
             
-            <div class="mt-8 border-t border-slate-800 pt-6">
-                <a href="{% url 'checkout' %}" class="btn btn-outline-success font-black uppercase italic tracking-wider">
+            <div class="mt-8 border-t-2 border-black pt-6">
+                <a href="{% url 'checkout' %}" class="btn border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none font-black uppercase italic tracking-wider">
                     🛒 Review My Pooled Order
                 </a>
             </div>

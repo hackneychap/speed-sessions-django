@@ -2,38 +2,38 @@
 
 {% block content %}
 <div class="flex items-center justify-center py-10 px-4">
-    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 p-8 rounded-xl shadow-2xl">
-        <h2 class="text-3xl font-black text-white mb-8 italic uppercase tracking-tighter text-center">Add Community Gear</h2>
+    <div class="w-full max-w-2xl bg-white border border-black border-2 p-8 rounded-none shadow-none">
+        <h2 class="text-3xl font-black text-black mb-8 italic uppercase tracking-tighter text-center">Add Community Gear</h2>
         
         <form method="post" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
             
             {% if form.errors %}
-            <div class="p-3 bg-red-900/40 border border-red-800 rounded text-red-200 text-sm mb-4">
+            <div class="p-3 bg-white border border-black border-2 rounded-none text-red-600 text-sm mb-4">
                 Please correct the errors below.
             </div>
             {% endif %}
 
             {% for field in form %}
             <div>
-                <label for="{{ field.id_for_label }}" class="block text-slate-500 font-bold uppercase text-xs mb-2 tracking-widest">
+                <label for="{{ field.id_for_label }}" class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">
                     {{ field.label }}
                 </label>
                 {{ field }}
                 {% if field.help_text %}
-                <p class="text-[10px] text-slate-600 mt-1 uppercase">{{ field.help_text }}</p>
+                <p class="text-[10px] text-black mt-1 uppercase">{{ field.help_text }}</p>
                 {% endif %}
                 {% if field.errors %}
-                <p class="text-[10px] text-red-500 mt-1 uppercase font-bold">{{ field.errors.as_text }}</p>
+                <p class="text-[10px] text-red-600 mt-1 uppercase font-bold">{{ field.errors.as_text }}</p>
                 {% endif %}
             </div>
             {% endfor %}
 
             <div class="pt-4 flex gap-4">
-                <button type="submit" class="flex-grow py-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-xl rounded transition-all uppercase italic">
+                <button type="submit" class="flex-grow py-3 bg-black hover:bg-white text-white hover:text-black font-black text-xl rounded-none transition-all uppercase italic border-2 border-black">
                     Add Gear
                 </button>
-                <a href="{% url 'community-detail' community.slug %}" class="py-3 px-6 bg-slate-800 text-slate-400 font-bold rounded transition-all">Cancel</a>
+                <a href="{% url 'community-detail' community.slug %}" class="py-3 px-6 bg-white text-black font-bold rounded-none transition-all">Cancel</a>
             </div>
         </form>
     </div>
@@ -43,16 +43,15 @@
     input[type="text"], input[type="number"], textarea, select {
         width: 100%;
         padding: 0.75rem 1rem;
-        background-color: #0f172a !important;
-        border: 1px solid #334155 !important;
-        border-radius: 0.5rem;
-        color: #f8fafc !important;
+        background-color: white !important;
+        border: 2px solid black !important;
+        border-radius: 0 !important;
+        color: black !important;
         font-family: 'JetBrains+Mono', monospace;
     }
     input:focus, textarea:focus, select:focus {
         outline: none !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+        border-color: black !important;
     }
 </style>
 {% endblock %}

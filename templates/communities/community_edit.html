@@ -2,71 +2,71 @@
 
 {% block content %}
 <div class="container mx-auto py-10 px-4 max-w-4xl">
-    <div class="bg-slate-900 border border-slate-800 p-8 rounded-xl shadow-2xl">
-        <h2 class="text-3xl font-black text-white mb-8 italic uppercase tracking-tighter">Edit {{ community.name }}</h2>
+    <div class="bg-white border border-black border-2 p-8 rounded-none shadow-none">
+        <h2 class="text-3xl font-black text-black mb-8 italic uppercase tracking-tighter">Edit {{ community.name }}</h2>
         
         <form method="post" enctype="multipart/form-data" class="space-y-8">
             {% csrf_token %}
             
             <div class="grid md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-slate-500 font-bold uppercase text-xs mb-2 tracking-widest">Name</label>
+                    <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Name</label>
                     {{ form.name }}
                 </div>
                 <div>
-                    <label class="block text-slate-500 font-bold uppercase text-xs mb-2 tracking-widest">Banner Image URL</label>
+                    <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Banner Image URL</label>
                     {{ form.image_url }}
                 </div>
             </div>
 
             <div>
-                <label class="block text-slate-500 font-bold uppercase text-xs mb-2 tracking-widest">Description</label>
+                <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Description</label>
                 {{ form.description }}
             </div>
 
-            <div class="border-t border-slate-800 pt-6">
-                <h3 class="text-xl font-black text-white italic uppercase tracking-tighter mb-4">Gallery Images (Max 5)</h3>
-                <p class="text-slate-500 text-xs mb-4 uppercase">Upload up to 5 images (max 1MB each) to showcase your community.</p>
+            <div class="border-t border-black border-2 pt-6">
+                <h3 class="text-xl font-black text-black italic uppercase tracking-tighter mb-4">Gallery Images (Max 5)</h3>
+                <p class="text-black text-xs mb-4 uppercase">Upload up to 5 images (max 1MB each) to showcase your community.</p>
                 {{ form.gallery_images }}
                 {% if community.gallery_images.all %}
                     <div class="flex gap-2 mt-4 flex-wrap">
                         {% for img in community.gallery_images.all %}
                             <div class="relative group">
-                                <img src="{{ img.image.url }}" class="h-20 w-20 object-cover rounded border border-slate-700">
+                                <img src="{{ img.image.url }}" class="h-20 w-20 object-cover rounded-none border border-black border-2">
                             </div>
                         {% endfor %}
                     </div>
                 {% endif %}
             </div>
 
-            <div class="border-t border-slate-800 pt-6">
-                <h3 class="text-xl font-black text-white italic uppercase tracking-tighter mb-4">Manage Merchandise</h3>
-                <p class="text-slate-500 text-xs mb-4 uppercase">Uncheck items to hide them from the community page.</p>
-                <div class="bg-slate-950 rounded border border-slate-800 divide-y divide-slate-800">
+            <div class="border-t border-black border-2 pt-6">
+                <h3 class="text-xl font-black text-black italic uppercase tracking-tighter mb-4">Manage Merchandise</h3>
+                <p class="text-black text-xs mb-4 uppercase">Uncheck items to hide them from the community page.</p>
+                <div class="bg-white rounded-none border border-black border-2 divide-y divide-black divide-y-2">
                     {% for merch in all_merch %}
                         <div class="p-4 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <input type="checkbox" name="merch_listed" value="{{ merch.id }}" 
                                        {% if merch.is_listed %}checked{% endif %}
-                                       class="w-5 h-5 bg-slate-900 border-slate-700 rounded text-blue-600 focus:ring-blue-500">
+                                       class="w-5 h-5 bg-white border-black border-2 rounded-none text-black focus:ring-black">
                                 <div>
-                                    <div class="text-white font-bold">{{ merch.name }}</div>
-                                    <div class="text-slate-500 text-xs">${{ merch.price }}</div>
+                                    <div class="text-black font-bold">{{ merch.name }}</div>
+                                    <div class="text-black text-xs">${{ merch.price }}</div>
                                 </div>
                             </div>
                             {% if not merch.is_listed %}
-                                <span class="text-[10px] bg-slate-800 text-slate-500 px-2 py-1 rounded uppercase font-bold">Unlisted</span>
+                                <span class="text-[10px] bg-white text-black px-2 py-1 rounded-none uppercase font-bold">Unlisted</span>
                             {% endif %}
                         </div>
                     {% empty %}
-                        <div class="p-4 text-slate-500 italic text-sm text-center">No gear added yet.</div>
+                        <div class="p-4 text-black italic text-sm text-center">No gear added yet.</div>
                     {% endfor %}
                 </div>
             </div>
 
-            <div class="pt-4 flex gap-4 border-t border-slate-800">
-                <button type="submit" class="flex-grow py-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-xl rounded transition-all uppercase italic shadow-lg shadow-blue-900/20">Save Changes</button>
-                <a href="{% url 'community-detail' community.slug %}" class="py-3 px-6 bg-slate-800 text-slate-400 font-bold rounded transition-all">Cancel</a>
+            <div class="pt-4 flex gap-4 border-t border-black border-2">
+                <button type="submit" class="flex-grow py-3 bg-black hover:bg-white text-white hover:text-black font-black text-xl rounded-none transition-all uppercase italic shadow-none">Save Changes</button>
+                <a href="{% url 'community-detail' community.slug %}" class="py-3 px-6 bg-white text-black font-bold rounded-none transition-all">Cancel</a>
             </div>
         </form>
     </div>
@@ -76,17 +76,16 @@
     input[type="text"], textarea, select, input[type="url"] {
         width: 100%;
         padding: 0.75rem 1rem;
-        background-color: #0f172a !important;
-        border: 1px solid #334155 !important;
-        border-radius: 0.5rem;
-        color: #f8fafc !important;
+        background-color: white !important;
+        border: 2px solid black !important;
+        border-radius: 0 !important;
+        color: black !important;
         font-family: 'JetBrains+Mono', monospace;
         font-size: 0.875rem;
     }
     input:focus, textarea:focus, select:focus {
         outline: none !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+        border-color: black !important;
     }
 </style>
 {% endblock %}

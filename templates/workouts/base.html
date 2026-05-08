@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" data-theme="lofi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,38 +9,54 @@
     <link rel="icon" type="image/png" href="{% static 'favicon/favicon-96x96.png' %}" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="{% static 'favicon/favicon.svg' %}" />
     <link rel="manifest" href="{% static 'favicon/site.webmanifest' %}" />
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
     <title>RunTRASH | {% block title %}Welcome{% endblock %}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    borderRadius: {
+                        'none': '0',
+                        'sm': '0',
+                        'DEFAULT': '0',
+                        'md': '0',
+                        'lg': '0',
+                        'xl': '0',
+                        '2xl': '0',
+                        '3xl': '0',
+                        'full': '0',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular'],
+                    },
+                }
+            }
+        }
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.1/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://unpkg.com/htmx.org@1.9.10" crossorigin="anonymous"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700;800&display=swap');
         
         body {
-            font-family: 'JetBrains+Mono', monospace;
-            background-color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #000000;
         }
 
-        .retro-crt::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2000;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
+        .font-mono {
+            font-family: 'JetBrains+Mono', monospace !important;
         }
 
-        .nav-link { font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
-        .nav-link.active { color: #3b82f6 !important; }
+        .nav-link { font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; }
+        .nav-link.active { background-color: #000000 !important; color: #ffffff !important; }
         
         /* Force the navbar items to be visible */
         .navbar-nav {
@@ -57,17 +73,17 @@
             .navbar-collapse { display: flex !important; }
         }
 
-        /* Accessibility: Global focus styles for dark mode form fields */
+        /* Shipping Label Focus Styles */
         input:focus, 
         textarea:focus, 
         select:focus,
         .form-control:focus,
         .form-select:focus {
-            background-color: #1e293b !important; /* slate-800 */
-            color: #f8fafc !important; /* slate-50 */
-            border-color: #3b82f6 !important; /* blue-500 */
-            outline: 0 !important;
-            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            border-color: #000000 !important;
+            outline: none !important;
+            box-shadow: 4px 4px 0px 0px #000000 !important;
         }
 
         /* Minimal Bootstrap Compatibility for Grid */
@@ -78,10 +94,11 @@
         input, select, textarea {
             width: 100% !important;
             min-height: 44px !important;
-            border-radius: 0.5rem !important;
+            border-radius: 0 !important;
+            border: 2px solid #000 !important;
         }
         @media (max-width: 768px) {
-            .btn { width: 100% !important; }
+            .btn { width: 100% !important; border-radius: 0 !important; }
             .navbar .btn { width: auto !important; }
         }
         .g-4 { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; }
@@ -94,9 +111,32 @@
         @media (min-width: 992px) {
             .col-lg-6 { flex: 0 0 auto; width: 50%; }
         }
-        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; display: flex; flex-direction: column; }
+        
+        /* Shipping Label Components */
+        .card { 
+            background-color: #ffffff; 
+            border: 2px solid #000000; 
+            border-radius: 0 !important;
+            display: flex; 
+            flex-direction: column; 
+        }
         .card-body { flex: 1 1 auto; padding: 1rem; }
-        .card-header { padding: 0.75rem 1rem; background-color: #334155; border-bottom: 1px solid #475569; }
+        .card-header { 
+            padding: 0.75rem 1rem; 
+            background-color: #000000; 
+            color: #ffffff;
+            border-bottom: 2px solid #000000; 
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            border-radius: 0 !important;
+            border-width: 2px !important;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+        }
 
         /* HTMX Loading Indicator */
         .htmx-indicator {
@@ -113,66 +153,70 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 3px;
+            height: 4px;
             z-index: 10000;
             background: transparent;
         }
         .progress-bar-fill {
             height: 100%;
-            background-color: #3b82f6;
+            background-color: #000000;
             width: 0;
             transition: width 0.3s ease;
         }
+
+        /* Sharp edges for everything else */
+        * {
+            border-radius: 0 !important;
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-200 min-h-screen relative overflow-x-hidden">
+<body class="bg-white text-black min-h-screen relative overflow-x-hidden">
     <!-- Global HTMX Progress Bar -->
     <div class="progress-bar-container">
         <div id="htmx-progress" class="progress-bar-fill"></div>
     </div>
-    <div class="retro-crt fixed inset-0 pointer-events-none z-50 h-full w-full opacity-30"></div>
 
     <div class="drawer">
         <input id="main-drawer" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content flex flex-col">
             <!-- Navbar -->
-            <div class="w-full navbar bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4">
+            <div class="w-full navbar bg-white border-b-2 border-black sticky top-0 z-40 px-4">
                 <div class="flex-none lg:hidden">
                     <label for="main-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-black"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </label>
                 </div>
                 <div class="flex-1 px-2 mx-2">
-                    <a class="font-black tracking-tighter text-blue-500 text-2xl italic no-underline" href="{% if user.is_authenticated %}{% url 'session-list' %}{% else %}/{% endif %}">
-                        <span class="text-white">TRACK</span>SESH <span class="text-xs text-blue-400 font-bold uppercase tracking-widest align-middle ml-1">(TRASH)</span>
+                    <a class="font-black tracking-tighter text-black text-2xl no-underline" href="{% if user.is_authenticated %}{% url 'session-list' %}{% else %}/{% endif %}">
+                        TRACK<span class="bg-black text-white px-1 ml-0.5 italic">SESH</span> <span class="text-[10px] font-black uppercase tracking-widest align-middle ml-1 border border-black px-1">(TRASH)</span>
                     </a>
                 </div>
                 <div class="flex-none hidden lg:block">
-                    <ul class="menu menu-horizontal px-1 font-bold uppercase tracking-widest text-sm">
+                    <ul class="menu menu-horizontal px-1 font-black uppercase tracking-widest text-xs">
                         <!-- Navbar menu content here -->
                         {% if user.is_authenticated %}
-                            <li><a href="{% url 'planner-page' %}" class="{% if 'planner' in request.path %}text-blue-500{% endif %}">Planner</a></li>
-                            <li><a href="{% url 'session-list' %}" class="{% if 'sessions' in request.path %}text-blue-500{% endif %}">Calendar</a></li>
-                            <li><a href="{% url 'vdot-calculator-page' %}" class="{% if 'calculator' in request.path %}text-blue-500{% endif %}">VDOT Calc</a></li>
-                            <li><a href="{% url 'community-list' %}" class="{% if 'communities' in request.path %}text-blue-500{% endif %}">Groups</a></li>
+                            <li><a href="{% url 'planner-page' %}" class="{% if 'planner' in request.path %}bg-black text-white{% endif %}">Planner</a></li>
+                            <li><a href="{% url 'session-list' %}" class="{% if 'sessions' in request.path %}bg-black text-white{% endif %}">Calendar</a></li>
+                            <li><a href="{% url 'vdot-calculator-page' %}" class="{% if 'calculator' in request.path %}bg-black text-white{% endif %}">VDOT Calc</a></li>
+                            <li><a href="{% url 'community-list' %}" class="{% if 'communities' in request.path %}bg-black text-white{% endif %}">Groups</a></li>
                             
                             <!-- User Dropdown (Desktop) -->
-                            <li>
+                            <li class="ml-2">
                                 <details>
-                                    <summary class="text-blue-400">{{ user.username }}</summary>
-                                    <ul class="p-2 bg-slate-800 rounded-t-none z-50 border border-slate-700 w-56">
+                                    <summary class="border-2 border-black">{{ user.username }}</summary>
+                                    <ul class="p-2 bg-white rounded-none z-50 border-2 border-black w-56 -ml-2 mt-1">
                                         <li><a href="{% url 'profile' %}">Edit Profile</a></li>
                                         <li><a href="{% url 'user-orders' %}">My Orders</a></li>
                                         {% if user.managed_communities.exists %}
-                                            <li class="menu-title text-slate-500 text-[10px]">Management</li>
+                                            <li class="menu-title text-black text-[10px] opacity-50">Management</li>
                                             {% for community in user.managed_communities.all %}
-                                                <li><a href="{% url 'manage-orders' community.slug %}" class="text-blue-400 text-xs">Manage {{ community.name }}</a></li>
+                                                <li><a href="{% url 'manage-orders' community.slug %}" class="font-black">Manage {{ community.name }}</a></li>
                                             {% endfor %}
                                         {% endif %}
                                         <li>
                                             <form action="{% url 'logout' %}" method="post" class="p-0">
                                                 {% csrf_token %}
-                                                <button type="submit" class="w-full text-left text-red-400 px-4 py-2 hover:bg-slate-700 rounded-lg">Logout</button>
+                                                <button type="submit" class="w-full text-left text-red-600 px-4 py-2 hover:bg-black hover:text-white">Logout</button>
                                             </form>
                                         </li>
                                     </ul>
@@ -180,7 +224,7 @@
                             </li>
                         {% else %}
                             <li><a href="{% url 'login' %}">Login</a></li>
-                            <li><a href="{% url 'signup' %}" class="bg-blue-600 text-white hover:bg-blue-500 ml-2 rounded-lg">Sign Up</a></li>
+                            <li><a href="{% url 'signup' %}" class="bg-black text-white ml-2">Sign Up</a></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -195,18 +239,18 @@
 
             <!-- Bottom Nav (Mobile Only) -->
             {% if user.is_authenticated %}
-            <div class="btm-nav btm-nav-sm lg:hidden bg-slate-900 border-t border-slate-800 z-40">
-                <a href="{% url 'planner-page' %}" class="{% if 'planner' in request.path %}active text-blue-500{% endif %}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                    <span class="btm-nav-label text-[10px]">Plan</span>
+            <div class="btm-nav btm-nav-sm lg:hidden bg-white border-t-2 border-black z-40">
+                <a href="{% url 'planner-page' %}" class="{% if 'planner' in request.path %}active bg-black text-white border-none{% else %}text-black{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    <span class="btm-nav-label text-[10px] font-black">Plan</span>
                 </a>
-                <a href="{% url 'session-list' %}" class="{% if 'sessions' in request.path %}active text-blue-500{% endif %}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    <span class="btm-nav-label text-[10px]">Calendar</span>
+                <a href="{% url 'session-list' %}" class="{% if 'sessions' in request.path %}active bg-black text-white border-none{% else %}text-black{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <span class="btm-nav-label text-[10px] font-black">Calendar</span>
                 </a>
-                <a href="{% url 'community-list' %}" class="{% if 'communities' in request.path %}active text-blue-500{% endif %}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                    <span class="btm-nav-label text-[10px]">Groups</span>
+                <a href="{% url 'community-list' %}" class="{% if 'communities' in request.path %}active bg-black text-white border-none{% else %}text-black{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    <span class="btm-nav-label text-[10px] font-black">Groups</span>
                 </a>
             </div>
             {% endif %}
@@ -215,41 +259,41 @@
         <!-- Drawer Sidebar (Mobile) -->
         <div class="drawer-side z-50">
             <label for="main-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-            <ul class="menu p-4 w-80 min-h-full bg-slate-900 text-slate-200 font-bold uppercase tracking-widest">
+            <ul class="menu p-4 w-80 min-h-full bg-white text-black font-black uppercase tracking-widest border-r-2 border-black">
                 <!-- Sidebar content here -->
                 <li class="mb-4">
-                    <a class="text-2xl italic font-black text-blue-500 tracking-tighter hover:bg-transparent" href="{% if user.is_authenticated %}{% url 'session-list' %}{% else %}/{% endif %}">
-                        <span class="text-white">TRACK</span>SESH
+                    <a class="text-2xl italic font-black text-black tracking-tighter hover:bg-black hover:text-white" href="{% if user.is_authenticated %}{% url 'session-list' %}{% else %}/{% endif %}">
+                        TRACK<span class="bg-black text-white px-1">SESH</span>
                     </a>
                 </li>
                 
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'planner-page' %}" class="{% if 'planner' in request.path %}active{% endif %}">Planner</a></li>
-                    <li><a href="{% url 'session-list' %}" class="{% if 'sessions' in request.path %}active{% endif %}">Calendar</a></li>
-                    <li><a href="{% url 'vdot-calculator-page' %}" class="{% if 'calculator' in request.path %}active{% endif %}">VDOT Calc</a></li>
-                    <li><a href="{% url 'community-list' %}" class="{% if 'communities' in request.path %}active{% endif %}">Groups</a></li>
+                    <li><a href="{% url 'planner-page' %}" class="{% if 'planner' in request.path %}bg-black text-white{% endif %}">Planner</a></li>
+                    <li><a href="{% url 'session-list' %}" class="{% if 'sessions' in request.path %}bg-black text-white{% endif %}">Calendar</a></li>
+                    <li><a href="{% url 'vdot-calculator-page' %}" class="{% if 'calculator' in request.path %}bg-black text-white{% endif %}">VDOT Calc</a></li>
+                    <li><a href="{% url 'community-list' %}" class="{% if 'communities' in request.path %}bg-black text-white{% endif %}">Groups</a></li>
                     
-                    <div class="divider"></div>
+                    <div class="divider before:bg-black after:bg-black"></div>
                     
                     <li><a href="{% url 'profile' %}">Edit Profile</a></li>
                     <li><a href="{% url 'user-orders' %}">My Orders</a></li>
                     
                     {% if user.managed_communities.exists %}
-                        <li class="menu-title mt-4 text-slate-500 text-[10px]">Management</li>
+                        <li class="menu-title mt-4 text-black opacity-50 text-[10px]">Management</li>
                         {% for community in user.managed_communities.all %}
-                            <li><a href="{% url 'manage-orders' community.slug %}" class="text-blue-400">Manage {{ community.name }}</a></li>
+                            <li><a href="{% url 'manage-orders' community.slug %}">Manage {{ community.name }}</a></li>
                         {% endfor %}
                     {% endif %}
                     
                     <li class="mt-auto">
                         <form action="{% url 'logout' %}" method="post">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-error btn-outline w-full mt-4">Logout</button>
+                            <button type="submit" class="btn btn-error btn-outline w-full mt-4 border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white">Logout</button>
                         </form>
                     </li>
                 {% else %}
                     <li><a href="{% url 'login' %}">Login</a></li>
-                    <li><a href="{% url 'signup' %}" class="btn btn-primary mt-4 text-white">Sign Up</a></li>
+                    <li><a href="{% url 'signup' %}" class="btn bg-black text-white mt-4">Sign Up</a></li>
                 {% endif %}
             </ul>
         </div>

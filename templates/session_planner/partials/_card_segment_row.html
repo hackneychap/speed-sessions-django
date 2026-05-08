@@ -1,33 +1,29 @@
 <!--
-    CSS Fix: This ensures that in "Dark Mode", Bootstrap's focus state
-    doesn't turn the background white (which was hiding your white text).
+    CSS Fix: This ensures high contrast for the shipping label aesthetic.
 -->
 <style>
     .segment-input-row .form-control:focus,
     .segment-input-row .form-select:focus {
-        background-color: #374151 !important; /* gray-700 */
-        color: white !important;
-        border-color: #3b82f6 !important; /* blue-500 */
-        box-shadow: none !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-color: #000000 !important;
+        box-shadow: 4px 4px 0px 0px #000000 !important;
     }
 </style>
 
-<div class="segment-input-row bg-gray-800/40 p-2 rounded border border-gray-700 mb-2">
+<div class="segment-input-row bg-white p-2 rounded-none border border-black border-2 mb-2">
     <!-- ITEM TYPE MARKER -->
     <input type="hidden" name="{{ prefix }}item_type" value="segment">
 
-    <div class="row g-2 align-items-center">
+    <div class="flex flex-wrap md:flex-nowrap items-center gap-2 justify-between">
         <!-- LEFT SIDE: Inputs for Reps, Distance, and Intensity -->
-        <div class="col-8">
-            <!-- Row 1: Reps x Distance -->
-            <div class="d-flex align-items-center mb-1">
+        <div class="flex flex-wrap items-center gap-1 flex-grow">
+            <!-- Reps x Distance -->
+            <div class="flex items-center gap-1">
                 <input type="number" name="{{ prefix }}reps" value="{{ segment.reps }}"
-                       class="form-control form-control-sm bg-gray-700 text-white border-gray-600 text-center recalc-trigger"
-                       style="width: 60px;">
-
-                <span class="mx-1 text-gray-500 small">×</span>
-
-                <select name="{{ prefix }}distance" class="form-select form-select-sm bg-gray-700 text-white border-gray-600 recalc-trigger">
+                       class="bg-white text-black border-black border-2 text-center recalc-trigger w-12 text-sm p-1 focus:outline-none">
+                <span class="text-black font-black text-xs">×</span>
+                <select name="{{ prefix }}distance" class="bg-white text-black border-black border-2 recalc-trigger w-auto min-w-[70px] text-xs p-1 focus:outline-none">
                     <option value="200" {% if segment.distance|floatformat:0 == "200" %}selected{% endif %}>200m</option>
                     <option value="400" {% if segment.distance|floatformat:0 == "400" or not segment.distance %}selected{% endif %}>400m</option>
                     <option value="600" {% if segment.distance|floatformat:0 == "600" %}selected{% endif %}>600m</option>
@@ -38,29 +34,28 @@
                 </select>
             </div>
 
-            <!-- Row 2: Intensity and Rest -->
-            <div class="d-flex align-items-center">
-                <select name="{{ prefix }}intensity" class="form-select form-select-sm bg-gray-700 text-gray-400 border-gray-600 recalc-trigger small py-0 me-1" style="font-size: 0.75rem;">
+            <!-- Intensity and Rest -->
+            <div class="flex items-center gap-1">
+                <select name="{{ prefix }}intensity" class="bg-white text-black border-black border-2 recalc-trigger w-auto min-w-[85px] text-[10px] p-1 focus:outline-none uppercase font-black">
                     <option {% if segment.intensity == 'Threshold' or not segment.intensity %}selected{% endif %}>Threshold</option>
                     <option {% if segment.intensity == 'Interval' %}selected{% endif %}>Interval</option>
                     <option {% if segment.intensity == 'Repetition' %}selected{% endif %}>Repetition</option>
                 </select>
-
-                <div class="input-group input-group-sm" style="width: 110px;">
+                <div class="flex items-stretch border-2 border-black">
                     <input type="number" name="{{ prefix }}rest" value="{{ segment.rest }}"
-                           class="form-control bg-gray-700 text-white border-gray-600 recalc-trigger text-center py-0">
-                    <span class="input-group-text bg-gray-700 text-gray-500 border-gray-600 px-1" style="font-size: 0.7rem;">s</span>
+                           class="w-10 bg-white text-black text-center focus:outline-none recalc-trigger text-xs py-1">
+                    <span class="bg-white text-black border-l-2 border-black px-1 flex items-center justify-center text-[10px] font-black">S</span>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT SIDE: Displaying calculated times (Key for the Pacer) -->
-        <div class="col-4 text-end border-start border-gray-700 ps-2">
-            <div class="text-blue-400 font-monospace fw-bold" style="font-size: 1rem;">
+        <!-- RIGHT SIDE: Displaying calculated times -->
+        <div class="text-right border-t-2 md:border-t-0 md:border-l-2 border-black pt-1 md:pt-0 md:pl-2 min-w-[75px]">
+            <div class="text-black font-mono font-black text-sm">
                 {{ segment.target_pace }}
             </div>
-            <div class="text-gray-500 small font-monospace">
-                Lap: {{ segment.lap_time }}
+            <div class="text-black text-[9px] font-mono uppercase tracking-widest leading-tight">
+                {{ segment.lap_time }}
             </div>
         </div>
     </div>

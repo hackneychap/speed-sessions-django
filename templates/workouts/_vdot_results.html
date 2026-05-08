@@ -3,24 +3,24 @@
 This is an HTML fragment, not a full page.
 It's designed to be the response from your API that HTMX will place into the #results-container.
 -->
-<div class="card bg-gray-800 border-gray-700 shadow-lg mb-4">
+<div class="card bg-white border-black border-2 shadow-none mb-4">
     <div class="card-body p-4 text-center">
-        <h2 class="text-lg text-gray-400 mb-1">Your VDOT Score</h2>
-        <p class="display-4 font-bold text-white">{{ vdot_score }}</p>
+        <h2 class="text-lg text-black mb-1">Your VDOT Score</h2>
+        <p class="display-4 font-bold text-black">{{ vdot_score }}</p>
     </div>
 </div>
 
 <div class="row g-4">
     <!-- Equivalent Race Times Card -->
     <div class="col-lg-6">
-        <div class="card bg-gray-800 border-gray-700 shadow-lg h-100">
+        <div class="card bg-white border-black border-2 shadow-none h-100">
             <div class="card-body">
-                <h5 class="card-title text-white font-semibold mb-3">Equivalent Race Times</h5>
+                <h5 class="card-title text-black font-semibold mb-3">Equivalent Race Times</h5>
                 <ul class="list-group list-group-flush">
                     {% for name, time in equivalent_times.items %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-black border-2 text-black px-0">
                             {{ name }}
-                            <span class="badge bg-primary rounded-pill">{{ time }}</span>
+                            <span class="badge bg-black text-white rounded-none">{{ time }}</span>
                         </li>
                     {% endfor %}
                 </ul>
@@ -30,12 +30,12 @@ It's designed to be the response from your API that HTMX will place into the #re
 
     <!-- Training Paces Card -->
     <div class="col-lg-6">
-        <div class="card bg-gray-800 border-gray-700 shadow-lg h-100">
+        <div class="card bg-white border-black border-2 shadow-none h-100">
             <div class="card-body">
-                <h5 class="card-title text-white font-semibold mb-3">Training Paces (per km)</h5>
+                <h5 class="card-title text-black font-semibold mb-3">Training Paces (per km)</h5>
                 <ul class="list-group list-group-flush">
                     {% for zone, pace in pace_targets.items %}
-                         <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
+                         <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-black border-2 text-black px-0">
                             <span>
                                 {{ zone }}
                                 <!-- Tooltip Icon -->
@@ -45,7 +45,7 @@ It's designed to be the response from your API that HTMX will place into the #re
                                    title="{% if zone == 'Easy' %}Used for warm-ups, cool-downs, and recovery runs to build aerobic base.{% elif zone == 'Marathon' %}Your predicted race pace for a marathon. Used for long runs to practice race conditions.{% elif zone == 'Threshold' %}A 'comfortably hard' pace that improves endurance. The fastest pace you could sustain for about an hour.{% elif zone == 'Interval' %}Hard repeats of 3-5 minutes to improve your VO2 Max (maximal oxygen uptake).{% elif zone == 'Repetition' %}Fast, short repeats to improve speed and running economy. Requires full recovery.{% endif %}">
                                 </i>
                             </span>
-                            <span class="badge bg-secondary rounded-pill">{{ pace }}</span>
+                            <span class="badge bg-black text-white rounded-none">{{ pace }}</span>
                         </li>
                     {% endfor %}
                 </ul>
@@ -55,19 +55,19 @@ It's designed to be the response from your API that HTMX will place into the #re
 </div>
 
 <!-- Target Interval Times Card -->
-<div class="card bg-gray-800 border-gray-700 shadow-lg mt-4">
+<div class="card bg-white border-black border-2 shadow-none mt-4">
     <div class="card-body">
-        <h5 class="card-title text-white font-semibold mb-3">Target Interval Times</h5>
+        <h5 class="card-title text-black font-semibold mb-3">Target Interval Times</h5>
 
         <!-- Section 1: Repetition Paces -->
         <div>
-            <h6 class="text-gray-400">Repetitions (Speed/Economy)</h6>
+            <h6 class="text-black">Repetitions (Speed/Economy)</h6>
             <ul class="list-group list-group-flush">
                 {% for name, time in target_interval_times.items %}
                     {% if 'Repetition' in name %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-black border-2 text-black px-0">
                             {{ name|replace:" Repetition," }}
-                            <span class="badge bg-secondary rounded-pill">{{ time }}</span>
+                            <span class="badge bg-black text-white rounded-none">{{ time }}</span>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -76,13 +76,13 @@ It's designed to be the response from your API that HTMX will place into the #re
 
         <!-- Section 2: Interval & Threshold Paces -->
         <div class="mt-4">
-             <h6 class="text-gray-400">Intervals (Aerobic/Endurance)</h6>
+             <h6 class="text-black">Intervals (Aerobic/Endurance)</h6>
              <ul class="list-group list-group-flush">
                 {% for name, time in target_interval_times.items %}
                     {% if 'Interval' in name %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-black border-2 text-black px-0">
                             {{ name|replace:" Interval," }}
-                            <span class="badge bg-secondary rounded-pill">{{ time }}</span>
+                            <span class="badge bg-black text-white rounded-none">{{ time }}</span>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -92,13 +92,13 @@ It's designed to be the response from your API that HTMX will place into the #re
 
     <!-- Section 3: Interval & Threshold Paces -->
         <div class="mt-4">
-             <h6 class="text-gray-400">Threshold (Endurance)</h6>
+             <h6 class="text-black">Threshold (Endurance)</h6>
              <ul class="list-group list-group-flush">
                 {% for name, time in target_interval_times.items %}
                     {% if 'Threshold' in name %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-gray-700 text-gray-300 px-0">
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-black border-2 text-black px-0">
                             {{ name|replace:" Threshold," }}
-                            <span class="badge bg-secondary rounded-pill">{{ time }}</span>
+                            <span class="badge bg-black text-white rounded-none">{{ time }}</span>
                         </li>
                     {% endif %}
                 {% endfor %}

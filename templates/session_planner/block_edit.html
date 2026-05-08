@@ -3,10 +3,10 @@
 {% block content %}
 <div class="container mx-auto py-10 px-4" style="max-width: 800px;">
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-4xl font-black italic uppercase tracking-tighter text-white">
-            Edit <span class="text-blue-500">{{ training_block.title }}</span>
+        <h1 class="text-4xl font-black italic uppercase tracking-tighter text-black">
+            Edit <span class="text-black">{{ training_block.title }}</span>
         </h1>
-        <a href="{% url 'block-list' %}" class="btn bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded uppercase tracking-wider transition-colors border border-slate-700">
+        <a href="{% url 'block-list' %}" class="btn bg-white hover:bg-white text-white font-bold py-2 px-4 rounded-none uppercase tracking-wider transition-colors border border-black border-2">
             Back to Blocks
         </a>
     </div>
@@ -15,28 +15,28 @@
         {% csrf_token %}
         <input type="hidden" name="template_order" id="template_order" value="">
         
-        <div class="bg-slate-900 border border-slate-800 rounded-xl shadow-xl mb-6">
-            <div class="p-4 border-b border-slate-800">
-                <p class="text-slate-400 text-sm font-bold tracking-wide">Drag and drop the sessions below to reorder them within the block.</p>
+        <div class="bg-white border border-black border-2 rounded-none shadow-none mb-6">
+            <div class="p-4 border-b border-black border-2">
+                <p class="text-black text-sm font-bold tracking-wide">Drag and drop the sessions below to reorder them within the block.</p>
             </div>
             
-            <ul id="sortable-list" class="divide-y divide-slate-800">
+            <ul id="sortable-list" class="divide-y divide-black divide-y-2">
                 {% for template in templates %}
-                <li data-id="{{ template.id }}" class="p-4 flex items-center gap-4 bg-slate-900 hover:bg-slate-800 transition-colors cursor-move">
-                    <div class="text-slate-500">
+                <li data-id="{{ template.id }}" class="p-4 flex items-center gap-4 bg-white hover:bg-white transition-colors cursor-move">
+                    <div class="text-black">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </div>
                     <div class="flex-1">
                         <div class="flex items-baseline gap-3">
-                            <span class="text-blue-400 font-bold text-sm uppercase tracking-widest">Week {{ template.week_number }}</span>
-                            <span class="text-white font-bold text-lg uppercase tracking-wide">{{ template.title }}</span>
+                            <span class="text-black font-bold text-sm uppercase tracking-widest">Week {{ template.week_number }}</span>
+                            <span class="text-black font-bold text-lg uppercase tracking-wide">{{ template.title }}</span>
                         </div>
                     </div>
                 </li>
                 {% empty %}
-                <li class="p-8 text-center text-slate-500 uppercase tracking-widest font-bold">
+                <li class="p-8 text-center text-black uppercase tracking-widest font-bold">
                     No sessions added to this block yet.
                 </li>
                 {% endfor %}
@@ -44,7 +44,7 @@
         </div>
         
         <div class="flex gap-4 justify-end">
-            <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded uppercase tracking-wider shadow-lg transition-colors border border-blue-500">
+            <button type="submit" class="px-6 py-3 bg-black hover:bg-white text-white font-bold rounded-none uppercase tracking-wider shadow-none transition-colors border border-black border-2">
                 Save Order
             </button>
         </div>
@@ -59,7 +59,7 @@
         if (el) {
             new Sortable(el, {
                 animation: 150,
-                ghostClass: 'bg-slate-800'
+                ghostClass: 'bg-white'
             });
         }
         

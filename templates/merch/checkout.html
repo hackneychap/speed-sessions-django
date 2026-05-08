@@ -2,56 +2,56 @@
 
 {% block content %}
 <div class="container mx-auto py-10 px-4 max-w-[600px]" id="checkout-container" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-    <h2 class="text-3xl font-black text-white mb-8 italic uppercase tracking-tighter">Checkout</h2>
+    <h2 class="text-3xl font-black text-black mb-8 italic uppercase tracking-tighter">Checkout</h2>
     
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-lg mb-6">
-        <h4 class="text-white font-bold mb-4">Order Summary</h4>
+    <div class="bg-white border border-black border-2 p-6 rounded-none mb-6">
+        <h4 class="text-black font-bold mb-4">Order Summary</h4>
         <ul class="space-y-4 mb-6">
             {% for entry in items %}
-            <li class="d-flex justify-content-between text-slate-300 items-center">
+            <li class="d-flex justify-content-between text-black items-center">
                 <div>
                     <span class="block font-bold">{{ entry.item.name }}</span>
-                    <span class="text-[10px] text-slate-500 uppercase tracking-widest">{{ entry.size }}, {{ entry.color }}</span>
+                    <span class="text-[10px] text-black uppercase tracking-widest">{{ entry.size }}, {{ entry.color }}</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <span class="font-mono text-sm text-blue-400">£{{ entry.item.price }}</span>
+                    <span class="font-mono text-sm text-black">£{{ entry.item.price }}</span>
                     <button hx-post="{% url 'remove-from-cart' forloop.counter0 %}" 
                             hx-target="#checkout-container" 
                             hx-select="#checkout-container"
                             hx-swap="outerHTML"
-                            class="text-red-500 hover:text-red-400 font-bold uppercase text-[10px] tracking-widest transition-colors">
+                            class="text-red-600 hover:text-red-600 font-bold uppercase text-[10px] tracking-widest transition-colors">
                         Remove
                     </button>
                 </div>
             </li>
             {% endfor %}
             {% if not items %}
-            <li class="text-center py-4 text-slate-500 uppercase tracking-widest text-xs font-bold">
-                Your order is empty. <a href="{% url 'community-list' %}" class="text-blue-500 hover:underline">Go back to gear</a>
+            <li class="text-center py-4 text-black uppercase tracking-widest text-xs font-bold">
+                Your order is empty. <a href="{% url 'community-list' %}" class="text-black hover:underline">Go back to gear</a>
             </li>
             {% endif %}
         </ul>
-        <div class="border-t border-slate-700 pt-4 d-flex justify-content-between font-black text-xl text-white">
+        <div class="border-t border-black border-2 pt-4 d-flex justify-content-between font-black text-xl text-black">
             <span>Subtotal:</span>
             <span>£{{ total_price }}</span>
         </div>
-        <p class="text-[10px] text-slate-500 uppercase mt-2 italic">Note: Shipping will be calculated and invoiced in about two weeks.</p>
+        <p class="text-[10px] text-black uppercase mt-2 italic">Note: Shipping will be calculated and invoiced in about two weeks.</p>
     </div>
 
-    <form hx-post="{% url 'checkout' %}" hx-target="#checkout-container" hx-swap="innerHTML" class="bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-4">
+    <form hx-post="{% url 'checkout' %}" hx-target="#checkout-container" hx-swap="innerHTML" class="bg-white border border-black border-2 p-6 rounded-none space-y-4">
         {% csrf_token %}
         
         {% for field in form %}
         <div>
-            <label class="block text-slate-500 font-bold uppercase text-[10px] tracking-widest mb-1">{{ field.label }}</label>
+            <label class="block text-black font-bold uppercase text-[10px] tracking-widest mb-1">{{ field.label }}</label>
             {{ field }}
             {% if field.errors %}
-                <div class="text-red-500 text-[10px] uppercase font-bold mt-1">{{ field.errors }}</div>
+                <div class="text-red-600 text-[10px] uppercase font-bold mt-1">{{ field.errors }}</div>
             {% endif %}
         </div>
         {% endfor %}
         
-        <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-black rounded shadow-lg shadow-blue-900/20 transition-all uppercase italic">
+        <button type="submit" class="w-full py-3 bg-black hover:bg-white text-white hover:text-black font-black rounded-none shadow-none transition-all uppercase italic border-2 border-black">
             Submit Order to Pool
         </button>
     </form>
@@ -61,17 +61,16 @@
     input, textarea {
         width: 100%;
         padding: 0.75rem 1rem;
-        background-color: #0f172a !important;
-        border: 1px solid #334155 !important;
-        border-radius: 0.5rem;
-        color: #f8fafc !important;
+        background-color: white !important;
+        border: 2px solid black !important;
+        border-radius: 0 !important;
+        color: black !important;
         font-family: 'JetBrains+Mono', monospace;
         font-size: 0.875rem;
     }
     input:focus, textarea:focus {
         outline: none !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+        border-color: black !important;
     }
 </style>
 {% endblock %}

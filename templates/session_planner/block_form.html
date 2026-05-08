@@ -2,26 +2,26 @@
 
 {% block content %}
 <div class="container mx-auto py-10 px-4" style="max-width: 600px;">
-    <h1 class="text-3xl font-black italic uppercase tracking-tighter text-white mb-6">Create New Training Block</h1>
+    <h1 class="text-3xl font-black italic uppercase tracking-tighter text-black mb-6">Create New Training Block</h1>
     
-    <form method="POST" class="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-xl">
+    <form method="POST" class="bg-white border border-black border-2 p-6 rounded-none shadow-none">
         {% csrf_token %}
         <div class="mb-4">
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Title</label>
-            <input type="text" name="title" required class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2">
+            <label class="block text-xs font-bold text-black uppercase tracking-widest mb-2">Title</label>
+            <input type="text" name="title" required class="w-full bg-white border border-black border-2 text-black rounded-none px-3 py-2">
         </div>
         <div class="mb-4">
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Target Distance</label>
-            <input type="text" name="target_distance" required class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2">
+            <label class="block text-xs font-bold text-black uppercase tracking-widest mb-2">Target Distance</label>
+            <input type="text" name="target_distance" required class="w-full bg-white border border-black border-2 text-black rounded-none px-3 py-2">
         </div>
         <div class="mb-6">
-            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Description</label>
-            <textarea name="description" class="w-full bg-slate-950 border border-slate-700 text-white rounded px-3 py-2 h-32"></textarea>
+            <label class="block text-xs font-bold text-black uppercase tracking-widest mb-2">Description</label>
+            <textarea name="description" class="w-full bg-white border border-black border-2 text-black rounded-none px-3 py-2 h-32"></textarea>
         </div>
         
         <div class="flex gap-4">
-            <button type="submit" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded uppercase tracking-wider">Create Block</button>
-            <a href="{% url 'block-list' %}" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-bold uppercase tracking-wider">Cancel</a>
+            <button type="submit" class="flex-1 py-2 bg-black hover:bg-white text-white font-bold rounded-none uppercase tracking-wider">Create Block</button>
+            <a href="{% url 'block-list' %}" class="px-4 py-2 bg-white hover:bg-white text-black rounded-none font-bold uppercase tracking-wider">Cancel</a>
         </div>
     </form>
 </div>

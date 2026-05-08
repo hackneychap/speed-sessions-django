@@ -5,116 +5,116 @@ Updated with:
 2. Track Volume (Distance - Emoji: 👣)
 3. Session Duration (Time - Emoji: ⏳)
 {% endcomment %}
-<div id="group-card-{{ forloop.counter }}" class="col-md-4">
-    <div class="card bg-gray-800 border-gray-700 shadow-lg h-100 d-flex flex-column">
-        <div class="card-header bg-gray-700 border-gray-600">
-            <h5 class="mb-0 text-white">{{ group.name }}</h5>
-            <small class="text-gray-400">VDOT: {{ group.vdot }}</small>
+<div id="group-card-{{ forloop.counter }}" class="flex flex-col bg-white border-2 border-black h-full">
+    <div class="bg-black text-white p-3 flex justify-between items-center">
+        <h5 class="mb-0 font-black uppercase tracking-widest text-lg">{{ group.name }}</h5>
+        <span class="font-mono text-sm border border-white px-2 py-1">VDOT: {{ group.vdot }}</span>
+    </div>
+
+    <div class="flex-grow p-4">
+        <div hx-post="{% url 'recalculate-plan' %}"
+              hx-trigger="change from:.recalc-trigger"
+              hx-target="#group-card-{{ forloop.counter }}"
+              hx-swap="outerHTML"
+              hx-include="this">
+
+            <input type="hidden" name="group_name" value="{{ group.name }}">
+            <input type="hidden" name="group_vdot" value="{{ group.vdot }}">
+            <input type="hidden" name="group_prefix" value="{{ group.prefix }}">
+            <input type="hidden" name="forloop_counter" value="{{ forloop.counter }}">
+
+            <div class="workout-items space-y-3">
+                {% for item in group.workout_structure %}
+                    {% if item.type == 'block' %}
+                        <div class="p-2 border-l-4 border-black bg-white rounded-none">
+                            <div class="flex items-center gap-2 mb-2">
+                                <input type="hidden" name="{{ group.prefix }}item_type" value="block_start">
+                                <div class="flex items-stretch border-2 border-black">
+                                    <input type="number" name="{{ group.prefix }}block_multiplier" value="{{ item.multiplier }}"
+                                           class="w-12 bg-white text-black text-center focus:outline-none recalc-trigger font-black">
+                                    <span class="bg-black text-white px-2 flex items-center justify-center font-black">×</span>
+                                </div>
+                                <span class="text-[10px] font-black text-black uppercase tracking-widest">Repeat Set</span>
+                            </div>
+
+                            <div class="pl-2 space-y-2 border-l-2 border-dashed border-black ml-4">
+                                {% for seg in item.segments %}
+                                    {% include 'session_planner/partials/_card_segment_row.html' with segment=seg prefix=group.prefix %}
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" name="{{ group.prefix }}item_type" value="block_end">
+                        </div>
+                    {% else %}
+                        <div class="p-1">
+                            {% include 'session_planner/partials/_card_segment_row.html' with segment=item.segment prefix=group.prefix %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
+    </div>
 
-        <div class="card-body flex-grow-1">
-            <div hx-post="{% url 'recalculate-plan' %}"
-                  hx-trigger="change from:.recalc-trigger"
-                  hx-target="#group-card-{{ forloop.counter }}"
-                  hx-swap="outerHTML"
-                  hx-include="this">
-
-                <input type="hidden" name="group_name" value="{{ group.name }}">
-                <input type="hidden" name="group_vdot" value="{{ group.vdot }}">
-                <input type="hidden" name="group_prefix" value="{{ group.prefix }}">
-                <input type="hidden" name="forloop_counter" value="{{ forloop.counter }}">
-
-                <div class="workout-items space-y-3">
-                    {% for item in group.workout_structure %}
-                        {% if item.type == 'block' %}
-                            <div class="p-2 border-l-4 border-yellow-600 bg-gray-900/30 rounded-r shadow-inner">
-                                <div class="d-flex align-items-center mb-2">
-                                    <input type="hidden" name="{{ group.prefix }}item_type" value="block_start">
-                                    <div class="input-group input-group-sm" style="max-width: 80px;">
-                                        <input type="number" name="{{ group.prefix }}block_multiplier" value="{{ item.multiplier }}"
-                                               class="form-control bg-gray-800 text-white border-gray-600 recalc-trigger px-2 text-center font-bold">
-                                        <span class="input-group-text bg-gray-800 text-gray-500 border-gray-600 px-1">x</span>
-                                    </div>
-                                    <span class="ms-2 text-[10px] font-black text-yellow-600 uppercase tracking-widest">Repeat Set</span>
-                                </div>
-
-                                <div class="ps-2 space-y-2">
-                                    {% for seg in item.segments %}
-                                        {% include 'session_planner/partials/_card_segment_row.html' with segment=seg prefix=group.prefix %}
-                                    {% endfor %}
-                                </div>
-                                <input type="hidden" name="{{ group.prefix }}item_type" value="block_end">
-                            </div>
-                        {% else %}
-                            <div class="p-1">
-                                {% include 'session_planner/partials/_card_segment_row.html' with segment=item.segment prefix=group.prefix %}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
+    <div class="border-t-2 border-black p-4 flex flex-col lg:flex-row gap-6">
+        <!-- Totals (Left side on LG, stacked otherwise) -->
+        <div class="space-y-3 lg:w-1/3">
+            <div class="flex flex-col border-b border-black pb-2">
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-black">Distance</span>
+                <span class="font-mono font-black text-lg text-black">{{ group.summary.distance }}</span>
+            </div>
+            <div class="flex flex-col border-b border-black pb-2">
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-black">Active Time</span>
+                <span class="font-mono font-black text-lg text-black">{{ group.summary.active_time }}</span>
+            </div>
+            <div class="flex flex-col border-b border-black pb-2">
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-black">Total Time</span>
+                <span class="font-mono font-black text-lg text-black">{{ group.summary.total_time }}</span>
+            </div>
+            <div class="flex justify-between items-center text-black">
+                <span class="text-[10px] font-black uppercase tracking-[0.2em]">TSS Score</span>
+                <span class="font-mono font-black text-base">{{ group.summary.tss }}</span>
             </div>
         </div>
 
-        <div class="card-footer bg-gray-700 border-gray-600">
-            <ul class="list-unstyled mb-0 small text-gray-300">
-                <li class="d-flex justify-content-between mb-1">
-                    <span>Total Distance:</span>
-                    <strong class="text-white">{{ group.summary.distance }}</strong>
-                </li>
-                <li class="d-flex justify-content-between mb-1">
-                    <span>Active Time:</span>
-                    <strong class="text-white">{{ group.summary.active_time }}</strong>
-                </li>
-                <li class="d-flex justify-content-between mb-1">
-                    <span>Total Time:</span>
-                    <strong class="text-white">{{ group.summary.total_time }}</strong>
-                </li>
-                <li class="d-flex justify-content-between mb-1">
-                    <span class="text-blue-400">TSS Score:</span>
-                    <strong class="text-white">{{ group.summary.tss }}</strong>
-                </li>
-
-                <li class="pt-2 mt-2 border-top border-gray-600">
-                    <!-- TSS Spice Scale (Intensity) -->
-                    <div class="p-2 bg-gray-900 rounded d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-gray-400 text-[10px] uppercase font-bold tracking-tight">TSS Spice</span>
-                        <div class="text-end">
-                            <span class="fs-6">
-                                {% if group.summary.tss < 20 %}🌶️{% elif group.summary.tss <= 32 %}🌶️🌶️{% elif group.summary.tss <= 39 %}🌶️🌶️🌶️{% elif group.summary.tss <= 43 %}🌶️🌶️🌶️🌶️{% else %}🌶️🌶️🌶️🌶️🌶️{% endif %}
-                            </span>
-                            <div class="text-[9px] font-black uppercase mt-n1">
-                                {% if group.summary.tss <= 32 %}<span class="text-gray-500">Too Mild</span>{% elif group.summary.tss <= 39 %}<span class="text-success">Just Right</span>{% elif group.summary.tss <= 43 %}<span class="text-warning">Hot! Monthly</span>{% else %}<span class="text-danger">Too Spicy!</span>{% endif %}
-                            </div>
-                        </div>
+        <!-- Scales (Right side on LG, stacked otherwise) -->
+        <div class="lg:w-2/3 lg:border-l-2 lg:border-black lg:pl-6 pt-4 lg:pt-0 border-t-4 lg:border-t-0 border-black space-y-4">
+            <!-- TSS Spice Scale -->
+            <div class="flex justify-between items-center">
+                <span class="text-black text-[10px] uppercase font-black tracking-widest">TSS Spice</span>
+                <div class="text-right">
+                    <span class="text-lg tracking-widest">
+                        {% if group.summary.tss < 20 %}🌶️{% elif group.summary.tss <= 32 %}🌶️🌶️{% elif group.summary.tss <= 39 %}🌶️🌶️🌶️{% elif group.summary.tss <= 43 %}🌶️🌶️🌶️🌶️{% else %}🌶️🌶️🌶️🌶️🌶️{% endif %}
+                    </span>
+                    <div class="text-[9px] font-black uppercase mt-1">
+                        {% if group.summary.tss <= 32 %}<span class="text-black">Too Mild</span>{% elif group.summary.tss <= 39 %}<span class="text-green-600">Just Right</span>{% elif group.summary.tss <= 43 %}<span class="text-black">Hot! Monthly</span>{% else %}<span class="text-red-600">Too Spicy!</span>{% endif %}
                     </div>
+                </div>
+            </div>
 
-                    <!-- Track Volume Scale (Distance - Emoji: Footprints) -->
-                    <div class="p-2 bg-gray-900 rounded d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-gray-400 text-[10px] uppercase font-bold tracking-tight">Track Volume</span>
-                        <div class="text-end">
-                            <span class="fs-6">
-                                {% if group.summary.raw_distance_km < 4 %}👣{% elif group.summary.raw_distance_km <= 6 %}👣👣👣{% else %}👣👣👣👣👣{% endif %}
-                            </span>
-                            <div class="text-[9px] font-black uppercase mt-n1">
-                                {% if group.summary.raw_distance_km < 4 %}<span class="text-gray-500">Short & Sweet</span>{% elif group.summary.raw_distance_km <= 6 %}<span class="text-success">The Sweet Spot</span>{% else %}<span class="text-warning">The Long Haul</span>{% endif %}
-                            </div>
-                        </div>
+            <!-- Track Volume Scale -->
+            <div class="flex justify-between items-center">
+                <span class="text-black text-[10px] uppercase font-black tracking-widest">Track Vol</span>
+                <div class="text-right">
+                    <span class="text-lg tracking-widest">
+                        {% if group.summary.raw_distance_km < 4 %}👣{% elif group.summary.raw_distance_km <= 6 %}👣👣👣{% else %}👣👣👣👣👣{% endif %}
+                    </span>
+                    <div class="text-[9px] font-black uppercase mt-1">
+                        {% if group.summary.raw_distance_km < 4 %}<span class="text-black">Short</span>{% elif group.summary.raw_distance_km <= 6 %}<span class="text-green-600">Perfect</span>{% else %}<span class="text-black">Long</span>{% endif %}
                     </div>
+                </div>
+            </div>
 
-                    <!-- Session Duration Scale (Time - Emoji: Hourglass) -->
-                    <div class="p-2 bg-gray-900 rounded d-flex justify-content-between align-items-center">
-                        <span class="text-gray-400 text-[10px] uppercase font-bold tracking-tight">Session Time</span>
-                        <div class="text-end">
-                            <span class="fs-6">
-                                {% if group.summary.raw_total_time_min < 25 %}⏳{% elif group.summary.raw_total_time_min <= 35 %}⏳⏳⏳{% else %}⏳⏳⏳⏳⏳{% endif %}
-                            </span>
-                            <div class="text-[9px] font-black uppercase mt-n1">
-                                {% if group.summary.raw_total_time_min < 25 %}<span class="text-gray-500">Quick Blast</span>{% elif group.summary.raw_total_time_min <= 35 %}<span class="text-success">Perfect Timing</span>{% else %}<span class="text-danger">Long Shift</span>{% endif %}
-                            </div>
-                        </div>
+            <!-- Session Duration Scale -->
+            <div class="flex justify-between items-center">
+                <span class="text-black text-[10px] uppercase font-black tracking-widest">Session Time</span>
+                <div class="text-right">
+                    <span class="text-lg tracking-widest">
+                        {% if group.summary.raw_total_time_min < 25 %}⏳{% elif group.summary.raw_total_time_min <= 35 %}⏳⏳⏳{% else %}⏳⏳⏳⏳⏳{% endif %}
+                    </span>
+                    <div class="text-[9px] font-black uppercase mt-1">
+                        {% if group.summary.raw_total_time_min < 25 %}<span class="text-black">Quick</span>{% elif group.summary.raw_total_time_min <= 35 %}<span class="text-green-600">Perfect</span>{% else %}<span class="text-red-600">Long</span>{% endif %}
                     </div>
-                </li>
-            </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>

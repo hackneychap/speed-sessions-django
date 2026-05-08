@@ -4,31 +4,31 @@
 <div class="container mx-auto max-width-[1000px] py-10 px-4">
     <!-- Hero Section -->
     <div class="text-center mb-16 relative">
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 opacity-10 pointer-events-none">
-            <span class="text-[150px] font-black text-blue-500">PACE</span>
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 opacity-5 pointer-events-none">
+            <span class="text-[150px] font-black text-black">PACE</span>
         </div>
-        <h1 class="text-5xl md:text-7xl font-black italic tracking-tighter text-white mb-4 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] uppercase">
-            Train <span class="text-blue-500">Together</span>
+        <h1 class="text-5xl md:text-7xl font-black italic tracking-tighter text-black mb-4 uppercase">
+            Train <span class="bg-black text-white px-2">Together</span>
         </h1>
-        <p class="text-xl md:text-2xl text-slate-400 font-bold uppercase tracking-[0.1em] mb-8">
+        <p class="text-xl md:text-2xl text-black font-bold uppercase tracking-[0.1em] mb-8">
             Differing speeds. Same session. One community.
         </p>
         
         {% if not user.is_authenticated %}
         <div class="flex flex-wrap justify-center gap-4">
-            <a href="{% url 'signup' %}" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-xl rounded shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all hover:scale-105 active:scale-95 uppercase italic">
+            <a href="{% url 'signup' %}" class="px-8 py-3 bg-black hover:bg-gray-800 text-white font-black text-xl rounded-none border-2 border-black transition-all hover:scale-105 active:scale-95 uppercase italic">
                 Join the Group
             </a>
-            <a href="{% url 'login' %}" class="px-8 py-3 border-2 border-slate-700 hover:border-blue-500 text-slate-300 hover:text-white font-black text-xl rounded transition-all uppercase italic">
+            <a href="{% url 'login' %}" class="px-8 py-3 border-2 border-black hover:bg-black hover:text-white text-black font-black text-xl rounded-none transition-all uppercase italic">
                 Login
             </a>
         </div>
         {% else %}
         <div class="flex flex-wrap justify-center gap-4">
-            <a href="{% url 'planner-page' %}" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-xl rounded shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all hover:scale-105 active:scale-95 uppercase italic">
+            <a href="{% url 'planner-page' %}" class="px-8 py-3 bg-black hover:bg-gray-800 text-white font-black text-xl rounded-none border-2 border-black transition-all hover:scale-105 active:scale-95 uppercase italic">
                 Plan a Session
             </a>
-            <a href="{% url 'session-list' %}" class="px-8 py-3 border-2 border-slate-700 hover:border-blue-500 text-slate-300 hover:text-white font-black text-xl rounded transition-all uppercase italic">
+            <a href="{% url 'session-list' %}" class="px-8 py-3 border-2 border-black hover:bg-black hover:text-white text-black font-black text-xl rounded-none transition-all uppercase italic">
                 View Shared Calendar
             </a>
         </div>
@@ -37,39 +37,39 @@
 
     <!-- The Science Section -->
     <div class="grid md:grid-cols-2 gap-8 mb-16">
-        <div class="bg-slate-900/80 border border-slate-800 p-8 rounded-xl shadow-2xl relative overflow-hidden group">
+        <div class="bg-white border-2 border-black p-8 rounded-none relative overflow-hidden group">
             <div class="absolute top-0 right-0 p-4 opacity-20 text-6xl group-hover:scale-110 transition-transform">🤝</div>
-            <h2 class="text-3xl font-black text-white mb-6 italic uppercase tracking-wider border-b-2 border-blue-500 inline-block">The "Why" Behind VDOT</h2>
-            <p class="text-slate-400 leading-relaxed mb-4">
-                We believe the best way to train is <span class="text-white font-bold italic">together</span>. But since everyone runs at a different pace, how do we share the same track? That's where <span class="text-white font-bold">Track Sessions (TRASH)</span> and <span class="text-white font-bold">VDOT</span> come in.
+            <h2 class="text-3xl font-black text-black mb-6 italic uppercase tracking-wider border-b-4 border-black inline-block">The "Why" Behind VDOT</h2>
+            <p class="text-black leading-relaxed mb-4">
+                We believe the best way to train is <span class="text-black font-bold italic underline">together</span>. But since everyone runs at a different pace, how do we share the same track? That's where <span class="text-black font-black uppercase">Track Sessions (TRASH)</span> and <span class="text-black font-bold">VDOT</span> come in.
             </p>
-            <p class="text-slate-400 leading-relaxed">
-                By understanding your current fitness level through a VDOT score, we've grouped people with similar targets together to help share the difficulty and negative thoughts of running fast. Whether you're in Group A or Group C, you're doing the <span class="text-blue-400 font-bold italic">exact same workout intensity</span> relative to your ability. No one gets left behind.
+            <p class="text-black leading-relaxed">
+                By understanding your current fitness level through a VDOT score, we've grouped people with similar targets together to help share the difficulty and negative thoughts of running fast. Whether you're in Group A or Group C, you're doing the <span class="text-black font-black italic">exact same workout intensity</span> relative to your ability. No one gets left behind.
             </p>
         </div>
 
-        <div class="bg-slate-900/80 border border-slate-800 p-8 rounded-xl shadow-2xl relative overflow-hidden group">
+        <div class="bg-white border-2 border-black p-8 rounded-none relative overflow-hidden group">
             <div class="absolute top-0 right-0 p-4 opacity-20 text-6xl group-hover:scale-110 transition-transform">✨</div>
-            <h2 class="text-3xl font-black text-white mb-6 italic uppercase tracking-wider border-b-2 border-orange-500 inline-block">Supportive Intensity</h2>
-            <p class="text-slate-400 leading-relaxed mb-4">
-                Our <span class="text-orange-400 font-bold italic">TSS Spice Scale</span> helps the group find the right balance. We're not just chasing numbers; we're making sure the session is challenging but sustainable for everyone.
+            <h2 class="text-3xl font-black text-black mb-6 italic uppercase tracking-wider border-b-4 border-black inline-block">Supportive Intensity</h2>
+            <p class="text-black leading-relaxed mb-4">
+                Our <span class="text-black font-bold italic">TSS Spice Scale</span> helps the group find the right balance. We're not just chasing numbers; we're making sure the session is challenging but sustainable for everyone.
             </p>
             <div class="grid grid-cols-2 gap-4 mt-6">
-                <div class="bg-slate-950 p-3 rounded border border-slate-800">
-                    <div class="text-orange-500 font-black text-xs uppercase mb-1">Threshold</div>
-                    <div class="text-white text-sm">Working below your anaerobic threshold</div>
+                <div class="bg-white p-3 rounded-none border-2 border-black">
+                    <div class="text-black font-black text-xs uppercase mb-1 font-mono">Threshold</div>
+                    <div class="text-black text-sm">Working below your anaerobic threshold</div>
                 </div>
-                <div class="bg-slate-950 p-3 rounded border border-slate-800">
-                    <div class="text-blue-500 font-black text-xs uppercase mb-1">Interval</div>
-                    <div class="text-white text-sm">Working above your Anaerobic Threshold</div>
+                <div class="bg-white p-3 rounded-none border-2 border-black">
+                    <div class="text-black font-black text-xs uppercase mb-1 font-mono">Interval</div>
+                    <div class="text-black text-sm">Working above your Anaerobic Threshold</div>
                 </div>
-                <div class="bg-slate-950 p-3 rounded border border-slate-800">
-                    <div class="text-red-500 font-black text-xs uppercase mb-1">Repetition</div>
-                    <div class="text-white text-sm">Fast! For short intense distances.</div>
+                <div class="bg-white p-3 rounded-none border-2 border-black">
+                    <div class="text-red-600 font-black text-xs uppercase mb-1 font-mono">Repetition</div>
+                    <div class="text-black text-sm">Fast! For short intense distances.</div>
                 </div>
-                <div class="bg-slate-950 p-3 rounded border border-slate-800">
-                    <div class="text-green-500 font-black text-xs uppercase mb-1">Easy</div>
-                    <div class="text-white text-sm">Supporting Recovery</div>
+                <div class="bg-white p-3 rounded-none border-2 border-black">
+                    <div class="text-green-600 font-black text-xs uppercase mb-1 font-mono">Easy</div>
+                    <div class="text-black text-sm">Supporting Recovery</div>
                 </div>
             </div>
         </div>
@@ -77,28 +77,21 @@
 
     <!-- Feature Grid -->
     <div class="grid md:grid-cols-3 gap-6 text-center">
-        <div class="p-6">
+        <div class="p-6 border-2 border-black bg-white">
             <div class="text-4xl mb-4">👥</div>
-            <h3 class="text-xl font-bold text-white mb-2 uppercase italic">Inclusive Planning</h3>
-            <p class="text-slate-500 text-sm">Define one session and immediately see what that looks like for every runner in the group, regardless of their speed.</p>
+            <h3 class="text-xl font-bold text-black mb-2 uppercase italic font-black">Inclusive Planning</h3>
+            <p class="text-black text-sm">Define one session and immediately see what that looks like for every runner in the group, regardless of their speed.</p>
         </div>
-        <div class="p-6">
+        <div class="p-6 border-2 border-black bg-white">
             <div class="text-4xl mb-4">📲</div>
-            <h3 class="text-xl font-bold text-white mb-2 uppercase italic">Group Chat Ready</h3>
-            <p class="text-slate-500 text-sm">Easily share clearly formatted plans to your WhatsApp group so everyone arrives prepared for the session.</p>
+            <h3 class="text-xl font-bold text-black mb-2 uppercase italic font-black">Group Chat Ready</h3>
+            <p class="text-black text-sm">Easily share clearly formatted plans to your WhatsApp group so everyone arrives prepared for the session.</p>
         </div>
-        <div class="p-6">
+        <div class="p-6 border-2 border-black bg-white">
             <div class="text-4xl mb-4">📅</div>
-            <h3 class="text-xl font-bold text-white mb-2 uppercase italic">Shared Progress</h3>
-            <p class="text-slate-500 text-sm">Keep a log of our group sessions and watch as we all improve our fitness levels, together.</p>
+            <h3 class="text-xl font-bold text-black mb-2 uppercase italic font-black">Shared Progress</h3>
+            <p class="text-black text-sm">Keep a log of our group sessions and watch as we all improve our fitness levels, together.</p>
         </div>
     </div>
 </div>
-
-<style>
-    .bg-slate-900\/80 {
-        background-image: linear-gradient(0deg, rgba(15, 23, 42, 0.1) 50%, rgba(255, 255, 255, 0.02) 50%);
-        background-size: 100% 4px;
-    }
-</style>
 {% endblock %}
