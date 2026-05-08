@@ -1,182 +1,182 @@
 {% extends 'workouts/base.html' %}
 
 {% block content %}
-<div class="container-fluid" style="max-width: 1200px;">
-    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+<div class="container mx-auto max-w-7xl py-10 px-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 no-print">
         <div>
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-1">
-                    <li class="breadcrumb-item"><a href="{% url 'session-list' %}" class="text-black">Calendar</a></li>
-                    <li class="breadcrumb-item active text-black" aria-current="page">{{ session.date|date:"j F Y" }}</li>
+                <ol class="flex gap-2 mb-1 uppercase font-black tracking-widest text-[10px]">
+                    <li><a href="{% url 'session-list' %}" class="text-black hover:underline">Calendar</a></li>
+                    <li class="text-black opacity-50">/</li>
+                    <li class="text-black" aria-current="page">{{ session.date|date:"j F Y" }}</li>
                 </ol>
             </nav>
             <h1 class="text-4xl font-black text-black mb-0 italic uppercase tracking-tighter">{{ session.title }}</h1>
             {% if session.description %}
-                <div class="mt-3 p-4 bg-white border-l-4 border-black border-2 rounded-none text-black italic whitespace-pre-line">
+                <div class="mt-4 p-4 bg-white border-l-4 border-black border-2 rounded-none text-black italic whitespace-pre-line">
                     {{ session.description }}
                 </div>
             {% endif %}
         </div>
-        <div class="text-end">
-             <div class="bg-white border border-black border-2 rounded-none px-3 py-2 text-center">
-                 <div class="text-[10px] font-black uppercase text-black tracking-widest">Training Date</div>
-                 <div class="text-xl font-bold text-black">{{ session.date|date:"l" }}</div>
+        <div class="text-right self-stretch md:self-auto">
+             <div class="bg-black text-white border-2 border-black rounded-none px-6 py-3 text-center mb-3">
+                 <div class="text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-80">Training Date</div>
+                 <div class="text-2xl font-black italic uppercase tracking-tighter">{{ session.date|date:"l" }}</div>
              </div>
-             <div class="mt-2 flex gap-2 justify-end">
+             <div class="flex gap-2 justify-end">
                 {% if is_manager %}
-                    <a href="{% url 'edit-session' session.id %}" class="btn btn-sm border-2 border-yellow-600 text-yellow-600 bg-white hover:bg-yellow-600 hover:text-white rounded-none">Edit Session</a>
+                    <a href="{% url 'edit-session' session.id %}" class="px-4 py-2 border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none uppercase font-black tracking-widest text-xs transition-all">Edit Session</a>
                 {% endif %}
-                <a href="{% url 'planner-page' %}" class="btn btn-sm border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none font-bold uppercase tracking-wider text-xs">New Workout</a>
+                <a href="{% url 'planner-page' %}" class="px-4 py-2 bg-black hover:bg-white text-white hover:text-black border-2 border-black rounded-none uppercase font-black tracking-widest text-xs transition-all">New Workout</a>
              </div>
         </div>
     </div>
 
-    <div class="mb-6 flex flex-wrap gap-2 justify-center no-print">
-        <button id="toggle-all-btn" class="px-4 py-2 bg-white text-black font-bold rounded-none uppercase tracking-wider text-xs border border-black border-2 hover:bg-white transition-all shadow-none"
+    <div class="mb-10 flex flex-wrap gap-4 justify-center no-print">
+        <button id="toggle-all-btn" class="px-6 py-3 bg-white text-black font-black rounded-none uppercase tracking-widest text-xs border-2 border-black hover:bg-black hover:text-white transition-all shadow-none"
                 onclick="toggleAllAccordions()">
             ↔️ Expand All
         </button>
-        <button class="px-4 py-2 bg-green-600 text-white border-2 border-black rounded-none text-black font-bold uppercase tracking-wider text-xs shadow-none hover:bg-white transition-all"
+        <button class="px-6 py-3 bg-white text-black font-black rounded-none uppercase tracking-widest text-xs border-2 border-black hover:bg-black hover:text-white transition-all shadow-none"
                 onclick="copyAllWorkoutsToWhatsApp('{{ session.title }}', '{{ session.date|date:'l, M d' }}')">
-            📋 Copy All to WhatsApp
+            📋 Copy WhatsApp
         </button>
-        <button class="px-4 py-2 bg-black text-white border-2 border-black rounded-none font-bold uppercase tracking-wider text-xs shadow-none hover:bg-black transition-all"
+        <button class="px-6 py-3 bg-black text-white font-black rounded-none uppercase tracking-widest text-xs border-2 border-black hover:bg-white hover:text-black transition-all shadow-none"
                 onclick="downloadAllCardsAsImage('all-groups-grid', '{{ session.title|slugify }}_full_schedule')">
-            🖼️ Download All as Image
+            🖼️ Download All
         </button>
     </div>
 
-    <div class="row g-4 mt-2" id="all-groups-grid">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6" id="all-groups-grid">
         {% for group in groups %}
-            <div class="col-md-4 group-card-container">
-                <div id="group-card-{{ forloop.counter }}" class="collapse collapse-arrow bg-white border border-black border-2 shadow-none h-100 rounded-none overflow-hidden group">
-                    <input type="checkbox" class="accordion-checkbox" checked /> 
+            <div id="group-card-{{ forloop.counter }}" class="collapse collapse-arrow bg-white border-2 border-black rounded-none h-full group">
+                <input type="checkbox" class="accordion-checkbox" checked /> 
+                
+                <div class="collapse-title bg-black text-white p-4 flex flex-col justify-center !pr-12">
+                    <h5 class="mb-0 font-black italic uppercase tracking-widest text-xl">{{ group.name }}</h5>
+                    <span class="font-mono text-xs font-black uppercase tracking-widest mt-1">VDOT: {{ group.vdot }}</span>
                     
-                    <div class="collapse-title card-header bg-white border-black border-2 d-flex justify-content-between align-items-center !pr-12">
-                        <div>
-                            <h5 class="mb-0 text-black font-black italic uppercase tracking-tighter">{{ group.name }}</h5>
-                            <small class="text-black font-bold">VDOT: {{ group.vdot }}</small>
-                        </div>
-                        <div class="no-print pointer-events-auto flex gap-1">
-                            <button class="btn btn-xs border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none p-1 relative z-20" title="Copy to WhatsApp" 
-                                    onclick="event.stopPropagation(); copyWorkoutToWhatsApp('{{ group.name }}', {{ forloop.counter }})">
-                                📋
-                            </button>
-                            <button class="btn btn-xs border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none p-1 relative z-20" title="Download Image"
-                                    onclick="event.stopPropagation(); downloadCardAsImage('group-card-{{ forloop.counter }}', '{{ session.title|slugify }}_{{ group.name|slugify }}')">
-                                🖼️
-                            </button>
+                    <div class="no-print pointer-events-auto flex gap-2 mt-3">
+                        <button class="px-2 py-1 border-2 border-white text-white bg-black hover:bg-white hover:text-black rounded-none text-[10px] font-black uppercase transition-all" title="Copy to WhatsApp" 
+                                onclick="event.stopPropagation(); copyWorkoutToWhatsApp('{{ group.name }}', {{ forloop.counter }})">
+                            📋 COPY
+                        </button>
+                        <button class="px-2 py-1 border-2 border-white text-white bg-black hover:bg-white hover:text-black rounded-none text-[10px] font-black uppercase transition-all" title="Download Image"
+                                onclick="event.stopPropagation(); downloadCardAsImage('group-card-{{ forloop.counter }}', '{{ session.title|slugify }}_{{ group.name|slugify }}')">
+                            🖼️ IMG
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="collapse-content !p-0">
+                    <div class="p-4 bg-white">
+                        <div class="workout-items space-y-4" id="workout-items-{{ forloop.counter }}">
+                            {% for item in group.workout_structure %}
+                                {% if item.type == 'block' %}
+                                    <div class="p-3 border-l-4 border-black bg-white rounded-none workout-item" data-type="block" data-multiplier="{{ item.multiplier }}">
+                                        <div class="mb-2">
+                                            <span class="text-[10px] font-black text-black uppercase tracking-[0.2em]">{{ item.multiplier }}x Sets of:</span>
+                                        </div>
+                                        <div class="pl-2 space-y-2 border-l-2 border-dashed border-black ml-4 block-segments">
+                                            {% for seg in item.segments %}
+                                                <div class="bg-white p-2 border-2 border-black segment-data" 
+                                                     data-reps="{{ seg.reps }}" data-dist="{{ seg.distance }}" data-intensity="{{ seg.intensity }}" 
+                                                     data-pace="{{ seg.target_pace }}" data-rest="{{ seg.rest }}">
+                                                    <div class="flex items-center gap-2 justify-between">
+                                                        <div class="flex flex-wrap items-center gap-1 flex-grow">
+                                                            <div class="text-black font-black text-sm uppercase">{{ seg.reps }} x {{ seg.distance }}m</div>
+                                                            <div class="text-black font-black uppercase text-[10px] opacity-60">{{ seg.intensity }} @ {{ seg.rest }}S</div>
+                                                        </div>
+                                                        <div class="text-right border-l-2 border-black pl-3 min-w-[80px]">
+                                                            <div class="text-black font-mono font-black text-sm">{{ seg.target_pace }}</div>
+                                                            <div class="text-black text-[9px] font-mono uppercase tracking-widest">LAP: {{ seg.lap_time }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="p-3 bg-white border-2 border-black workout-item segment-data" 
+                                         data-type="single" data-reps="{{ item.segment.reps }}" data-dist="{{ item.segment.distance }}" 
+                                         data-intensity="{{ item.segment.intensity }}" data-pace="{{ item.segment.target_pace }}" data-rest="{{ item.segment.rest }}">
+                                        <div class="flex items-center gap-2 justify-between">
+                                            <div class="flex flex-wrap items-center gap-1 flex-grow">
+                                                <div class="text-black font-black text-sm uppercase">{{ item.segment.reps }} x {{ item.segment.distance }}m</div>
+                                                <div class="text-black font-black uppercase text-[10px] opacity-60">{{ item.segment.intensity }} @ {{ item.segment.rest }}S</div>
+                                            </div>
+                                            <div class="text-right border-l-2 border-black pl-3 min-w-[80px]">
+                                                <div class="text-black font-mono font-black text-sm">{{ item.segment.target_pace }}</div>
+                                                <div class="text-black text-[9px] font-mono uppercase tracking-widest">LAP: {{ item.segment.lap_time }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
                     </div>
                     
-                    <div class="collapse-content card-body flex-grow-1 !p-0">
-                        <div class="p-4">
-                            <div class="workout-items space-y-3" id="workout-items-{{ forloop.counter }}">
-                                {% for item in group.workout_structure %}
-                                    {% if item.type == 'block' %}
-                                        <div class="p-2 border-l-4 border-black border-2 bg-white rounded-none workout-item" data-type="block" data-multiplier="{{ item.multiplier }}">
-                                            <div class="mb-2">
-                                                <span class="text-[10px] font-black text-yellow-600 uppercase tracking-widest">{{ item.multiplier }}x Sets of:</span>
-                                            </div>
-                                            <div class="ps-2 space-y-2 block-segments">
-                                                {% for seg in item.segments %}
-                                                    <div class="bg-white p-2 rounded-none border border-black border-2 segment-data" 
-                                                         data-reps="{{ seg.reps }}" data-dist="{{ seg.distance }}" data-intensity="{{ seg.intensity }}" 
-                                                         data-pace="{{ seg.target_pace }}" data-rest="{{ seg.rest }}">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-8">
-                                                                <div class="text-black font-bold">{{ seg.reps }} x {{ seg.distance }}m</div>
-                                                                <div class="text-black small">{{ seg.intensity }} @ {{ seg.rest }}s rest</div>
-                                                            </div>
-                                                            <div class="col-4 text-end border-start border-black border-2">
-                                                                <div class="text-black font-monospace fw-bold">{{ seg.target_pace }}</div>
-                                                                <div class="text-black text-[10px] font-monospace">Lap: {{ seg.lap_time }}</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    {% else %}
-                                        <div class="p-2 bg-white rounded-none border border-black border-2 workout-item segment-data" 
-                                             data-type="single" data-reps="{{ item.segment.reps }}" data-dist="{{ item.segment.distance }}" 
-                                             data-intensity="{{ item.segment.intensity }}" data-pace="{{ item.segment.target_pace }}" data-rest="{{ item.segment.rest }}">
-                                            <div class="row align-items-center">
-                                                <div class="col-8">
-                                                    <div class="text-black font-bold">{{ item.segment.reps }} x {{ item.segment.distance }}m</div>
-                                                    <div class="text-black small">{{ item.segment.intensity }} @ {{ item.segment.rest }}s rest</div>
-                                                </div>
-                                                <div class="col-4 text-end border-start border-black border-2">
-                                                    <div class="text-black font-monospace fw-bold">{{ item.segment.target_pace }}</div>
-                                                    <div class="text-black text-[10px] font-monospace">Lap: {{ item.segment.lap_time }}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endif %}
-                                {% endfor %}
+                    <div class="border-t-2 border-black p-4 flex flex-col lg:flex-row gap-6">
+                        <!-- Totals Column -->
+                        <div class="space-y-3 lg:w-1/3">
+                            <div class="flex flex-col border-b border-black pb-2">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-black opacity-60">Distance</span>
+                                <span class="font-mono font-black text-lg text-black">{{ group.summary.distance }}</span>
+                            </div>
+                            <div class="flex flex-col border-b border-black pb-2">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-black opacity-60">Active Time</span>
+                                <span class="font-mono font-black text-lg text-black">{{ group.summary.active_time }}</span>
+                            </div>
+                            <div class="flex flex-col border-b border-black pb-2">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-black opacity-60">Total Time</span>
+                                <span class="font-mono font-black text-lg text-black">{{ group.summary.total_time }}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-black">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">TSS Score</span>
+                                <span class="font-mono font-black text-base">{{ group.summary.tss }}</span>
                             </div>
                         </div>
-                        
-                        <div class="card-footer bg-white border-black border-2 p-4">
-                            <ul class="list-unstyled mb-0 small text-black">
-                                <li class="d-flex justify-content-between mb-1">
-                                    <span>Total Distance:</span>
-                                    <strong class="text-black">{{ group.summary.distance }}</strong>
-                                </li>
-                                <li class="d-flex justify-content-between mb-1">
-                                    <span>Active Time:</span>
-                                    <strong class="text-black">{{ group.summary.active_time }}</strong>
-                                </li>
-                                <li class="d-flex justify-content-between mb-1">
-                                    <span>Total Time:</span>
-                                    <strong class="text-black">{{ group.summary.total_time }}</strong>
-                                </li>
-                                <li class="d-flex justify-content-between mb-1">
-                                    <span class="text-black">TSS Score:</span>
-                                    <strong class="text-black">{{ group.summary.tss }}</strong>
-                                </li>
-                                
-                                <li class="pt-2 mt-2 border-top border-black border-2 space-y-2">
-                                    <!-- TSS Spice Scale -->
-                                    <div class="p-2 bg-white rounded-none d-flex justify-content-between align-items-center">
-                                        <span class="text-black text-[10px] uppercase font-bold tracking-tight">TSS Spice</span>
-                                        <div class="text-end">
-                                            <span class="fs-6">
-                                                {% if group.summary.tss < 20 %}🌶️{% elif group.summary.tss <= 32 %}🌶️🌶️{% elif group.summary.tss <= 39 %}🌶️🌶️🌶️{% elif group.summary.tss <= 43 %}🌶️🌶️🌶️🌶️{% else %}🌶️🌶️🌶️🌶️🌶️{% endif %}
-                                            </span>
-                                            <div class="text-[9px] font-black uppercase mt-n1">
-                                                {% if group.summary.tss <= 32 %}<span class="text-black">Too Mild</span>{% elif group.summary.tss <= 39 %}<span class="text-green-600">Just Right</span>{% elif group.summary.tss <= 43 %}<span class="text-yellow-600">Hot! Monthly</span>{% else %}<span class="text-red-600">Too Spicy!</span>{% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <!-- Track Volume Scale -->
-                                    <div class="p-2 bg-white rounded-none d-flex justify-content-between align-items-center">
-                                        <span class="text-black text-[10px] uppercase font-bold tracking-tight">Track Volume</span>
-                                        <div class="text-end">
-                                            <span class="fs-6">
-                                                {% if group.summary.raw_distance_km < 4 %}👣{% elif group.summary.raw_distance_km <= 6 %}👣👣👣{% else %}👣👣👣👣👣{% endif %}
-                                            </span>
-                                            <div class="text-[9px] font-black uppercase mt-n1">
-                                                {% if group.summary.raw_distance_km < 4 %}<span class="text-black">Short & Sweet</span>{% elif group.summary.raw_distance_km <= 6 %}<span class="text-green-600">The Sweet Spot</span>{% else %}<span class="text-yellow-600">The Long Haul</span>{% endif %}
-                                            </div>
-                                        </div>
+                        <!-- Scales Column -->
+                        <div class="lg:w-2/3 lg:border-l-2 lg:border-black lg:pl-6 pt-4 lg:pt-0 border-t-4 lg:border-t-0 border-black space-y-4">
+                            <!-- TSS Spice Scale -->
+                            <div class="flex justify-between items-center">
+                                <span class="text-black text-[10px] uppercase font-black tracking-widest">TSS Spice</span>
+                                <div class="text-right">
+                                    <span class="text-lg tracking-widest">
+                                        {% if group.summary.tss < 20 %}🌶️{% elif group.summary.tss <= 32 %}🌶️🌶️{% elif group.summary.tss <= 39 %}🌶️🌶️🌶️{% elif group.summary.tss <= 43 %}🌶️🌶️🌶️🌶️{% else %}🌶️🌶️🌶️🌶️🌶️{% endif %}
+                                    </span>
+                                    <div class="text-[9px] font-black uppercase mt-1">
+                                        {% if group.summary.tss <= 32 %}<span class="text-black">Too Mild</span>{% elif group.summary.tss <= 39 %}<span class="text-green-600">Just Right</span>{% elif group.summary.tss <= 43 %}<span class="text-black">Hot! Monthly</span>{% else %}<span class="text-red-600">Too Spicy!</span>{% endif %}
                                     </div>
+                                </div>
+                            </div>
 
-                                    <!-- Session Duration Scale -->
-                                    <div class="p-2 bg-white rounded-none d-flex justify-content-between align-items-center">
-                                        <span class="text-black text-[10px] uppercase font-bold tracking-tight">Session Time</span>
-                                        <div class="text-end">
-                                            <span class="fs-6">
-                                                {% if group.summary.raw_total_time_min < 25 %}⏳{% elif group.summary.raw_total_time_min <= 35 %}⏳⏳⏳{% else %}⏳⏳⏳⏳⏳{% endif %}
-                                            </span>
-                                            <div class="text-[9px] font-black uppercase mt-n1">
-                                                {% if group.summary.raw_total_time_min < 25 %}<span class="text-black">Quick Blast</span>{% elif group.summary.raw_total_time_min <= 35 %}<span class="text-green-600">Perfect Timing</span>{% else %}<span class="text-red-600">Long Shift</span>{% endif %}
-                                            </div>
-                                        </div>
+                            <!-- Track Volume Scale -->
+                            <div class="flex justify-between items-center">
+                                <span class="text-black text-[10px] uppercase font-black tracking-widest">Track Vol</span>
+                                <div class="text-right">
+                                    <span class="text-lg tracking-widest">
+                                        {% if group.summary.raw_distance_km < 4 %}👣{% elif group.summary.raw_distance_km <= 6 %}👣👣👣{% else %}👣👣👣👣👣{% endif %}
+                                    </span>
+                                    <div class="text-[9px] font-black uppercase mt-1">
+                                        {% if group.summary.raw_distance_km < 4 %}<span class="text-black">Short</span>{% elif group.summary.raw_distance_km <= 6 %}<span class="text-green-600">Perfect</span>{% else %}<span class="text-black">Long</span>{% endif %}
                                     </div>
-                                </li>
-                            </ul>
+                                </div>
+                            </div>
+
+                            <!-- Session Duration Scale -->
+                            <div class="flex justify-between items-center">
+                                <span class="text-black text-[10px] uppercase font-black tracking-widest">Session Time</span>
+                                <div class="text-right">
+                                    <span class="text-lg tracking-widest">
+                                        {% if group.summary.raw_total_time_min < 25 %}⏳{% elif group.summary.raw_total_time_min <= 35 %}⏳⏳⏳{% else %}⏳⏳⏳⏳⏳{% endif %}
+                                    </span>
+                                    <div class="text-[9px] font-black uppercase mt-1">
+                                        {% if group.summary.raw_total_time_min < 25 %}<span class="text-black">Quick</span>{% elif group.summary.raw_total_time_min <= 35 %}<span class="text-green-600">Perfect</span>{% else %}<span class="text-red-600">Long</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -212,7 +212,7 @@
         // Wait for accordion transition
         setTimeout(() => {
             html2canvas(element, {
-                backgroundColor: '#ffffff', // gray-800
+                backgroundColor: '#ffffff',
                 scale: 2, // Higher quality
                 logging: false,
                 useCORS: true
@@ -248,7 +248,7 @@
         // Wait a bit for layout to settle even without transitions
         setTimeout(() => {
             html2canvas(container, {
-                backgroundColor: '#ffffff', // slate-950
+                backgroundColor: '#ffffff',
                 scale: 2,
                 logging: true, // Enable logging to debug
                 useCORS: true,
@@ -311,7 +311,7 @@
         const containers = document.querySelectorAll('[id^="workout-items-"]');
         containers.forEach((container) => {
             const counter = container.id.split('-').pop();
-            const groupName = container.closest('.collapse').querySelector('h5').innerText;
+            const groupName = container.closest('.group').querySelector('h5').innerText;
             fullText += getWorkoutText(groupName, counter) + '\n' + '-'.repeat(20) + '\n\n';
         });
 
@@ -334,12 +334,6 @@
 <style>
     @media print {
         .no-print { display: none !important; }
-    }
-    .btn-xs {
-        padding: 1px 5px;
-        font-size: 12px;
-        line-height: 1.5;
-        border-radius: 3px;
     }
     /* Fix for daisyUI collapse-title padding */
     .collapse-title {
