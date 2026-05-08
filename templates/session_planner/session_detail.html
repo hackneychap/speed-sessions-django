@@ -186,7 +186,7 @@
 </div>
 
 <!-- Scripts for Image Download and WhatsApp Copy -->
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
 <script>
     function toggleAllAccordions() {
         const btn = document.getElementById('toggle-all-btn');
@@ -198,7 +198,7 @@
     }
 
     function prepareForCapture(element) {
-        // Force Standard Colors to bypass oklch parsing errors in html2canvas
+        // Force Standard Colors to bypass oklch parsing errors in htmlToImage.toPng
         const style = document.createElement('style');
         style.id = 'capture-overrides';
         style.innerHTML = `
@@ -234,23 +234,20 @@
         buttons.forEach(b => b.style.display = 'none');
         
         setTimeout(() => {
-            html2canvas(element, {
+            htmlToImage.toPng(element, {
                 backgroundColor: '#ffffff',
-                scale: 2,
-                logging: false,
-                useCORS: true,
-                allowTaint: true
-            }).then(canvas => {
+                pixelRatio: 2
+            }).then(dataUrl => {
                 const link = document.createElement('a');
                 link.download = `${filename}.png`;
-                link.href = canvas.toDataURL('image/png');
+                link.href = dataUrl;
                 link.click();
-                
-                buttons.forEach(b => b.style.display = '');
-                checkbox.checked = wasChecked;
-                cleanupAfterCapture(styleOverride);
             }).catch(err => {
                 console.error("Capture failed", err);
+                alert("Error capturing image: " + err.message);
+            }).finally(() => {
+                buttons.forEach(b => b.style.display = '');
+                checkbox.checked = wasChecked;
                 cleanupAfterCapture(styleOverride);
             });
         }, 200);
@@ -268,29 +265,20 @@
         buttons.forEach(b => b.style.display = 'none');
 
         setTimeout(() => {
-            html2canvas(container, {
+            htmlToImage.toPng(container, {
                 backgroundColor: '#ffffff',
-                scale: 2,
-                logging: false,
-                useCORS: true,
-                allowTaint: true
-            }).then(canvas => {
-                try {
-                    const link = document.createElement('a');
-                    link.download = `${filename}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                } catch (e) {
-                    console.error("Download failed", e);
-                    alert("Image capture failed. Try expanding all accordions manually first.");
-                } finally {
-                    buttons.forEach(b => b.style.display = '');
-                    checkboxes.forEach((cb, i) => cb.checked = previousStates[i]);
-                    cleanupAfterCapture(styleOverride);
-                }
+                pixelRatio: 2
+            }).then(dataUrl => {
+                const link = document.createElement('a');
+                link.download = `${filename}.png`;
+                link.href = dataUrl;
+                link.click();
             }).catch(err => {
-                console.error("html2canvas error", err);
+                console.error("html-to-image error", err);
                 alert("Error capturing image: " + err.message);
+            }).finally(() => {
+                buttons.forEach(b => b.style.display = '');
+                checkboxes.forEach((cb, i) => cb.checked = previousStates[i]);
                 cleanupAfterCapture(styleOverride);
             });
         }, 600);
