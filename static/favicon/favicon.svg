@@ -1,3 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200"><rect width="200" height="200" fill="url('#gradient')"></rect><defs><linearGradient id="gradient" gradientTransform="rotate(45 0.5 0.5)"><stop offset="0%" stop-color="#3c4845"></stop><stop offset="100%" stop-color="#1b7974"></stop></linearGradient></defs><g><g fill="#3df383" transform="matrix(9.476606683804627,0,0,9.476606683804627,6.656791149926363,167.3780496536)" stroke="#c2d02d" stroke-width="0.2"><path d="M12.24-14.22L12.24-11.57L7.97-11.57L7.97 0L4.54 0L4.54-11.57L0.35-11.57L0.35-14.22L12.24-14.22ZM19.35-10.64L19.29-7.59L18.20-7.67Q16.65-7.67 16.21-6.69L16.21-6.69L16.21 0L12.92 0L12.92-10.57L16.01-10.57L16.11-9.21Q16.94-10.76 18.43-10.76L18.43-10.76Q18.96-10.76 19.35-10.64L19.35-10.64Z"></path></g></g></svg></svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
-@media (prefers-color-scheme: dark) { :root { filter: none; } }
-</style></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- White Background -->
+  <rect width="512" height="512" fill="#ffffff" />
+
+  <!-- "T" - Normal, Black -->
+  <g fill="#000000">
+    <!-- Horizontal bar -->
+    <rect x="52" y="100" width="200" height="70" />
+    <!-- Vertical bar -->
+    <rect x="117" y="100" width="70" height="312" />
+  </g>
+
+  <!-- Black Background for "S" -->
+  <rect x="256" y="90" width="204" height="332" fill="#000000" />
+
+  <!-- "S" - Italic, White on Black background -->
+  <g fill="#ffffff" transform="translate(266, 126) skewX(-12)">
+    <path d="M 160 40 C 160 10, 100 0, 80 0 C 40 0, 20 20, 20 50 C 20 80, 50 90, 80 100 C 120 110, 140 130, 140 170 C 140 210, 110 240, 70 240 C 30 240, 0 210, 0 180 L 40 170 C 40 190, 50 205, 70 205 C 100 205, 100 180, 100 170 C 100 140, 70 130, 40 120 C 10 110, -10 80, -10 50 C -10 10, 30 -35, 80 -35 C 120 -35, 150 -15, 160 10 Z" />
+  </g>
+
+  <!-- Border for the whole icon, to fit the shipping label look -->
+  <rect width="512" height="512" fill="none" stroke="#000000" stroke-width="32" />
+</svg>
