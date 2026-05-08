@@ -1,0 +1,32 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --minify",
+    "watch:css": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackneychap/speed-sessions-django.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hackneychap/speed-sessions-django/issues"
+  },
+  "homepage": "https://github.com/hackneychap/speed-sessions-django#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.5.0",
+    "daisyui": "^4.10.1",
+    "postcss": "^8.5.14",
+    "tailwindcss": "^3.4.19"
+  }
+}
