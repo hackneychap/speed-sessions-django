@@ -190,7 +190,7 @@
                                             {% endfor %}
                                         {% endif %}
                                         <li>
-                                            <form action="{% url 'logout' %}" method="post" class="p-0">
+                                            <form action="{% url 'account_logout' %}" method="post" class="p-0">
                                                 {% csrf_token %}
                                                 <button type="submit" class="w-full text-left text-red-600 px-4 py-2 hover:bg-black hover:text-white">Logout</button>
                                             </form>
@@ -199,8 +199,8 @@
                                 </details>
                             </li>
                         {% else %}
-                            <li><a href="{% url 'login' %}">Login</a></li>
-                            <li><a href="{% url 'signup' %}" class="bg-black text-white ml-2">Sign Up</a></li>
+                            <li><a href="{% url 'account_login' %}">Login</a></li>
+                            <li><a href="{% url 'account_signup' %}" class="bg-black text-white ml-2">Sign Up</a></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -262,14 +262,14 @@
                     {% endif %}
                     
                     <li class="mt-auto">
-                        <form action="{% url 'logout' %}" method="post">
+                        <form action="{% url 'account_logout' %}" method="post">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-error btn-outline w-full mt-4 border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white">Logout</button>
                         </form>
                     </li>
                 {% else %}
-                    <li><a href="{% url 'login' %}">Login</a></li>
-                    <li><a href="{% url 'signup' %}" class="btn bg-black text-white mt-4">Sign Up</a></li>
+                    <li><a href="{% url 'account_login' %}">Login</a></li>
+                    <li><a href="{% url 'account_signup' %}" class="btn bg-black text-white mt-4">Sign Up</a></li>
                 {% endif %}
             </ul>
         </div>

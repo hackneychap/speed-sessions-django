@@ -1,0 +1,61 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block entrance_title %}{% trans "Sign In" %}{% endblock %}
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+{% block entrance_content %}
+    <p class="mb-4 text-center text-sm font-bold text-black uppercase">
+        {% blocktrans %}Don't have an account? <a href="{{ signup_url }}" class="underline hover:text-gray-600">Sign Up</a>{% endblocktrans %}
+    </p>
+
+    {% get_providers as socialaccount_providers %}
+    {% if socialaccount_providers %}
+        {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+        {% include "account/snippets/login_extra.html" %}
+
+        <div class="my-6 border-t border-black border-2 pt-4 relative">
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-white px-2 text-xs font-black text-black uppercase italic">
+                {% trans "or" %}
+            </div>
+        </div>
+    {% endif %}
+
+    <form class="space-y-6" method="post" action="{% url 'account_login' %}">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            {% if field.name == 'remember' %}
+                <div class="flex items-center">
+                    {{ field }}
+                    <label for="{{ field.id_for_label }}" class="ml-2 text-xs font-bold uppercase tracking-widest text-black">
+                        {{ field.label }}
+                    </label>
+                </div>
+            {% else %}
+                <div class="form-field-container">
+                    <label for="{{ field.id_for_label }}" class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">
+                        {{ field.label }}
+                    </label>
+                    <div class="field-container">{{ field }}</div>
+                    {% if field.errors %}
+                        <p class="text-[10px] text-red-600 mt-1 uppercase font-bold">{{ field.errors.as_text }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+        <div class="pt-4">
+            <button type="submit" class="w-full py-3 bg-black hover:bg-white text-white hover:text-black font-black text-xl rounded-none transition-all uppercase italic border-2 border-black">
+                {% trans "Sign In" %}
+            </button>
+        </div>
+    </form>
+
+    <div class="mt-8 text-center border-t-2 border-black pt-6">
+        <a href="{% url 'account_reset_password' %}" class="text-black text-sm font-bold hover:underline uppercase">{% trans "Forgot Password?" %}</a>
+    </div>
+{% endblock %}
