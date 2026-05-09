@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'communities.apps.CommunitiesConfig',
     'merch.apps.MerchConfig',
     'djstripe',
+    'anymail',
 ]
 
 STRIPE_LIVE_PUBLIC_KEY = os.getenv("STRIPE_LIVE_PUBLIC_KEY", "")
@@ -214,3 +215,16 @@ if IS_VERCEL:
         "Set up a cloud storage provider (e.g., S3, Cloudinary) for production.",
         UserWarning
     )
+
+# Email Settings
+ANYMAIL = {
+    "RESEND_API_KEY": os.getenv("RESEND_API_KEY", ""),
+}
+
+# Use Resend in production if key is present, otherwise fallback to console for development
+if os.getenv("RESEND_API_KEY"):
+    EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+    DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "webmaster@localhost")
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    DEFAULT_FROM_EMAIL = "webmaster@localhost"
