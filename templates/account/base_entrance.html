@@ -1,0 +1,32 @@
+{% extends "workouts/base.html" %}
+
+{% block content %}
+<div class="flex items-center justify-center py-20 px-4">
+    <div class="w-full max-w-md bg-white border border-black border-2 p-8 rounded-none shadow-none relative">
+        <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-black px-4 py-1 rounded-none text-white font-black italic uppercase tracking-widest shadow-none">
+            {% block entrance_title %}Trash HQ{% endblock %}
+        </div>
+
+        <h2 class="text-3xl font-black text-black text-center mb-8 italic uppercase tracking-tighter">{% block head_title %}{% endblock %}</h2>
+
+        {% block entrance_content %}
+        {% endblock %}
+    </div>
+</div>
+
+<style>
+    .field-container input, input[type="text"], input[type="password"], input[type="email"] {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: #ffffff !important;
+        border: 2px solid #000000 !important;
+        border-radius: 0 !important;
+        color: #000000 !important;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    input:focus {
+        outline: none !important;
+        box-shadow: 4px 4px 0px 0px #000000 !important;
+    }
+</style>
+{% endblock content %}

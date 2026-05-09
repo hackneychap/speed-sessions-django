@@ -59,6 +59,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.apple',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.mfa',
     # My Apps
     'workouts.apps.WorkoutsConfig',
     'session_planner.apps.SessionPlannerConfig',
@@ -79,14 +87,14 @@ DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'speed_sessions.urls'
@@ -105,6 +113,42 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# allauth settings
+SITE_ID = 1
+
+ACCOUNT_ADAPTER = 'speed_sessions.adapter.CustomAccountAdapter'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+
+# Allow users to set up 2FA for account recovery etc if they choose,
+# although only email verification is strictly required for signup.
+MFA_SUPPORTED_TYPES = ['totp', 'recovery_codes']
+MFA_PASSKEY_LOGIN_ENABLED = False
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+    },
+    'apple': {},
+    'facebook': {
+        'METHOD': 'oauth2',
+        'SCOPE': ['email', 'public_profile'],
+        'INIT_PARAMS': {'cookie': True},
+        'FIELDS': ['id', 'email', 'name', 'first_name', 'last_name', 'verified', 'link'],
+        'EXCHANGE_TOKEN': True,
+        'LOCALE_FUNC': lambda request: 'en_US',
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v13.0',
+    }
+}
 
 WSGI_APPLICATION = 'speed_sessions.wsgi.application'
 
