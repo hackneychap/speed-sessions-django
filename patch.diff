@@ -1,0 +1,11 @@
+--- templates/session_planner/partials/_group_card.html
++++ templates/session_planner/partials/_group_card.html
+@@ -16,6 +16,8 @@
+               hx-swap="outerHTML"
+               hx-include="this">
+
++            {% csrf_token %}
++
+             <input type="hidden" name="group_name" value="{{ group.name }}">
+             <input type="hidden" name="group_vdot" value="{{ group.vdot }}">
+             <input type="hidden" name="group_prefix" value="{{ group.prefix }}">
