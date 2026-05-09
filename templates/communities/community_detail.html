@@ -9,7 +9,13 @@
         
         <div class="p-8">
             <div class="flex justify-between items-center mb-4">
-                <h1 class="text-4xl font-black text-black italic uppercase tracking-tighter">{{ community.name }}</h1>
+                <div class="flex items-center gap-4">
+                    <h1 class="text-4xl font-black text-black italic uppercase tracking-tighter">{{ community.name }}</h1>
+                    <button onclick="copyInviteLink()" class="btn btn-sm border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none flex items-center gap-1" id="copy-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-link"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        Invite Link
+                    </button>
+                </div>
                 {% if is_manager %}
                     <div class="flex gap-2">
                         <a href="{% url 'manage-orders' community.slug %}" class="btn btn-sm bg-black hover:bg-gray-800 text-white border-2 border-black rounded-none">Manage Orders</a>
@@ -124,4 +130,24 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copyInviteLink() {
+        const signupUrl = new URL("{% url 'signup' %}", window.location.origin);
+        signupUrl.searchParams.set('community', '{{ community.id }}');
+
+        navigator.clipboard.writeText(signupUrl.toString()).then(() => {
+            const btn = document.getElementById('copy-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
+</script>
 {% endblock %}

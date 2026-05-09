@@ -74,6 +74,7 @@ def home_view(request):
     return render(request, 'home.html')
 
 def signup_view(request):
+    invite_community_id = request.GET.get('community')
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         community_name = request.POST.get('community_name')
@@ -91,9 +92,17 @@ def signup_view(request):
             return redirect('session-list')
     else:
         form = UserRegistrationForm()
+
+    # Try converting the invite_community_id to an integer if it exists
+    try:
+        invite_community_id = int(invite_community_id) if invite_community_id else None
+    except ValueError:
+        invite_community_id = None
+
     return render(request, 'registration/signup.html', {
         'form': form,
-        'communities': Community.objects.all()
+        'communities': Community.objects.all(),
+        'invite_community_id': invite_community_id
     })
 
 @login_required

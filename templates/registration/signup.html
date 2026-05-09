@@ -68,7 +68,7 @@
                         <select name="community_id" class="w-full p-3 bg-white border border-black border-2 rounded-none text-black font-mono text-sm focus:outline-none focus:border-black">
                             <option value="">Join an existing community...</option>
                             {% for comm in communities %}
-                                <option value="{{ comm.id }}">{{ comm.name }}</option>
+                                <option value="{{ comm.id }}" {% if comm.id == invite_community_id %}selected{% endif %}>{{ comm.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
