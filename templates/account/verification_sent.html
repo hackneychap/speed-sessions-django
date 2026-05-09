@@ -1,0 +1,16 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+
+{% block entrance_title %}{% trans "Verify Email" %}{% endblock %}
+{% block head_title %}{% trans "Verify Your Email Address" %}{% endblock %}
+
+{% block entrance_content %}
+    <p class="text-center font-bold text-black uppercase mb-6">
+        {% blocktrans %}We have sent an email to you for verification. Follow the link provided to finalize the signup process. If you do not see the verification email in your main inbox, check your spam folder. Please contact us if you do not receive the verification email within a few minutes.{% endblocktrans %}
+    </p>
+    <div class="pt-4 text-center">
+        <a href="{% url 'account_login' %}" class="inline-block py-3 px-6 bg-black hover:bg-white text-white hover:text-black font-black text-xl rounded-none transition-all uppercase italic border-2 border-black">
+            {% trans "Return to Log In" %}
+        </a>
+    </div>
+{% endblock %}

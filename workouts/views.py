@@ -63,47 +63,10 @@ def vdot_calculator_page(request):
 
 # --- Home & Auth Views ---
 
-class UserRegistrationForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-    class Meta(UserCreationForm.Meta):
-        fields = UserCreationForm.Meta.fields + ('email',)
-
 def home_view(request):
     if request.user.is_authenticated:
         return redirect('session-list')
     return render(request, 'home.html')
-
-def signup_view(request):
-    invite_community_id = request.GET.get('community')
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        community_name = request.POST.get('community_name')
-        community_id = request.POST.get('community_id')
-        if form.is_valid():
-            user = form.save()
-            if community_id:
-                community = Community.objects.get(id=community_id)
-                user.profile.community = community
-            elif community_name:
-                community = Community.objects.create(name=community_name, manager=user)
-                user.profile.community = community
-            user.profile.save()
-            login(request, user)
-            return redirect('session-list')
-    else:
-        form = UserRegistrationForm()
-
-    # Try converting the invite_community_id to an integer if it exists
-    try:
-        invite_community_id = int(invite_community_id) if invite_community_id else None
-    except ValueError:
-        invite_community_id = None
-
-    return render(request, 'registration/signup.html', {
-        'form': form,
-        'communities': Community.objects.all(),
-        'invite_community_id': invite_community_id
-    })
 
 @login_required
 def profile_view(request):
