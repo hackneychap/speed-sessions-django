@@ -57,14 +57,19 @@ def checkout_view(request):
             order.status = 'PENDING_INVOICE'
             order.save()
             
+            order_items_to_create = []
             for entry in items:
-                OrderItem.objects.create(
-                    order=order,
-                    item=entry['item'],
-                    size=entry['size'],
-                    color=entry['color'],
-                    price_at_order=entry['item'].price
+                order_items_to_create.append(
+                    OrderItem(
+                        order=order,
+                        item=entry['item'],
+                        size=entry['size'],
+                        color=entry['color'],
+                        price_at_order=entry['item'].price
+                    )
                 )
+            if order_items_to_create:
+                OrderItem.objects.bulk_create(order_items_to_create)
                 
             request.session['cart'] = []
             
