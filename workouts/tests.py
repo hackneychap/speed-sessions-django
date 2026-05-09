@@ -1,5 +1,5 @@
 from django.test import TestCase
-from workouts.utils import calculate_vdot, calculate_pace_from_vdot, calculate_tss
+from workouts.utils import calculate_vdot, calculate_pace_from_vdot, calculate_tss, _solve_for_time
 
 class WorkoutUtilsTest(TestCase):
     def test_calculate_vdot(self):
@@ -44,3 +44,19 @@ class WorkoutUtilsTest(TestCase):
         tss_valid = calculate_tss(54.55, [workout_segments[0]])
 
         self.assertEqual(tss_all, tss_valid)
+    def test_solve_for_time(self):
+        # Happy paths
+        # A VDOT of 54.55 and distance of 5000m should result in roughly 18.5 minutes (18:30)
+        time_minutes = _solve_for_time(54.55, 5000)
+        self.assertIsNotNone(time_minutes)
+        self.assertAlmostEqual(time_minutes, 18.5, places=2)
+
+        # Test low VDOT score
+        time_minutes_low = _solve_for_time(30, 5000)
+        self.assertIsNotNone(time_minutes_low)
+        self.assertAlmostEqual(time_minutes_low, 30.68, places=2)
+
+        # Test high VDOT score
+        time_minutes_high = _solve_for_time(85, 5000)
+        self.assertIsNotNone(time_minutes_high)
+        self.assertAlmostEqual(time_minutes_high, 12.62, places=2)

@@ -38,7 +38,7 @@
         </div>
         
         <div class="mt-8 border-t border-black border-2 pt-6 text-center">
-            <form action="{% url 'logout' %}" method="post">
+            <form action="{% url 'account_logout' %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="text-black hover:text-red-600 font-bold uppercase tracking-widest text-sm">Logout</button>
             </form>

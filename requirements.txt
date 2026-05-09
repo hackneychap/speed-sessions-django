@@ -13,3 +13,5 @@ whitenoise==6.9.0
 pytest==8.1.1
 pytest-django==4.8.0
 pytest-factoryboy==2.7.0
+django-anymail[resend]
+django-allauth[socialaccount,mfa]
