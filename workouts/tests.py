@@ -26,6 +26,24 @@ class WorkoutUtilsTest(TestCase):
         self.assertGreater(tss, 0)
         self.assertLess(tss, 100)
 
+    def test_calculate_tss_invalid_segment(self):
+        # Pass malformed segments to test the except (ValueError, KeyError) block
+        workout_segments = [
+            {'reps': 10, 'distance': 400, 'intensity': 'Interval'},  # Valid segment
+            {'distance': 400, 'intensity': 'Interval'},              # Missing 'reps'
+            {'reps': 'invalid', 'distance': 400, 'intensity': 'Interval'}, # Invalid 'reps'
+            {'reps': 10, 'intensity': 'Interval'},                   # Missing 'distance'
+            {'reps': 10, 'distance': 'invalid', 'intensity': 'Interval'}, # Invalid 'distance'
+            {'reps': 10, 'distance': 400},                           # Missing 'intensity'
+            {'reps': 10, 'distance': 400, 'intensity': 'InvalidZone'}, # Invalid intensity zone
+        ]
+        # Calculate TSS ignoring the invalid segments, which should only count the valid one
+        tss_all = calculate_tss(54.55, workout_segments)
+
+        # Calculate TSS with just the valid segment
+        tss_valid = calculate_tss(54.55, [workout_segments[0]])
+
+        self.assertEqual(tss_all, tss_valid)
     def test_solve_for_time(self):
         # Happy paths
         # A VDOT of 54.55 and distance of 5000m should result in roughly 18.5 minutes (18:30)
