@@ -10,36 +10,12 @@
     <link rel="icon" type="image/svg+xml" href="{% static 'favicon/favicon.svg' %}" />
     <link rel="manifest" href="{% static 'favicon/site.webmanifest' %}" />
     <meta name="theme-color" content="#ffffff">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
     <title>RunTRASH | {% block title %}Welcome{% endblock %}</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    borderRadius: {
-                        'none': '0',
-                        'sm': '0',
-                        'DEFAULT': '0',
-                        'md': '0',
-                        'lg': '0',
-                        'xl': '0',
-                        '2xl': '0',
-                        '3xl': '0',
-                        'full': '0',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-                        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular'],
-                    },
-                }
-            }
-        }
-    </script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.1/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/output.css' %}" rel="stylesheet" type="text/css" />
     <script src="https://unpkg.com/htmx.org@1.9.10" crossorigin="anonymous"></script>
 
     <style>
