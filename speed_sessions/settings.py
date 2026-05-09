@@ -224,7 +224,7 @@ ANYMAIL = {
 # Use Resend in production if key is present, otherwise fallback to console for development
 if os.getenv("RESEND_API_KEY"):
     EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
-    DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "webmaster@localhost")
+    DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Speed Sessions <noreply@speed-sessions.example.com>")
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    DEFAULT_FROM_EMAIL = "webmaster@localhost"
+    DEFAULT_FROM_EMAIL = "Speed Sessions <noreply@speed-sessions.example.com>"
