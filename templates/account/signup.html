@@ -52,7 +52,7 @@
                 <div class="text-center text-xs font-black text-black uppercase italic mt-4 mb-2">
                     — OR JOIN EXISTING (Needs ID) —
                 </div>
-                <input type="number" name="community_id" placeholder="Community ID..."
+                <input type="number" name="community_id" placeholder="Community ID..." value="{{ request.GET.community_id|default:'' }}"
                        class="w-full p-3 bg-white border border-black border-2 rounded-none text-black font-mono text-sm focus:outline-none focus:border-black">
             </div>
         </div>
