@@ -24,7 +24,8 @@ class MerchManagementTest(TestCase):
     def setUp(self):
         self.manager = User.objects.create_user(username='manager', password='password123')
         self.other_user = User.objects.create_user(username='other', password='password123')
-        self.community = Community.objects.create(name='Test Comm', manager=self.manager)
+        self.community = Community.objects.create(name='Test Comm')
+        self.community.managers.add(self.manager)
         
         # Ensure profile exists (signal should handle it, but being explicit)
         self.manager.profile.community = self.community
@@ -103,7 +104,8 @@ class OrderFulfillmentTest(TestCase):
         
         self.manager = User.objects.create_user(username='manager_fulfillment', password='password123')
         self.user = User.objects.create_user(username='customer', password='password123')
-        self.community = Community.objects.create(name='Fulfillment Comm', manager=self.manager)
+        self.community = Community.objects.create(name='Fulfillment Comm')
+        self.community.managers.add(self.manager)
         
         self.item = MerchItem.objects.create(
             community=self.community,

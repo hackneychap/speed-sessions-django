@@ -63,7 +63,8 @@ class SessionPlannerViewTest(TestCase):
 class TrainingBlockViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser_block', password='password123')
-        self.community = Community.objects.create(name='Test Community 2', slug='test-community-2', manager=self.user)
+        self.community = Community.objects.create(name='Test Community 2', slug='test-community-2')
+        self.community.managers.add(self.user)
         self.user.profile.community = self.community
         self.user.profile.save()
         self.client = Client()

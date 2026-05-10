@@ -98,7 +98,7 @@ def test_session_edit_view_loads_differentiated_plan(logged_in_client, test_user
     SessionGroup.objects.create(session=session, name="Group A", vdot=54.55)
     
     # Ensure the community manager is the test_user
-    community.manager = test_user
+    community.managers.add(test_user)
     community.save()
     
     # 2. Access edit view

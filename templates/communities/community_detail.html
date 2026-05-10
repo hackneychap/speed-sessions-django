@@ -75,8 +75,14 @@
             {% endif %}
             
             <div class="bg-white p-4 rounded-none border-2 border-black mb-8">
-                <span class="text-black font-bold uppercase text-xs tracking-widest block mb-2">Community Manager</span>
-                <span class="text-black font-mono">{{ community.manager.username }}</span>
+                <span class="text-black font-bold uppercase text-xs tracking-widest block mb-2">Community Managers</span>
+                <div class="flex flex-col gap-1">
+                    {% for manager in community.managers.all %}
+                        <span class="text-black font-mono">{{ manager.username }}</span>
+                    {% empty %}
+                        <span class="text-black font-mono italic">No managers assigned.</span>
+                    {% endfor %}
+                </div>
             </div>
 
             <!-- Invite Link -->

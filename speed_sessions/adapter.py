@@ -17,7 +17,8 @@ class CustomAccountAdapter(DefaultAccountAdapter):
                 except Community.DoesNotExist:
                     pass
             elif community_name:
-                community = Community.objects.create(name=community_name, manager=user)
+                community = Community.objects.create(name=community_name)
+                community.managers.add(user)
                 user.profile.community = community
 
             user.profile.save()
