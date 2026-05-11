@@ -261,7 +261,7 @@ def session_edit_view(request, pk):
     session = get_object_or_404(Session, pk=pk)
     
     # Verify user is community manager
-    if not session.community or session.community.manager != request.user:
+    if not session.community or request.user not in session.community.managers.all():
         return redirect('session-detail', pk=pk)
     
     # Prepare groups data for the form
@@ -388,7 +388,7 @@ def save_workout_view(request):
             # Update existing session
             session = get_object_or_404(Session, id=session_id)
             # Security check
-            if session.community != community or session.community.manager != request.user:
+            if session.community != community or request.user not in session.community.managers.all():
                 return HttpResponse("Unauthorized", status=403)
             
             session.title = title
@@ -488,7 +488,7 @@ def session_list_view(request):
         return redirect('home')
 
     today = timezone.now().date()
-    is_manager = (request.user == community.manager)
+    is_manager = request.user in community.managers.all()
 
     # 1. Fetch upcoming Sessions
     sessions = Session.objects.filter(community=community, date__gte=today).order_by('date')
@@ -551,7 +551,7 @@ def session_detail_view(request, pk):
     session = get_object_or_404(Session, pk=pk, community=community)
     
     # Check if user is community manager for edit permissions
-    is_manager = community.manager == request.user
+    is_manager = request.user in community.managers.all()
 
     groups_data = []
     for group in session.groups.all():

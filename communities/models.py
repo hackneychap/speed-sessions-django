@@ -13,7 +13,7 @@ class Community(models.Model):
     image_url = models.URLField(max_length=500, blank=True, help_text="A URL for the community banner image")
     
     # Who "owns" or manages this community
-    manager = models.ForeignKey(User, related_name='managed_communities', on_delete=models.SET_NULL, null=True)
+    managers = models.ManyToManyField(User, related_name='managed_communities_set', blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
 

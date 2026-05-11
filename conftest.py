@@ -26,11 +26,12 @@ def logged_in_client(db, client, test_user, test_password):
 
 @pytest.fixture
 def community(db, test_user):
-    return Community.objects.create(
+    comm = Community.objects.create(
         name="Test Community",
         slug="test-community",
-        manager=test_user
     )
+    comm.managers.add(test_user)
+    return comm
 
 @pytest.fixture
 def user_profile(db, test_user, community):

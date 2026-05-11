@@ -19,7 +19,7 @@ def community_detail_view(request, slug):
         item.size_list = [s.strip() for s in item.available_sizes.split(',')]
         item.color_list = [c.strip() for c in item.available_colors.split(',')]
         
-    is_manager = (request.user == community.manager)
+    is_manager = request.user in community.managers.all()
     
     # Get the next scheduled workout
     next_session = community.sessions.filter(date__gte=timezone.now().date()).order_by('date').first()
@@ -41,7 +41,7 @@ def community_detail_view(request, slug):
 @login_required
 def create_calendar_event_view(request, slug):
     community = get_object_or_404(Community, slug=slug)
-    if community.manager != request.user:
+    if request.user not in community.managers.all():
         return redirect('community-detail', slug=slug)
 
     if request.method == 'POST':
@@ -63,12 +63,34 @@ def create_calendar_event_view(request, slug):
 @login_required
 def community_edit_view(request, slug):
     community = get_object_or_404(Community, slug=slug)
-    if request.user != community.manager:
+    if request.user not in community.managers.all():
         return redirect('community-detail', slug=slug)
         
     all_merch = community.merch_items.all()
 
+    # Get all members with their users
+    members = community.members.select_related('user').all()
+
     if request.method == 'POST':
+        # 0. Handle member management
+        promote_user_id = request.POST.get('promote_user')
+        if promote_user_id:
+            try:
+                user_to_promote = members.get(user_id=promote_user_id).user
+                community.managers.add(user_to_promote)
+            except:
+                pass
+
+        demote_user_id = request.POST.get('demote_user')
+        if demote_user_id:
+            # Prevent a manager from demoting themselves
+            if int(demote_user_id) != request.user.id:
+                try:
+                    user_to_demote = members.get(user_id=demote_user_id).user
+                    community.managers.remove(user_to_demote)
+                except:
+                    pass
+
         # 1. Handle Merch unlisting
         listed_ids = request.POST.getlist('merch_listed')
         all_merch.update(is_listed=False)
@@ -97,5 +119,6 @@ def community_edit_view(request, slug):
     return render(request, 'communities/community_edit.html', {
         'community': community, 
         'form': form,
-        'all_merch': all_merch
+        'all_merch': all_merch,
+        'members': members
     })

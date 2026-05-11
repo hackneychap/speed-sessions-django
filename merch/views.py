@@ -107,7 +107,7 @@ def user_orders_view(request):
 @login_required
 def add_merch_view(request, slug):
     community = get_object_or_404(Community, slug=slug)
-    if community.manager != request.user:
+    if request.user not in community.managers.all():
         return redirect('community-detail', slug=slug)
 
     if request.method == 'POST':
@@ -134,7 +134,7 @@ from decimal import Decimal
 @login_required
 def manage_orders_view(request, slug):
     community = get_object_or_404(Community, slug=slug)
-    if community.manager != request.user:
+    if request.user not in community.managers.all():
         return HttpResponseForbidden("You are not the manager of this community.")
     
     # Get all unique orders that have items belonging to this community
@@ -155,7 +155,7 @@ def manage_orders_view(request, slug):
 @require_POST
 def release_orders_view(request, slug):
     community = get_object_or_404(Community, slug=slug)
-    if community.manager != request.user:
+    if request.user not in community.managers.all():
         return HttpResponseForbidden("You are not the manager of this community.")
         
     shipping_cost_str = request.POST.get('shipping_cost', '0')
@@ -241,7 +241,7 @@ def update_order_status_view(request, order_id):
     # Permission check: must be the manager of the community associated with items in this order
     # (Simplified: we check the first item's community manager)
     first_item = order.order_items.first()
-    if not first_item or first_item.item.community.manager != request.user:
+    if not first_item or request.user not in first_item.item.community.managers.all():
         return HttpResponseForbidden("You are not authorized to update this order.")
         
     new_status = request.POST.get('status')
