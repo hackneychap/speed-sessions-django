@@ -16,50 +16,51 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def block_list_view(request):
-    """View to list all training blocks."""
-    blocks = TrainingBlock.objects.all()
+    """View to list all training blocks for the user's community."""
+    community = None
+    if hasattr(request.user, 'profile'):
+        community = request.user.profile.community
+
+    if community:
+        blocks = TrainingBlock.objects.filter(community=community)
+    else:
+        blocks = TrainingBlock.objects.filter(created_by=request.user)
+
     return render(request, 'session_planner/block_list.html', {'blocks': blocks})
 
+@require_http_methods(["POST"])
 @login_required
 def copy_training_block_view(request, block_id):
-    """View to copy a training block to the user's community."""
+    """View to copy a training block to the user's community instantly."""
     original_block = get_object_or_404(TrainingBlock, id=block_id, is_tradeable=True)
 
     community = None
     if hasattr(request.user, 'profile'):
         community = request.user.profile.community
 
-    if request.method == 'POST':
-        new_title = request.POST.get('title')
+    from django.db import transaction
+    with transaction.atomic():
+        new_block = TrainingBlock.objects.create(
+            title=original_block.title,
+            description=original_block.description,
+            target_distance=original_block.target_distance,
+            created_by=request.user,
+            community=community,
+            is_tradeable=False  # Copied blocks are not tradeable by default
+        )
 
-        if new_title:
-            from django.db import transaction
-            with transaction.atomic():
-                new_block = TrainingBlock.objects.create(
-                    title=new_title,
-                    description=original_block.description,
-                    target_distance=original_block.target_distance,
-                    created_by=request.user,
-                    community=community,
-                    is_tradeable=False  # Copied blocks are not tradeable by default
-                )
+        # Copy all templates
+        from .models import BlockSessionTemplate
+        for template in original_block.templates.all():
+            BlockSessionTemplate.objects.create(
+                block=new_block,
+                week_number=template.week_number,
+                title=template.title,
+                description=template.description,
+                structure_json=template.structure_json
+            )
 
-                # Copy all templates
-                from .models import BlockSessionTemplate
-                for template in original_block.templates.all():
-                    BlockSessionTemplate.objects.create(
-                        block=new_block,
-                        week_number=template.week_number,
-                        title=template.title,
-                        description=template.description,
-                        structure_json=template.structure_json
-                    )
-
-            return redirect('block-list')
-
-    return render(request, 'session_planner/copy_block.html', {
-        'original_block': original_block
-    })
+    return redirect('edit-block', block_id=new_block.id)
 
 @login_required
 def create_training_block_view(request):
