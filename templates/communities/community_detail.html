@@ -8,10 +8,10 @@
         {% endif %}
         
         <div class="p-8">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-4xl font-black text-black italic uppercase tracking-tighter">{{ community.name }}</h1>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                <h1 class="text-4xl font-black text-black italic uppercase tracking-tighter break-words max-w-full">{{ community.name }}</h1>
                 {% if is_manager %}
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap gap-2">
                         <a href="{% url 'manage-orders' community.slug %}" class="btn btn-sm bg-black hover:bg-gray-800 text-white border-2 border-black rounded-none">Manage Orders</a>
                         <a href="{% url 'add-merch' community.slug %}" class="btn btn-sm bg-black hover:bg-gray-800 text-white border-2 border-black rounded-none">Add gear</a>
                         <a href="{% url 'community-edit' community.slug %}" class="btn btn-sm border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none">Edit Community</a>
@@ -33,12 +33,12 @@
             <!-- Next Scheduled Workout -->
             {% if next_session %}
                 <div class="bg-white border-2 border-black p-6 rounded-none mb-8">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                        <div class="break-words max-w-full">
                             <span class="text-black font-mono font-bold uppercase text-xs tracking-widest block mb-1">Next Scheduled Workout</span>
                             <h2 class="text-2xl font-black text-black italic uppercase tracking-tighter">{{ next_session.title }}</h2>
                         </div>
-                        <div class="text-right">
+                        <div class="text-left sm:text-right shrink-0">
                             <span class="text-black font-black text-xl block">{{ next_session.date|date:"D, M d" }}</span>
                             <span class="text-black text-[10px] font-bold uppercase tracking-widest italic">Upcoming</span>
                         </div>
@@ -52,12 +52,12 @@
             <!-- Next Calendar Event -->
             {% if next_event %}
                 <div class="bg-white border-2 border-black p-6 rounded-none mb-8">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                        <div class="break-words max-w-full">
                             <span class="text-black font-mono font-bold uppercase text-xs tracking-widest block mb-1">Upcoming Event</span>
                             <h2 class="text-2xl font-black text-black italic uppercase tracking-tighter">{{ next_event.title }}</h2>
                         </div>
-                        <div class="text-right">
+                        <div class="text-left sm:text-right shrink-0">
                             <span class="text-black font-black text-xl block">{{ next_event.date|date:"D, M d" }}</span>
                             {% if next_event.is_public %}
                                 <span class="text-black text-[10px] font-bold uppercase tracking-widest italic">Public</span>
@@ -163,8 +163,8 @@
                 <p class="text-black text-sm font-bold uppercase tracking-widest mb-6">Tradeable Training Blocks</p>
                 <div class="grid gap-4">
                     {% for block in tradeable_blocks %}
-                    <div class="bg-white border-2 border-black p-4 rounded-none flex justify-between items-center hover:bg-gray-50 transition-colors">
-                        <div>
+                    <div class="bg-white border-2 border-black p-4 rounded-none flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-gray-50 transition-colors">
+                        <div class="break-words max-w-full">
                             <h4 class="text-xl font-bold text-black uppercase">{{ block.title }}</h4>
                             <span class="text-black text-xs font-mono bg-gray-200 px-2 py-1 rounded-none inline-block mt-1 uppercase">{{ block.target_distance }}</span>
                             {% if block.description %}
@@ -172,10 +172,10 @@
                             {% endif %}
                         </div>
                         {% if is_visitor_manager %}
-                        <div>
+                        <div class="shrink-0">
                             <form method="POST" action="{% url 'copy-block' block.id %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn bg-black hover:bg-gray-800 text-white font-bold rounded-none uppercase tracking-wider text-sm border-2 border-black">
+                                <button type="submit" class="btn bg-black hover:bg-gray-800 text-white font-bold rounded-none uppercase tracking-wider text-sm border-2 border-black w-full sm:w-auto">
                                     Copy Block
                                 </button>
                             </form>
