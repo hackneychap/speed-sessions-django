@@ -8,11 +8,11 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             user.save()
 
             community_name = request.POST.get('community_name')
-            community_id = request.POST.get('community_id')
+            join_code = request.POST.get('join_code')
 
-            if community_id:
+            if join_code:
                 try:
-                    community = Community.objects.get(id=community_id)
+                    community = Community.objects.get(join_code__iexact=join_code)
                     user.profile.community = community
                 except Community.DoesNotExist:
                     pass

@@ -28,10 +28,22 @@ class MultipleFileField(forms.FileField):
 
 class CommunityForm(forms.ModelForm):
     gallery_images = MultipleFileField(required=False)
+    join_code = forms.CharField(min_length=4, max_length=20, required=False, help_text="Custom unique code to join the community")
 
     class Meta:
         model = Community
-        fields = ['name', 'description', 'image_url']
+        fields = ['name', 'description', 'image_url', 'join_code']
+
+    def clean_join_code(self):
+        join_code = self.cleaned_data.get('join_code')
+        if join_code:
+            # Check for uniqueness
+            qs = Community.objects.filter(join_code__iexact=join_code)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError("This join code is already in use by another community.")
+        return join_code
 
     def clean_gallery_images(self):
         files = self.files.getlist('gallery_images')

@@ -39,23 +39,27 @@
             </div>
         {% endfor %}
 
-        <div class="border-t border-black border-2 pt-6 mt-6">
-            <label class="block text-black font-bold uppercase text-xs mb-4 tracking-widest">
-                Community Membership (Optional)
-            </label>
-            <div class="space-y-4">
-                <div class="text-center text-xs font-black text-black uppercase italic mb-2">
-                    — CREATE NEW —
+        {% if request.GET.join_code %}
+            <input type="hidden" name="join_code" value="{{ request.GET.join_code }}">
+        {% else %}
+            <div class="border-t border-black border-2 pt-6 mt-6">
+                <label class="block text-black font-bold uppercase text-xs mb-4 tracking-widest">
+                    Community Membership (Optional)
+                </label>
+                <div class="space-y-4">
+                    <div class="text-center text-xs font-black text-black uppercase italic mb-2">
+                        — CREATE NEW —
+                    </div>
+                    <input type="text" name="community_name" placeholder="Name your new community..."
+                           class="w-full p-3 bg-white border border-black border-2 rounded-none text-black font-mono text-sm focus:outline-none focus:border-black">
+                    <div class="text-center text-xs font-black text-black uppercase italic mt-4 mb-2">
+                        — OR JOIN EXISTING (Needs Code) —
+                    </div>
+                    <input type="text" name="join_code" placeholder="Community Code..." value=""
+                           class="w-full p-3 bg-white border border-black border-2 rounded-none text-black font-mono text-sm focus:outline-none focus:border-black uppercase">
                 </div>
-                <input type="text" name="community_name" placeholder="Name your new community..."
-                       class="w-full p-3 bg-white border border-black border-2 rounded-none text-black font-mono text-sm focus:outline-none focus:border-black">
-                <div class="text-center text-xs font-black text-black uppercase italic mt-4 mb-2">
-                    — OR JOIN EXISTING (Needs ID) —
-                </div>
-                <input type="number" name="community_id" placeholder="Community ID..." value="{{ request.GET.community_id|default:'' }}"
-                       class="w-full p-3 bg-white border border-black border-2 rounded-none text-black font-mono text-sm focus:outline-none focus:border-black">
             </div>
-        </div>
+        {% endif %}
 
         {% if redirect_field_value %}
             <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
