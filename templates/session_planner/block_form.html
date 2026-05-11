@@ -19,6 +19,11 @@
             <textarea name="description" class="w-full bg-white border border-black border-2 text-black rounded-none px-3 py-2 h-32"></textarea>
         </div>
         
+        <div class="mb-6 flex items-center gap-2">
+            <input type="checkbox" name="is_tradeable" id="is_tradeable" class="w-5 h-5 border-2 border-black rounded-none accent-black bg-white cursor-pointer" {% if training_block.is_tradeable %}checked{% endif %}>
+            <label for="is_tradeable" class="text-sm font-bold text-black uppercase tracking-widest cursor-pointer">Tradeable in Community Marketplace</label>
+        </div>
+
         <div class="flex gap-4">
             <button type="submit" class="flex-1 py-2 bg-black hover:bg-white text-white font-bold rounded-none uppercase tracking-wider">Create Block</button>
             <a href="{% url 'block-list' %}" class="px-4 py-2 bg-white hover:bg-white text-black rounded-none font-bold uppercase tracking-wider">Cancel</a>

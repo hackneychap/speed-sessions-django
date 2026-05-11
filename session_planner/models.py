@@ -46,6 +46,8 @@ class TrainingBlock(models.Model):
     description = models.TextField(blank=True)
     target_distance = models.CharField(max_length=50)
     created_by = models.ForeignKey(User, related_name='training_blocks', on_delete=models.CASCADE)
+    community = models.ForeignKey(Community, related_name='training_blocks', on_delete=models.CASCADE, null=True, blank=True)
+    is_tradeable = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

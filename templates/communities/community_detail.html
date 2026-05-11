@@ -151,6 +151,33 @@
                     🛒 Review My Pooled Order
                 </a>
             </div>
+
+            <!-- Marketplace: Tradeable Training Blocks -->
+            {% if is_visitor_manager and tradeable_blocks %}
+            <div class="mt-12 border-t-4 border-black pt-8">
+                <h3 class="text-3xl font-black text-black italic uppercase tracking-tighter mb-2">Marketplace</h3>
+                <p class="text-black text-sm font-bold uppercase tracking-widest mb-6">Tradeable Training Blocks</p>
+                <div class="grid gap-4">
+                    {% for block in tradeable_blocks %}
+                    <div class="bg-white border-2 border-black p-4 rounded-none flex justify-between items-center hover:bg-gray-50 transition-colors">
+                        <div>
+                            <h4 class="text-xl font-bold text-black uppercase">{{ block.title }}</h4>
+                            <span class="text-black text-xs font-mono bg-gray-200 px-2 py-1 rounded-none inline-block mt-1 uppercase">{{ block.target_distance }}</span>
+                            {% if block.description %}
+                            <p class="text-black text-sm mt-2 italic">{{ block.description|truncatechars:100 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <a href="{% url 'copy-block' block.id %}" class="btn bg-black hover:bg-gray-800 text-white font-bold rounded-none uppercase tracking-wider text-sm border-2 border-black">
+                                Copy Block
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
         </div>
     </div>
 </div>
