@@ -21,6 +21,10 @@ class Community(models.Model):
     # Who "owns" or manages this community
     managers = models.ManyToManyField(User, related_name='managed_communities_set', blank=True)
     
+    vdot_group_a = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group A")
+    vdot_group_b = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group B")
+    vdot_group_c = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group C")
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
