@@ -87,10 +87,14 @@
 
             <!-- Invite Link -->
             <div class="bg-white p-4 rounded-none border-2 border-black mb-8">
-                <span class="text-black font-bold uppercase text-xs tracking-widest block mb-2">Invite Link</span>
-                <p class="text-black text-sm mb-3">Copy this link and send it to new users to pre-fill the community join form:</p>
+                <span class="text-black font-bold uppercase text-xs tracking-widest block mb-2">Invite Link & Code</span>
+                <p class="text-black text-sm mb-3">Share this code or link with new users so they can join your community:</p>
+                <div class="mb-4">
+                    <span class="text-black font-mono font-bold uppercase text-xs tracking-widest block mb-1">Community Code</span>
+                    <div class="text-2xl font-black text-black font-mono bg-gray-100 p-2 inline-block border-2 border-black uppercase">{{ community.join_code }}</div>
+                </div>
                 <div class="flex gap-2">
-                    <input type="text" id="invite-link" readonly value="{{ request.scheme }}://{{ request.get_host }}{% url 'account_signup' %}?community_id={{ community.id }}" class="w-full p-2 bg-gray-100 border-2 border-black rounded-none text-sm text-black font-mono focus:outline-none">
+                    <input type="text" id="invite-link" readonly value="{{ request.scheme }}://{{ request.get_host }}{% url 'account_signup' %}?join_code={{ community.join_code }}" class="w-full p-2 bg-gray-100 border-2 border-black rounded-none text-sm text-black font-mono focus:outline-none">
                     <button onclick="copyInviteLink(this)" class="btn btn-sm bg-black hover:bg-gray-800 text-white border-2 border-black rounded-none uppercase italic">Copy</button>
                 </div>
                 <script>

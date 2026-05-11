@@ -3,10 +3,16 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import random
+import string
+
+def generate_join_code():
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
 class Community(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
+    join_code = models.CharField(max_length=20, unique=True, blank=True, null=True, help_text="A unique code for users to join the community")
     description = models.TextField(blank=True)
     
     # We could use an ImageField, but for now we'll allow a URL for simplicity
@@ -20,6 +26,11 @@ class Community(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
+        if not self.join_code:
+            self.join_code = generate_join_code()
+            # Ensure it's unique
+            while Community.objects.filter(join_code=self.join_code).exists():
+                self.join_code = generate_join_code()
         super().save(*args, **kwargs)
 
     def __str__(self):

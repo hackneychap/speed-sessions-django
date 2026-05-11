@@ -25,6 +25,16 @@
             </div>
 
             <div class="border-t border-black border-2 pt-6">
+                <h3 class="text-xl font-black text-black italic uppercase tracking-tighter mb-4">Join Settings</h3>
+                <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Custom Join Code</label>
+                {{ form.join_code }}
+                <p class="text-black text-xs mt-1 uppercase">{{ form.join_code.help_text }}</p>
+                {% if form.join_code.errors %}
+                    <p class="text-red-600 text-xs mt-1 font-bold">{{ form.join_code.errors.as_text }}</p>
+                {% endif %}
+            </div>
+
+            <div class="border-t border-black border-2 pt-6">
                 <h3 class="text-xl font-black text-black italic uppercase tracking-tighter mb-4">Gallery Images (Max 5)</h3>
                 <p class="text-black text-xs mb-4 uppercase">Upload up to 5 images (max 1MB each) to showcase your community.</p>
                 {{ form.gallery_images }}
