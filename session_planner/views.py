@@ -285,16 +285,17 @@ def _process_and_calculate_group_plan(group_name, group_vdot, structure, prefix=
 def planner_page_view(request):
     try:
         profile = request.user.profile
-        if not profile.community:
+        community = profile.community
+        if not community:
             return redirect('home')
     except:
         return redirect('home')
     
     # Default data for a new workout
     groups_form_data = [
-        {'char': 'a', 'name': 'Group A', 'vdot': ''},
-        {'char': 'b', 'name': 'Group B', 'vdot': ''},
-        {'char': 'c', 'name': 'Group C', 'vdot': ''},
+        {'char': 'a', 'name': 'Group A', 'vdot': community.vdot_group_a if community.vdot_group_a else ''},
+        {'char': 'b', 'name': 'Group B', 'vdot': community.vdot_group_b if community.vdot_group_b else ''},
+        {'char': 'c', 'name': 'Group C', 'vdot': community.vdot_group_c if community.vdot_group_c else ''},
     ]
     
     training_blocks = TrainingBlock.objects.filter(created_by=request.user)

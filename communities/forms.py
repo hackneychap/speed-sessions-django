@@ -32,7 +32,7 @@ class CommunityForm(forms.ModelForm):
 
     class Meta:
         model = Community
-        fields = ['name', 'description', 'image_url', 'join_code']
+        fields = ['name', 'description', 'image_url', 'join_code', 'vdot_group_a', 'vdot_group_b', 'vdot_group_c']
 
     def clean_join_code(self):
         join_code = self.cleaned_data.get('join_code')

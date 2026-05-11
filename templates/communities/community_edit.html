@@ -25,6 +25,28 @@
             </div>
 
             <div class="border-t border-black border-2 pt-6">
+                <h3 class="text-xl font-black text-black italic uppercase tracking-tighter mb-4">Default VDOTs</h3>
+                <p class="text-black text-xs mb-4 uppercase">These values will pre-fill the VDOT fields when creating a new session.</p>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Group A VDOT</label>
+                        {{ form.vdot_group_a }}
+                        <p class="text-black text-[10px] mt-1 uppercase">{{ form.vdot_group_a.help_text }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Group B VDOT</label>
+                        {{ form.vdot_group_b }}
+                        <p class="text-black text-[10px] mt-1 uppercase">{{ form.vdot_group_b.help_text }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Group C VDOT</label>
+                        {{ form.vdot_group_c }}
+                        <p class="text-black text-[10px] mt-1 uppercase">{{ form.vdot_group_c.help_text }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-black border-2 pt-6">
                 <h3 class="text-xl font-black text-black italic uppercase tracking-tighter mb-4">Join Settings</h3>
                 <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Custom Join Code</label>
                 {{ form.join_code }}
@@ -112,7 +134,7 @@
 </div>
 
 <style>
-    input[type="text"], textarea, select, input[type="url"] {
+    input[type="text"], input[type="number"], textarea, select, input[type="url"] {
         width: 100%;
         padding: 0.75rem 1rem;
         background-color: white !important;
