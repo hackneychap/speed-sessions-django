@@ -21,19 +21,67 @@ def block_list_view(request):
     return render(request, 'session_planner/block_list.html', {'blocks': blocks})
 
 @login_required
+def copy_training_block_view(request, block_id):
+    """View to copy a training block to the user's community."""
+    original_block = get_object_or_404(TrainingBlock, id=block_id, is_tradeable=True)
+
+    community = None
+    if hasattr(request.user, 'profile'):
+        community = request.user.profile.community
+
+    if request.method == 'POST':
+        new_title = request.POST.get('title')
+
+        if new_title:
+            from django.db import transaction
+            with transaction.atomic():
+                new_block = TrainingBlock.objects.create(
+                    title=new_title,
+                    description=original_block.description,
+                    target_distance=original_block.target_distance,
+                    created_by=request.user,
+                    community=community,
+                    is_tradeable=False  # Copied blocks are not tradeable by default
+                )
+
+                # Copy all templates
+                from .models import BlockSessionTemplate
+                for template in original_block.templates.all():
+                    BlockSessionTemplate.objects.create(
+                        block=new_block,
+                        week_number=template.week_number,
+                        title=template.title,
+                        description=template.description,
+                        structure_json=template.structure_json
+                    )
+
+            return redirect('block-list')
+
+    return render(request, 'session_planner/copy_block.html', {
+        'original_block': original_block
+    })
+
+@login_required
 def create_training_block_view(request):
     """View to create a new training block."""
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
         target_distance = request.POST.get('target_distance')
+        is_tradeable = request.POST.get('is_tradeable') == 'on'
         
+        community = None
+        if hasattr(request.user, 'profile'):
+            community = request.user.profile.community
+
         if title and target_distance:
             TrainingBlock.objects.create(
                 title=title,
                 description=description,
                 target_distance=target_distance,
-                created_by=request.user
+                created_by=request.user,
+                community=community,
+                is_tradeable=is_tradeable
             )
             # Redirect back to block list or planner if specified
             return redirect('block-list')
@@ -569,6 +617,11 @@ def edit_training_block_view(request, block_id):
     block = get_object_or_404(TrainingBlock, id=block_id, created_by=request.user)
     
     if request.method == 'POST':
+        if request.POST.get('update_details') == 'true':
+            block.is_tradeable = request.POST.get('is_tradeable') == 'on'
+            block.save()
+            return redirect('edit-block', block_id=block.id)
+
         template_order = request.POST.get('template_order')
         if template_order:
             template_ids = [int(tid) for tid in template_order.split(',') if tid.strip().isdigit()]

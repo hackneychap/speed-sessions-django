@@ -15,6 +15,16 @@
         {% csrf_token %}
         <input type="hidden" name="template_order" id="template_order" value="">
         
+        <div class="bg-white border border-black border-2 p-6 mb-6">
+            <div class="flex items-center gap-2 mb-4">
+                <input type="checkbox" name="is_tradeable" id="is_tradeable" class="w-5 h-5 border-2 border-black rounded-none accent-black bg-white cursor-pointer" {% if training_block.is_tradeable %}checked{% endif %}>
+                <label for="is_tradeable" class="text-sm font-bold text-black uppercase tracking-widest cursor-pointer">Tradeable in Community Marketplace</label>
+            </div>
+            <button type="submit" name="update_details" value="true" class="px-6 py-2 bg-black hover:bg-white text-white font-bold rounded-none uppercase tracking-wider transition-colors border-2 border-black text-sm">
+                Update Block Details
+            </button>
+        </div>
+
         <div class="bg-white border border-black border-2 rounded-none shadow-none mb-6">
             <div class="p-4 border-b border-black border-2">
                 <p class="text-black text-sm font-bold tracking-wide">Drag and drop the sessions below to reorder them within the block.</p>

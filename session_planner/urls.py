@@ -13,7 +13,8 @@ from .views import (
     block_list_view,
     create_training_block_view,
     get_schedule_form_view,
-    apply_block_to_calendar_view
+    apply_block_to_calendar_view,
+    copy_training_block_view
 )
 
 
@@ -34,4 +35,5 @@ urlpatterns = [
     path('blocks/<int:block_id>/edit/', edit_training_block_view, name='edit-block'),
     path('blocks/<int:block_id>/schedule/', get_schedule_form_view, name='get-schedule-form'),
     path('blocks/apply/', apply_block_to_calendar_view, name='apply-block-to-calendar'),
+    path('blocks/<int:block_id>/copy/', copy_training_block_view, name='copy-block'),
 ]

@@ -143,3 +143,35 @@ class TrainingBlockViewTest(TestCase):
         template = BlockSessionTemplate.objects.filter(block=block, week_number=2).first()
         self.assertIsNotNone(template)
         self.assertEqual(template.title, "New Title")
+
+    def test_copy_training_block(self):
+        from session_planner.models import TrainingBlock, BlockSessionTemplate
+
+        # 1. Create original block (tradeable) by another user
+        other_user = User.objects.create_user(username='otheruser', password='password123')
+        original_block = TrainingBlock.objects.create(
+            title="Original Tradeable Block",
+            target_distance="10k",
+            created_by=other_user,
+            is_tradeable=True
+        )
+        BlockSessionTemplate.objects.create(
+            block=original_block, week_number=1, title="T1", structure_json={}
+        )
+
+        # 2. Copy the block via copy-block view
+        url = reverse('copy-block', args=[original_block.id])
+        data = {
+            'title': "Copied Block"
+        }
+        response = self.client.post(url, data)
+
+        # 3. Check redirects and database
+        self.assertRedirects(response, reverse('block-list'))
+
+        copied_block = TrainingBlock.objects.filter(title="Copied Block").first()
+        self.assertIsNotNone(copied_block)
+        self.assertEqual(copied_block.created_by, self.user)
+        self.assertEqual(copied_block.community, self.community)
+        self.assertFalse(copied_block.is_tradeable)
+        self.assertEqual(copied_block.templates.count(), 1)
