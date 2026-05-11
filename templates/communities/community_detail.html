@@ -157,7 +157,7 @@
             </div>
 
             <!-- Marketplace: Tradeable Training Blocks -->
-            {% if is_visitor_manager and tradeable_blocks %}
+            {% if tradeable_blocks %}
             <div class="mt-12 border-t-4 border-black pt-8">
                 <h3 class="text-3xl font-black text-black italic uppercase tracking-tighter mb-2">Marketplace</h3>
                 <p class="text-black text-sm font-bold uppercase tracking-widest mb-6">Tradeable Training Blocks</p>
@@ -172,9 +172,14 @@
                             {% endif %}
                         </div>
                         <div>
-                            <a href="{% url 'copy-block' block.id %}" class="btn bg-black hover:bg-gray-800 text-white font-bold rounded-none uppercase tracking-wider text-sm border-2 border-black">
-                                Copy Block
-                            </a>
+                            {% if is_visitor_manager %}
+                            <form method="post" action="{% url 'copy-block' block.id %}" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn bg-black hover:bg-gray-800 text-white font-bold rounded-none uppercase tracking-wider text-sm border-2 border-black">
+                                    Copy Block
+                                </button>
+                            </form>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}

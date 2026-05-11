@@ -35,9 +35,7 @@ def community_detail_view(request, slug):
     if request.user.is_authenticated and not is_manager:
         is_visitor_manager = request.user.managed_communities_set.exclude(id=community.id).exists()
 
-    tradeable_blocks = []
-    if is_visitor_manager:
-        tradeable_blocks = community.training_blocks.filter(is_tradeable=True)
+    tradeable_blocks = community.training_blocks.filter(is_tradeable=True)
 
     return render(request, 'communities/community_detail.html', {
         'community': community,

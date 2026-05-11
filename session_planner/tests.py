@@ -161,15 +161,12 @@ class TrainingBlockViewTest(TestCase):
 
         # 2. Copy the block via copy-block view
         url = reverse('copy-block', args=[original_block.id])
-        data = {
-            'title': "Copied Block"
-        }
-        response = self.client.post(url, data)
+        response = self.client.post(url)
 
         # 3. Check redirects and database
         self.assertRedirects(response, reverse('block-list'))
 
-        copied_block = TrainingBlock.objects.filter(title="Copied Block").first()
+        copied_block = TrainingBlock.objects.filter(title=f"Copy of {original_block.title}").first()
         self.assertIsNotNone(copied_block)
         self.assertEqual(copied_block.created_by, self.user)
         self.assertEqual(copied_block.community, self.community)
