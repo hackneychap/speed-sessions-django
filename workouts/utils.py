@@ -57,8 +57,12 @@ def _solve_for_time(vdot_score: float, distance_meters: float) -> float:
     """
     low_t = 0.5
     high_t = 600.0
+    epsilon = 1e-4
 
     for _ in range(100):
+        if high_t - low_t < epsilon:
+            break
+
         mid_t = (low_t + high_t) / 2
         if mid_t <= 0: return None
 
@@ -104,7 +108,11 @@ def _solve_for_time(vdot_score: float, distance_meters: float) -> float:
     low_t = 0.5
     high_t = 600.0
 
+    epsilon = 1e-4
+
     for _ in range(100):
+        if high_t - low_t < epsilon:
+            break
         mid_t = (low_t + high_t) / 2
         if mid_t <= 0: return None
 
