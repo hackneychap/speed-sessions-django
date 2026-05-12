@@ -30,6 +30,11 @@ def community_detail_view(request, slug):
         event_qs = event_qs.filter(is_public=True)
     next_event = event_qs.first()
     
+    # Check if visitor is a member of this community
+    is_member = False
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+        is_member = request.user.profile.community == community
+
     # Check if visitor is a manager of *another* community
     is_visitor_manager = False
     if request.user.is_authenticated and not is_manager:
@@ -41,6 +46,7 @@ def community_detail_view(request, slug):
         'community': community,
         'merch_items': merch_items,
         'is_manager': is_manager,
+        'is_member': is_member,
         'next_session': next_session,
         'next_event': next_event,
         'is_visitor_manager': is_visitor_manager,
