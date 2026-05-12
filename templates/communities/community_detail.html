@@ -2,33 +2,32 @@
 
 {% block content %}
 <div class="container mx-auto py-10 px-4 max-w-[800px]">
-    <div class="bg-white border-2 border-black rounded-none overflow-hidden">
-        {% if community.image_url %}
-        <div class="h-64 bg-cover bg-center border-b-2 border-black" style="background-image: url('{{ community.image_url }}')"></div>
-        {% endif %}
-        
-        <div class="p-8">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                <h1 class="text-4xl font-black text-black italic uppercase tracking-tighter break-words max-w-full">{{ community.name }}</h1>
-                {% if is_manager %}
-                    <div class="flex flex-wrap gap-2">
-                        <a href="{% url 'manage-orders' community.slug %}" class="btn btn-sm bg-black hover:bg-gray-800 text-white border-2 border-black rounded-none">Manage Orders</a>
-                        <a href="{% url 'add-merch' community.slug %}" class="btn btn-sm bg-black hover:bg-gray-800 text-white border-2 border-black rounded-none">Add gear</a>
-                        <a href="{% url 'community-edit' community.slug %}" class="btn btn-sm border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none">Edit Community</a>
-                    </div>
-                {% endif %}
-            </div>
 
-            <!-- Community Gallery -->
-            {% if community.gallery_images.all %}
-                <div class="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-                    {% for img in community.gallery_images.all %}
-                        <img src="{{ img.image.url }}" alt="Community gallery" class="h-40 rounded-none object-cover border-2 border-black flex-shrink-0">
-                    {% endfor %}
-                </div>
-            {% endif %}
-            
-            <p class="text-black text-lg mb-6">{{ community.description }}</p>
+    {% if community.image_url %}
+    <div class="h-64 bg-cover bg-center border-2 border-black mb-8" style="background-image: url('{{ community.image_url }}')"></div>
+    {% endif %}
+
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h1 class="text-4xl font-black text-black italic uppercase tracking-tighter break-words max-w-full">{{ community.name }}</h1>
+        {% if is_manager %}
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'manage-orders' community.slug %}" class="btn btn-sm bg-black hover:bg-gray-800 text-white border-2 border-black rounded-none">Manage Orders</a>
+                <a href="{% url 'add-merch' community.slug %}" class="btn btn-sm bg-black hover:bg-gray-800 text-white border-2 border-black rounded-none">Add gear</a>
+                <a href="{% url 'community-edit' community.slug %}" class="btn btn-sm border-2 border-black text-black bg-white hover:bg-black hover:text-white rounded-none">Edit Community</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Community Gallery -->
+    {% if community.gallery_images.all %}
+        <div class="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+            {% for img in community.gallery_images.all %}
+                <img src="{{ img.image.url }}" alt="Community gallery" class="h-40 rounded-none object-cover border-2 border-black flex-shrink-0">
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <p class="text-black text-lg mb-8">{{ community.description }}</p>
             
             <!-- Next Scheduled Workout -->
             {% if next_session %}
@@ -187,7 +186,5 @@
             </div>
             {% endif %}
 
-        </div>
-    </div>
 </div>
 {% endblock %}
