@@ -30,6 +30,7 @@
     <p class="text-black text-lg mb-8">{{ community.description }}</p>
             
             <!-- Next Scheduled Workout -->
+            {% if is_member or is_manager %}
             {% if next_session %}
                 <div class="bg-white border-2 border-black p-6 rounded-none mb-8">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
@@ -46,6 +47,7 @@
                         View Workout Details
                     </a>
                 </div>
+            {% endif %}
             {% endif %}
 
             <!-- Next Calendar Event -->
