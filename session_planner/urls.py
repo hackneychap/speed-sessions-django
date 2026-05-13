@@ -10,6 +10,7 @@ from .views import (
     session_list_view,
     session_detail_view,
     session_edit_view,
+    shift_schedule_view,
     block_list_view,
     create_training_block_view,
     get_schedule_form_view,
@@ -28,6 +29,7 @@ urlpatterns = [
     path('sessions/', session_list_view, name='session-list'),
     path('sessions/<int:pk>/', session_detail_view, name='session-detail'),
     path('sessions/<int:pk>/edit/', session_edit_view, name='edit-session'),
+    path('sessions/shift/', shift_schedule_view, name='shift-schedule'),
     
     # Training Blocks
     path('blocks/', block_list_view, name='block-list'),

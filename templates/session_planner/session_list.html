@@ -61,9 +61,37 @@
     <div class="space-y-12">
         {% for monday, items in sorted_weeks %}
             <div>
-                <h2 class="text-black font-black uppercase tracking-[0.3em] text-xs mb-6 border-b border-black border-2 pb-2">
-                    Week of {{ monday|date:"M d" }}
-                </h2>
+                <div class="flex justify-between items-center border-b border-black border-2 mb-6 pb-2">
+                    <h2 class="text-black font-black uppercase tracking-[0.3em] text-xs m-0">
+                        Week of {{ monday|date:"M d" }}
+                    </h2>
+                    {% if is_manager %}
+                    <div class="flex gap-2">
+                        <form method="POST" action="{% url 'shift-schedule' %}" class="m-0" onsubmit="return confirm('Are you sure you want to shift this week and all future weeks backward by 7 days?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="start_date" value="{{ monday|date:'Y-m-d' }}">
+                            <input type="hidden" name="shift_days" value="-7">
+                            <button type="submit" class="p-1 bg-white hover:bg-black text-black hover:text-white border border-black border-2 rounded-none transition-colors" title="Shift schedule backward 1 week">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-double-left" viewBox="0 0 16 16">
+                                  <path fill-rule="evenodd" d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                                  <path fill-rule="evenodd" d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                                </svg>
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'shift-schedule' %}" class="m-0" onsubmit="return confirm('Are you sure you want to shift this week and all future weeks forward by 7 days?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="start_date" value="{{ monday|date:'Y-m-d' }}">
+                            <input type="hidden" name="shift_days" value="7">
+                            <button type="submit" class="p-1 bg-white hover:bg-black text-black hover:text-white border border-black border-2 rounded-none transition-colors" title="Shift schedule forward 1 week">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-double-right" viewBox="0 0 16 16">
+                                  <path fill-rule="evenodd" d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                  <path fill-rule="evenodd" d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
                 
                 <div class="space-y-4 ps-4 border-l-2 border-black border-2 ml-2">
                     {% for item in items %}
