@@ -38,6 +38,8 @@ class SessionPlannerViewTest(TestCase):
         self.assertContains(response, 'Group A')
         # Check if it contains the calculated pace for 54.55 VDOT (1:25.76)
         self.assertContains(response, '1:25.76')
+        # Check if it contains the 100m split label
+        self.assertContains(response, '100m:')
 
     def test_generate_plan_view(self):
         # Prepare POST data for all groups
@@ -59,6 +61,7 @@ class SessionPlannerViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'A')
         self.assertContains(response, '1:25.76')
+        self.assertContains(response, '100m:')
 
 class TrainingBlockViewTest(TestCase):
     def setUp(self):
