@@ -215,6 +215,8 @@ def _process_and_calculate_group_plan(group_name, group_vdot, structure, prefix=
         pace_per_km_s = pace_data['pace_per_km']['minutes'] * 60 + pace_data['pace_per_km']['seconds']
         lap_time_s = pace_per_km_s * 0.4
         lap_fmt = f"{int(lap_time_s // 60)}:{lap_time_s % 60:05.2f}"
+        split_100m_s = pace_per_km_s * 0.1
+        split_100m_fmt = f"{int(split_100m_s // 60)}:{split_100m_s % 60:05.2f}"
 
         target_pace_fmt = f"{pace_data['target_pace']['minutes']}:{pace_data['target_pace']['seconds']:05.2f}"
 
@@ -228,6 +230,7 @@ def _process_and_calculate_group_plan(group_name, group_vdot, structure, prefix=
             **seg,
             'target_pace': target_pace_fmt,
             'lap_time': lap_fmt,
+            'split_100m': split_100m_fmt,
         }
 
         # Flatten for TSS (TSS needs total reps across all sets)
