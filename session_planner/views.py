@@ -15,6 +15,52 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
+def shift_schedule_view(request):
+    """View to shift all sessions and events from a specific date forward or backward."""
+    from communities.models import CalendarEvent
+    from datetime import datetime, timedelta
+
+    if request.method != 'POST':
+        return HttpResponse("Method not allowed", status=405)
+
+    try:
+        profile = request.user.profile
+        community = profile.community
+    except Exception:
+        return redirect('home')
+
+    if not community or request.user not in community.managers.all():
+        return HttpResponse("Unauthorized", status=403)
+
+    start_date_str = request.POST.get('start_date')
+    shift_days_str = request.POST.get('shift_days')
+
+    if not start_date_str or not shift_days_str:
+        return HttpResponse("Missing data", status=400)
+
+    try:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        shift_days = int(shift_days_str)
+    except ValueError:
+        return HttpResponse("Invalid data format", status=400)
+
+    from django.db import transaction
+    with transaction.atomic():
+        # Shift Sessions
+        sessions = Session.objects.filter(community=community, date__gte=start_date)
+        for session in sessions:
+            session.date = session.date + timedelta(days=shift_days)
+            session.save()
+
+        # Shift Events
+        events = CalendarEvent.objects.filter(community=community, date__gte=start_date)
+        for event in events:
+            event.date = event.date + timedelta(days=shift_days)
+            event.save()
+
+    return redirect('session-list')
+
+@login_required
 def block_list_view(request):
     """View to list all training blocks for the user's community."""
     community = None
