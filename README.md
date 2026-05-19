@@ -1,4 +1,4 @@
-# Speed-Sessions_django
+# Speed-Sessions-django
 
 **Run Faster, train harder, together.**
 
