@@ -8,10 +8,33 @@ Speed-Sessions_django is a web application designed specifically for run club co
 
 By leveraging scientific training metrics, the platform ensures that every runner gets a workout tailored to their current fitness level—maximizing performance gains while minimizing the risk of overtraining.
 
+## 🧠 The Methodology & Structure
+
+The difficulty with speed sessions is that if you run too hard, you get injured; too easy, you don't improve. This platform addresses that by relying on the **VDOT system** (from Jack Daniels' *Running Formula*) and **TSS (Training Stress Score)**.
+
+### How We Plan Sessions
+* **VDOT sets the pace:** If a classic session is 12 x 400m at "Interval pace," the VDOT score dictates exactly how fast that 400m should be run.
+* **TSS sets the volume:** The number of repeats (duration and distance) is controlled by TSS. We target a TSS score of around **35–43** for the main session. This typically aligns with ~30 minutes of running and ~5km distance, allowing it to fit into most training schedules and ensuring the workout is optimal without being destructive.
+* **Smart Session Builder:** When building a session, the app dynamically calculates the pacing based on the group's entered VDOT score and alerts the planner if the resulting TSS is too short, too long, or too hard.
+
+### Track Etiquette & Pacing
+A typical session goes like this:
+1. **Warm up:** ~10 laps easy conversational pace (e.g., in lane 5), followed by ~10 mins of drills.
+2. **Break:** Short pause for everyone.
+3. **The Main Session:** Run in assigned, closely matched pace groups (e.g., VDOT 55, 50, and 43).
+4. **Cool down:** A two-lap cool down.
+
+**The Role of the Pacer:**
+* The pacer memorizes the splits (e.g., for a VDOT 50 runner doing 400m reps in 1:33, they hit 23 seconds every 100m).
+* The pacer uses a stopwatch to check their 100m splits and call them out. **We don't rely on GPS watches for pacing**; the only distance that matters is the markings on the track.
+* Everyone else in the group matches the pacer. They don't overtake; they follow along, learn to feel the pace, and encourage each other.
+* The calculated paces are a limit, not a target. If an individual in the group is struggling, they should drop to a slower pace, as their personal TSS for that effort might be too high.
+
 ## ✨ Key Features
 
-- **Scientific Pacing & Workouts:** Utilizes **VDOT** scores and **TSS** (Training Stress Score) calculations to generate dynamically paced workouts. This ensures sessions have sufficient intensity and duration for each individual's ability level without leading to overtraining.
-- **Community Management:** Tailored for organizers to manage their run clubs, group runners, and plan customized block sessions.
+- **Scientific Pacing & Workouts:** Utilizes **VDOT** scores and **TSS** (Training Stress Score) calculations to generate dynamically paced workouts.
+- **Session Validation:** Flags workouts that are too hard or too easy based on the calculated metrics.
+- **Community Management:** Tailored for organizers to manage their run clubs, group runners by ability, and plan customized block sessions.
 - **Dynamic User Interface:** Built with HTMX and Tailwind CSS (via DaisyUI) for a snappy, modern, and responsive user experience.
 - **Merchandise & Payments:** Integrated with Stripe and dj-stripe for handling run club merchandise sales directly through the platform.
 - **Authentication & Profiles:** Powered by `django-allauth` for seamless user registration, profile management, and community assignments.
