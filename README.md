@@ -4,9 +4,9 @@
 
 *Deployed at: [runtrash.com](https://runtrash.com)*
 
-Speed-Sessions_django is a web application designed specifically for run club community organizers. It simplifies the process of planning group speed sessions by organizing runners of similar abilities into appropriate training groups.
+Speed-Sessions-django is a web application designed specifically for run club community organizers. It simplifies the process of planning group speed sessions by organizing runners of similar abilities into appropriate training groups.
 
-By leveraging scientific training metrics, the platform ensures that every runner gets a workout tailored to their current fitness level—maximizing performance gains while minimizing the risk of overtraining.
+By leveraging scientific training metrics, the platform ensures that groups of runners get a workout tailored to their current fitness level—maximizing performance gains while minimizing the risk of overtraining.
 
 ## 🧠 The Methodology & Structure
 
