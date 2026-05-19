@@ -18,6 +18,10 @@ services:
   django-web:
     build: .
     container_name: django-docker
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+             python manage.py migrate &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 speed_sessions.wsgi:application"
     ports:
       - "8000:8000"
     depends_on:
