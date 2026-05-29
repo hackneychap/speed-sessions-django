@@ -25,6 +25,33 @@
             </div>
 
             <div class="border-t border-black border-2 pt-6">
+                <h3 class="text-xl font-black text-black italic uppercase tracking-tighter mb-4">Track Training Settings</h3>
+                <p class="text-black text-xs mb-4 uppercase">Configure these settings if you train at a track that publishes an OpenActive API feed (e.g., Mile End Leisure Centre).</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">OpenActive API Feed URL</label>
+                        {{ form.track_api_link }}
+                        <p class="text-black text-[10px] mt-1 uppercase">{{ form.track_api_link.help_text }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Track Location Keyword</label>
+                        {{ form.track_location_keyword }}
+                        <p class="text-black text-[10px] mt-1 uppercase">{{ form.track_location_keyword.help_text }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Training Day</label>
+                        {{ form.track_training_day }}
+                        <p class="text-black text-[10px] mt-1 uppercase">{{ form.track_training_day.help_text }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-black font-bold uppercase text-xs mb-2 tracking-widest">Training Time</label>
+                        {{ form.track_training_time }}
+                        <p class="text-black text-[10px] mt-1 uppercase">{{ form.track_training_time.help_text }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-black border-2 pt-6">
                 <h3 class="text-xl font-black text-black italic uppercase tracking-tighter mb-4">Default VDOTs</h3>
                 <p class="text-black text-xs mb-4 uppercase">These values will pre-fill the VDOT fields when creating a new session.</p>
                 <div class="grid md:grid-cols-3 gap-6">
