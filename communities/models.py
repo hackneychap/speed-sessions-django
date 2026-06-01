@@ -25,6 +25,22 @@ class Community(models.Model):
     vdot_group_b = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group B")
     vdot_group_c = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group C")
 
+    # Track OpenActive API configuration
+    track_api_link = models.URLField(max_length=500, blank=True, help_text="OpenActive API feed URL for track schedule")
+    track_location_keyword = models.CharField(max_length=100, blank=True, help_text="Keyword to identify the track in the API (e.g., 'Mile End Track')")
+
+    DAY_CHOICES = [
+        (0, 'Monday'),
+        (1, 'Tuesday'),
+        (2, 'Wednesday'),
+        (3, 'Thursday'),
+        (4, 'Friday'),
+        (5, 'Saturday'),
+        (6, 'Sunday'),
+    ]
+    track_training_day = models.IntegerField(choices=DAY_CHOICES, null=True, blank=True, help_text="Day of the week the community trains at the track")
+    track_training_time = models.TimeField(null=True, blank=True, help_text="Time of the training session (local time)")
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

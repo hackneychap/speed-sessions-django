@@ -50,6 +50,25 @@
             {% endif %}
             {% endif %}
 
+            <!-- Track Training Info -->
+            {% if community.track_api_link and community.track_training_day is not None %}
+                <div class="bg-white border-2 border-black p-6 rounded-none mb-8">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                        <div class="break-words max-w-full">
+                            <span class="text-black font-mono font-bold uppercase text-xs tracking-widest block mb-1">Track Training</span>
+                            <h2 class="text-2xl font-black text-black italic uppercase tracking-tighter">{{ community.get_track_training_day_display }}s @ {{ community.track_training_time|time:"H:i" }}</h2>
+                        </div>
+                        <div class="text-left sm:text-right shrink-0">
+                            <span class="text-black text-[10px] font-bold uppercase tracking-widest italic block">Monitored Location</span>
+                            <span class="text-black font-mono text-sm block">{{ community.track_location_keyword }}</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-gray-100 border-l-4 border-black text-black text-xs uppercase tracking-wider font-bold">
+                        Schedule is monitored automatically via OpenActive API.
+                    </div>
+                </div>
+            {% endif %}
+
             <!-- Next Calendar Event -->
             {% if next_event %}
                 <div class="bg-white border-2 border-black p-6 rounded-none mb-8">

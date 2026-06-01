@@ -32,7 +32,14 @@ class CommunityForm(forms.ModelForm):
 
     class Meta:
         model = Community
-        fields = ['name', 'description', 'image_url', 'join_code', 'vdot_group_a', 'vdot_group_b', 'vdot_group_c']
+        fields = [
+            'name', 'description', 'image_url', 'join_code',
+            'vdot_group_a', 'vdot_group_b', 'vdot_group_c',
+            'track_api_link', 'track_location_keyword', 'track_training_day', 'track_training_time'
+        ]
+        widgets = {
+            'track_training_time': forms.TimeInput(attrs={'type': 'time'}),
+        }
 
     def clean_join_code(self):
         join_code = self.cleaned_data.get('join_code')
