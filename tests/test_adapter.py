@@ -17,6 +17,11 @@ class MockForm:
 
     def __init__(self):
         self._errors = {}
+        self.cleaned_data = {
+            'email': 'test@example.com',
+            'username': '',
+            'password1': 'testpass123',
+        }
 
     def add_error(self, field, error):
         if field is None:
@@ -26,8 +31,7 @@ class MockForm:
 
     @property
     def non_field_errors(self):
-        errors = self._errors.get(None, [])
-        return Mock(__iter__=lambda: iter(errors))
+        return self._errors.get(None, [])
 
 
 @pytest.mark.django_db
@@ -122,7 +126,7 @@ class TestCustomAccountAdapter:
         adapter = CustomAccountAdapter()
         adapter.save_user(request, user, form, commit=False)
 
-        # community_name branch runs, join_code branch skipped
+        # join_code is checked first, so it wins
         user.profile.refresh_from_db()
-        assert user.profile.community.name == 'My New Crew'
-        assert user in user.profile.community.managers.all()
+        assert user.profile.community.name == 'Already Joined'
+        assert user not in user.profile.community.managers.all()
