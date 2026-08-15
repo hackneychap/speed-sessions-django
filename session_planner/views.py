@@ -14,6 +14,50 @@ from .models import Session, SessionGroup, TrainingBlock
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_GROUP_LETTERS = "ABCDEFGHI"
+
+
+def _group_label(pos):
+    return f"Group {DEFAULT_GROUP_LETTERS[pos - 1]}"
+
+
+def _groups_form_data(community, count):
+    defaults = {g.position: g for g in community.group_vdots.all()}
+    out = []
+    for pos in range(1, count + 1):
+        g = defaults.get(pos)
+        out.append({"index": str(pos), "name": (g.display_name if g and g.display_name else _group_label(pos)), "vdot": (g.default_vdot if g and g.default_vdot else "")})
+    return out
+
+
+def _posted_group_count(post_data):
+    try:
+        n = int(post_data.get("groups_count") or 3)
+    except (TypeError, ValueError):
+        n = 3
+    return max(1, min(n, 9))
+
+
+def parse_group_value(metric, value):
+    if metric == "vdot":
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+    try:
+        parts = [int(x) for x in value.split(":")]
+    except (TypeError, ValueError, AttributeError):
+        return None
+    if len(parts) == 2:
+        minutes = parts[0] + parts[1] / 60
+    elif len(parts) == 3:
+        minutes = parts[0] * 60 + parts[1] + parts[2] / 60
+    else:
+        return None
+    res = calculate_vdot(5000, minutes)
+    return res["vdot_score"] if isinstance(res, dict) else res
+
+
 @login_required
 def shift_schedule_view(request):
     """View to shift all sessions and events from a specific date forward or backward."""
@@ -341,16 +385,14 @@ def planner_page_view(request):
         return redirect('home')
     
     # Default data for a new workout
-    groups_form_data = [
-        {'char': 'a', 'name': 'Group A', 'vdot': community.vdot_group_a if community.vdot_group_a else ''},
-        {'char': 'b', 'name': 'Group B', 'vdot': community.vdot_group_b if community.vdot_group_b else ''},
-        {'char': 'c', 'name': 'Group C', 'vdot': community.vdot_group_c if community.vdot_group_c else ''},
-    ]
+    count = community.num_groups
+    groups_form_data = _groups_form_data(community, count)
     
     training_blocks = TrainingBlock.objects.filter(created_by=request.user)
     
     return render(request, 'session_planner/planner_form.html', {
         'groups_form_data': groups_form_data,
+        'groups_count': count,
         'training_blocks': training_blocks
     })
 
@@ -367,39 +409,31 @@ def session_edit_view(request, pk):
     groups = session.groups.all().order_by('id')
     groups_form_data = []
     groups_results = []
-    chars = ['a', 'b', 'c']
     
     structure = session.structure_json
     
-    for i, group in enumerate(groups):
-        if i < len(chars):
-            groups_form_data.append({
-                'char': chars[i],
-                'name': group.name,
-                'vdot': group.vdot
-            })
-            
-            # Check if group has a specific structure, otherwise use session structure
-            group_structure = group.structure_json if group.structure_json else structure
-            
-            # Calculate the differentiated plan for this group with prefix
-            groups_results.append(_process_and_calculate_group_plan(
-                group.name, group.vdot, group_structure, prefix=f'group_{chars[i]}_'
-            ))
-    
-    # If session has fewer than 3 groups, fill the rest
-    while len(groups_form_data) < 3:
-        char = chars[len(groups_form_data)]
+    for pos, group in enumerate(groups, start=1):
         groups_form_data.append({
-            'char': char,
-            'name': f'Group {char.upper()}',
-            'vdot': ''
+            'index': str(pos),
+            'name': group.name,
+            'vdot': group.vdot
         })
+        
+        # Check if group has a specific structure, otherwise use session structure
+        group_structure = group.structure_json if group.structure_json else structure
+        
+        # Calculate the differentiated plan for this group with prefix
+        groups_results.append(_process_and_calculate_group_plan(
+            group.name, group.vdot, group_structure, prefix=f'group_{pos}_'
+        ))
+    
+    count = len(groups_form_data) or (session.community.num_groups if session.community else 3)
 
     return render(request, 'session_planner/planner_form.html', {
         'session': session,
         'groups_form_data': groups_form_data,
         'groups_results': groups_results,
+        'groups_count': count,
         'training_blocks': TrainingBlock.objects.filter(created_by=request.user)
     })
 
@@ -418,28 +452,16 @@ def generate_plan_view(request):
     structure = _extract_workout_structure(request.POST)
 
     groups_data = []
-    for char in ['a', 'b', 'c']:
-        name = request.POST.get(f'group_{char}_name')
-        metric = request.POST.get(f'group_{char}_metric')
-        val = request.POST.get(f'group_{char}_value')
+    for i in range(1, _posted_group_count(request.POST) + 1):
+        name = request.POST.get(f'group_{i}_name')
+        metric = request.POST.get(f'group_{i}_metric')
+        val = request.POST.get(f'group_{i}_value')
 
-        if name and val:
-            vdot = 0
-            if metric == 'vdot':
-                try:
-                    vdot = float(val)
-                except:
-                    continue
-            else:
-                try:
-                    p = [int(x) for x in val.split(':')]
-                    m = p[0] + p[1] / 60 if len(p) == 2 else p[0] * 60 + p[1] + p[2] / 60
-                    vdot_res = calculate_vdot(5000, m)
-                    vdot = vdot_res['vdot_score'] if isinstance(vdot_res, dict) else vdot_res
-                except:
-                    continue
+        vdot = parse_group_value(metric, val)
+        if vdot is None:
+            continue
 
-            groups_data.append(_process_and_calculate_group_plan(name, vdot, structure, prefix=f'group_{char}_'))
+        groups_data.append(_process_and_calculate_group_plan(name, vdot, structure, prefix=f'group_{i}_'))
 
     return render(request, 'session_planner/partials/_differentiated_plan_results.html', {'groups': groups_data})
 
@@ -512,41 +534,29 @@ def save_workout_view(request):
             )
             existing_group_structures = {}
         
-        for char in ['a', 'b', 'c']:
-            name = request.POST.get(f'group_{char}_name')
-            metric = request.POST.get(f'group_{char}_metric')
-            val = request.POST.get(f'group_{char}_value')
+        for i in range(1, _posted_group_count(request.POST) + 1):
+            name = request.POST.get(f'group_{i}_name')
+            metric = request.POST.get(f'group_{i}_metric')
+            val = request.POST.get(f'group_{i}_value')
 
-            if name and val:
-                vdot = 0
-                if metric == 'vdot':
-                    try:
-                        vdot = float(val)
-                    except:
-                        continue
-                else:
-                    try:
-                        p = [int(x) for x in val.split(':')]
-                        m = p[0] + p[1] / 60 if len(p) == 2 else p[0] * 60 + p[1] + p[2] / 60
-                        vdot_res = calculate_vdot(5000, m)
-                        vdot = vdot_res['vdot_score'] if isinstance(vdot_res, dict) else vdot_res
-                    except:
-                        continue
-                
-                # Extract group-specific structure if it exists
-                group_prefix = f'group_{char}_'
-                group_structure = _extract_workout_structure(request.POST, prefix=group_prefix)
-                
-                # If group structure is empty, try to preserve existing or fallback to base
-                if not group_structure:
-                    group_structure = existing_group_structures.get(name, base_structure)
+            vdot = parse_group_value(metric, val)
+            if vdot is None:
+                continue
+            
+            # Extract group-specific structure if it exists
+            group_prefix = f'group_{i}_'
+            group_structure = _extract_workout_structure(request.POST, prefix=group_prefix)
 
-                SessionGroup.objects.create(
-                    session=session,
-                    name=name,
-                    vdot=vdot,
-                    structure_json=group_structure 
-                )
+            # If group structure is empty, try to preserve existing or fallback to base
+            if not group_structure:
+                group_structure = existing_group_structures.get(name, base_structure)
+
+            SessionGroup.objects.create(
+                session=session,
+                name=name,
+                vdot=vdot,
+                structure_json=group_structure 
+            )
 
         # --- Save as Training Block Template ---
         if request.POST.get('save_as_template') == 'on':

@@ -44,9 +44,10 @@ class SessionPlannerViewTest(TestCase):
     def test_generate_plan_view(self):
         # Prepare POST data for all groups
         data = {
-            'group_a_name': 'A',
-            'group_a_metric': 'vdot',
-            'group_a_value': '54.55',
+            'groups_count': '1',
+            'group_1_name': 'A',
+            'group_1_metric': 'vdot',
+            'group_1_value': '54.55',
             'item_type': ['segment'],
             'reps': ['10'],
             'distance': ['400'],
@@ -123,9 +124,10 @@ class TrainingBlockViewTest(TestCase):
             'intensity': ['Interval'],
             'rest': ['90'],
             'block_multiplier': ['1'],
-            'group_a_name': 'Group A',
-            'group_a_metric': 'vdot',
-            'group_a_value': '50',
+            'groups_count': '1',
+            'group_1_name': 'Group A',
+            'group_1_metric': 'vdot',
+            'group_1_value': '50',
             'save_as_template': 'on',
             'block_id': block.id,
             'template_week_number': '2'

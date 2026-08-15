@@ -129,16 +129,17 @@ def test_save_workout_with_differentiated_structure(logged_in_client, test_user,
         'rest': ['60'],
         'block_multiplier': ['1'],
         
-        # Group A specific inputs (15 reps instead of 10)
-        'group_a_name': 'Group A',
-        'group_a_metric': 'vdot',
-        'group_a_value': '50',
-        'group_a_item_type': ['segment'],
-        'group_a_reps': ['15'],
-        'group_a_distance': ['400'],
-        'group_a_intensity': ['Interval'],
-        'group_a_rest': ['60'],
-        'group_a_block_multiplier': ['1'],
+        # Group 1 specific inputs (15 reps instead of 10)
+        'groups_count': '1',
+        'group_1_name': 'Group A',
+        'group_1_metric': 'vdot',
+        'group_1_value': '50',
+        'group_1_item_type': ['segment'],
+        'group_1_reps': ['15'],
+        'group_1_distance': ['400'],
+        'group_1_intensity': ['Interval'],
+        'group_1_rest': ['60'],
+        'group_1_block_multiplier': ['1'],
     }
     
     response = logged_in_client.post(url, data)
@@ -168,27 +169,28 @@ def test_save_workout_multiple_group_overrides(logged_in_client, test_user, comm
         'rest': ['60'],
         'block_multiplier': ['1'],
         
-        # Group A: 12 reps
-        'group_a_name': 'Group A',
-        'group_a_metric': 'vdot',
-        'group_a_value': '50',
-        'group_a_item_type': ['segment'],
-        'group_a_reps': ['12'],
-        'group_a_distance': ['400'],
-        'group_a_intensity': ['Interval'],
-        'group_a_rest': ['60'],
-        'group_a_block_multiplier': ['1'],
+        # Group 1: 12 reps
+        'groups_count': '3',
+        'group_1_name': 'Group A',
+        'group_1_metric': 'vdot',
+        'group_1_value': '50',
+        'group_1_item_type': ['segment'],
+        'group_1_reps': ['12'],
+        'group_1_distance': ['400'],
+        'group_1_intensity': ['Interval'],
+        'group_1_rest': ['60'],
+        'group_1_block_multiplier': ['1'],
         
-        # Group C: 8 reps
-        'group_c_name': 'Group C',
-        'group_c_metric': 'vdot',
-        'group_c_value': '40',
-        'group_c_item_type': ['segment'],
-        'group_c_reps': ['8'],
-        'group_c_distance': ['400'],
-        'group_c_intensity': ['Interval'],
-        'group_c_rest': ['60'],
-        'group_c_block_multiplier': ['1'],
+        # Group 3: 8 reps
+        'group_3_name': 'Group C',
+        'group_3_metric': 'vdot',
+        'group_3_value': '40',
+        'group_3_item_type': ['segment'],
+        'group_3_reps': ['8'],
+        'group_3_distance': ['400'],
+        'group_3_intensity': ['Interval'],
+        'group_3_rest': ['60'],
+        'group_3_block_multiplier': ['1'],
     }
     
     response = logged_in_client.post(url, data)
