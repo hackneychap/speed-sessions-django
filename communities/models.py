@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -20,10 +21,8 @@ class Community(models.Model):
     
     # Who "owns" or manages this community
     managers = models.ManyToManyField(User, related_name='managed_communities_set', blank=True)
-    
-    vdot_group_a = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group A")
-    vdot_group_b = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group B")
-    vdot_group_c = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group C")
+
+    num_groups = models.PositiveSmallIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(9)], help_text="Number of training groups (1\u20139). Defaults to 3.")
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -39,6 +38,23 @@ class Community(models.Model):
 
     def __str__(self):
         return self.name
+
+class CommunityGroupVDOT(models.Model):
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="group_vdots")
+    position = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(9)])
+    display_name = models.CharField(max_length=50, default="")
+    default_vdot = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["position"]
+        constraints = [models.UniqueConstraint(fields=["community", "position"], name="communitygroupvdot_unique_position_per_community")]
+
+    def __str__(self):
+        return f"{self.display_name or f'Group {chr(64 + self.position)}'} ({self.community.name})"
+
+    @property
+    def letter(self):
+        return chr(64 + self.position)
 
 class CommunityImage(models.Model):
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='gallery_images')
