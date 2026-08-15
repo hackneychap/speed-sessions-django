@@ -1,5 +1,5 @@
 from django import forms
-from .models import Community, CommunityImage, CalendarEvent
+from .models import Community, CommunityImage, CalendarEvent, CommunityGroupVDOT
 
 class CalendarEventForm(forms.ModelForm):
     class Meta:
@@ -32,7 +32,34 @@ class CommunityForm(forms.ModelForm):
 
     class Meta:
         model = Community
-        fields = ['name', 'description', 'image_url', 'join_code', 'vdot_group_a', 'vdot_group_b', 'vdot_group_c']
+        fields = ["name", "description", "image_url", "join_code", "num_groups"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for i in range(1, 10):
+            self.fields[f"display_name_{i}"] = forms.CharField(max_length=50, required=False)
+            self.fields[f"default_vdot_{i}"] = forms.FloatField(required=False)
+        if self.instance and self.instance.pk:
+            for group in self.instance.group_vdots.all():
+                self.fields[f"display_name_{group.position}"].initial = group.display_name
+                self.fields[f"default_vdot_{group.position}"].initial = group.default_vdot
+
+    def save(self, commit=True):
+        community = super().save(commit=commit)
+        if commit:
+            for i in range(1, community.num_groups + 1):
+                CommunityGroupVDOT.objects.update_or_create(
+                    community=community,
+                    position=i,
+                    defaults={
+                        "display_name": self.cleaned_data.get(f"display_name_{i}", ""),
+                        "default_vdot": self.cleaned_data.get(f"default_vdot_{i}"),
+                    },
+                )
+            CommunityGroupVDOT.objects.filter(
+                community=community, position__gt=community.num_groups
+            ).delete()
+        return community
 
     def clean_join_code(self):
         join_code = self.cleaned_data.get('join_code')
