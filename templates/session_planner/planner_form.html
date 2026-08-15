@@ -72,12 +72,13 @@
             </div>
         </div>
 
-        <!-- SECTION 2: Training Groups (A, B, C) -->
+        <!-- SECTION 2: Training Groups (1..N) -->
         <div class="card bg-white border-black border-2 shadow-none mb-6">
             <div class="card-header bg-black text-white font-black uppercase tracking-widest text-sm">
-                Step 2: Define Training Groups
+                Step 2: Define Training Groups ({{ groups_count }} group{{ groups_count|pluralize }})
             </div>
             <div class="p-6">
+                <input type="hidden" name="groups_count" value="{{ groups_count }}">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {% for group_data in groups_form_data %}
                     <div class="p-4 bg-white border-2 border-black rounded-none">

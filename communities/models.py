@@ -23,10 +23,6 @@ class Community(models.Model):
     managers = models.ManyToManyField(User, related_name='managed_communities_set', blank=True)
 
     num_groups = models.PositiveSmallIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(9)], help_text="Number of training groups (1\u20139). Defaults to 3.")
-    
-    vdot_group_a = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group A")
-    vdot_group_b = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group B")
-    vdot_group_c = models.FloatField(null=True, blank=True, help_text="Default VDOT for Group C")
 
     created_at = models.DateTimeField(auto_now_add=True)
 
