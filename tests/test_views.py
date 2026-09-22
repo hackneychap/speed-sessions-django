@@ -1,7 +1,21 @@
 import pytest
 from django.urls import reverse
+from django.http import QueryDict
 from session_planner.models import TrainingBlock, BlockSessionTemplate, Session, SessionGroup
+from session_planner.views import _extract_workout_structure
 from datetime import date
+
+
+def test_extract_workout_structure_preserves_zero_reps():
+    """A posted rep count of 0 must survive extraction and NOT be coerced to 1."""
+    post_data = QueryDict(
+        'item_type=segment&reps=0&distance=400&intensity=Interval&rest=60&block_multiplier=1'
+    )
+    structure = _extract_workout_structure(post_data)
+    assert len(structure) == 1
+    assert structure[0]['type'] == 'single'
+    assert structure[0]['segment']['reps'] == 0
+
 
 @pytest.mark.django_db
 def test_block_list_view(logged_in_client):
@@ -240,3 +254,101 @@ def test_save_workout_as_block_template(logged_in_client, test_user, community, 
     template = BlockSessionTemplate.objects.get(block=block, week_number=5)
     assert template.title == 'Template Workout'
     assert template.structure_json[0]['segment']['reps'] == 8
+
+
+@pytest.mark.django_db
+def test_save_workout_preserves_zero_reps(logged_in_client, test_user, community, user_profile):
+    """A 0-rep count must survive the full save_workout_view path for base and group structures."""
+    url = reverse('save-workout')
+    data = {
+        'title': 'Zero Rep Workout',
+        'date': '2025-01-01',
+        # Base workout with a 0-rep segment
+        'item_type': ['segment'],
+        'reps': ['0'],
+        'distance': ['400'],
+        'intensity': ['Interval'],
+        'rest': ['60'],
+        'block_multiplier': ['1'],
+
+        # Group-specific 0-rep override
+        'groups_count': '1',
+        'group_1_name': 'Group A',
+        'group_1_metric': 'vdot',
+        'group_1_value': '50',
+        'group_1_item_type': ['segment'],
+        'group_1_reps': ['0'],
+        'group_1_distance': ['400'],
+        'group_1_intensity': ['Interval'],
+        'group_1_rest': ['60'],
+        'group_1_block_multiplier': ['1'],
+    }
+
+    response = logged_in_client.post(url, data)
+    assert 'HX-Redirect' in response
+
+    session = Session.objects.get(title='Zero Rep Workout')
+    assert session.structure_json[0]['segment']['reps'] == 0
+
+    group_a = SessionGroup.objects.get(session=session, name='Group A')
+    assert group_a.structure_json[0]['segment']['reps'] == 0
+
+
+@pytest.mark.django_db
+def test_session_detail_zero_rep_rendering(logged_in_client, test_user, community, user_profile):
+    """A 0-rep segment must remain visible with strikethrough/marker treatment on the card."""
+    structure = [{
+        "type": "single",
+        "segment": {"reps": 0, "distance": 400, "intensity": "Interval", "rest": 60}
+    }]
+    session = Session.objects.create(
+        title="Zero Rep Session",
+        date=date.today(),
+        community=community,
+        creator=test_user,
+        structure_json=structure
+    )
+    SessionGroup.objects.create(session=session, name="Group A", vdot=50)
+    community.managers.add(test_user)
+
+    url = reverse('session-detail', kwargs={'pk': session.id})
+    response = logged_in_client.get(url)
+    assert response.status_code == 200
+    content = response.content.decode()
+
+    # Row stays in the DOM and carries the correct source-of-truth attribute.
+    assert 'data-reps="0"' in content
+    # Deliberate, visible marker so it does not read as a typo.
+    assert "SKIP" in content
+    # Strikethrough styling is present.
+    assert "line-through" in content
+    # It is de-emphasised.
+    assert "opacity-60" in content
+
+
+@pytest.mark.django_db
+def test_session_detail_zero_rep_whatsapp_copy_omitted(logged_in_client, test_user, community, user_profile):
+    """The WhatsApp copy function must omit 0-rep segments (it cannot use strikethrough markup)."""
+    structure = [{
+        "type": "single",
+        "segment": {"reps": 0, "distance": 400, "intensity": "Interval", "rest": 60}
+    }]
+    session = Session.objects.create(
+        title="Zero Rep Session",
+        date=date.today(),
+        community=community,
+        creator=test_user,
+        structure_json=structure
+    )
+    SessionGroup.objects.create(session=session, name="Group A", vdot=50)
+    community.managers.add(test_user)
+
+    url = reverse('session-detail', kwargs={'pk': session.id})
+    response = logged_in_client.get(url)
+    content = response.content.decode()
+
+    # The copy path reads data-reps and the JS guard skips reps === '0'.
+    assert 'data-reps="0"' in content
+    assert "reps === '0'" in content
+    assert "return null;" in content
+    assert "filter(Boolean)" in content

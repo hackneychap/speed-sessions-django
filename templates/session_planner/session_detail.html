@@ -79,12 +79,15 @@
                                         </div>
                                         <div class="pl-2 space-y-2 border-l-2 border-dashed border-black ml-4 block-segments">
                                             {% for seg in item.segments %}
-                                                <div class="bg-white p-2 border-2 border-black segment-data" 
+                                                <div class="bg-white p-2 border-2 border-black segment-data {% if seg.reps == 0 %}opacity-60{% endif %}" 
                                                      data-reps="{{ seg.reps }}" data-dist="{{ seg.distance }}" data-intensity="{{ seg.intensity }}" 
                                                      data-pace="{{ seg.target_pace }}" data-rest="{{ seg.rest }}" data-lap-time="{{ seg.lap_time }}" data-split-100m="{{ seg.split_100m }}">
                                                     <div class="flex items-center gap-2 justify-between">
                                                         <div class="flex flex-wrap items-center gap-1 flex-grow">
-                                                            <div class="text-black font-black text-sm uppercase">{{ seg.reps }} x {{ seg.distance }}m</div>
+                                                            {% if seg.reps == 0 %}
+                                                                <span class="text-[9px] bg-black text-white px-1 py-0.5 font-black uppercase tracking-wider">SKIP</span>
+                                                            {% endif %}
+                                                            <div class="text-black font-black text-sm uppercase {% if seg.reps == 0 %}line-through decoration-2{% endif %}">{{ seg.reps }} x {{ seg.distance }}m</div>
                                                             <div class="text-black font-black uppercase text-[10px] opacity-60">{{ seg.intensity }} @ {{ seg.rest }}S</div>
                                                         </div>
                                                         <div class="text-right border-l-2 border-black pl-3 min-w-[80px]">
@@ -98,12 +101,15 @@
                                         </div>
                                     </div>
                                 {% else %}
-                                    <div class="p-3 bg-white border-2 border-black workout-item segment-data" 
+                                    <div class="p-3 bg-white border-2 border-black workout-item segment-data {% if item.segment.reps == 0 %}opacity-60{% endif %}" 
                                          data-type="single" data-reps="{{ item.segment.reps }}" data-dist="{{ item.segment.distance }}" 
                                          data-intensity="{{ item.segment.intensity }}" data-pace="{{ item.segment.target_pace }}" data-rest="{{ item.segment.rest }}" data-lap-time="{{ item.segment.lap_time }}" data-split-100m="{{ item.segment.split_100m }}">
                                         <div class="flex items-center gap-2 justify-between">
                                             <div class="flex flex-wrap items-center gap-1 flex-grow">
-                                                <div class="text-black font-black text-sm uppercase">{{ item.segment.reps }} x {{ item.segment.distance }}m</div>
+                                                {% if item.segment.reps == 0 %}
+                                                    <span class="text-[9px] bg-black text-white px-1 py-0.5 font-black uppercase tracking-wider">SKIP</span>
+                                                {% endif %}
+                                                <div class="text-black font-black text-sm uppercase {% if item.segment.reps == 0 %}line-through decoration-2{% endif %}">{{ item.segment.reps }} x {{ item.segment.distance }}m</div>
                                                 <div class="text-black font-black uppercase text-[10px] opacity-60">{{ item.segment.intensity }} @ {{ item.segment.rest }}S</div>
                                             </div>
                                             <div class="text-right border-l-2 border-black pl-3 min-w-[80px]">
@@ -305,19 +311,25 @@
     function getWorkoutText(groupName, counter) {
         const itemsContainer = document.getElementById(`workout-items-${counter}`);
         const items = itemsContainer.querySelectorAll('.workout-item');
-        
+
         let text = `*${groupName} Session*\n`;
-        
+
         items.forEach(item => {
             if (item.getAttribute('data-type') === 'block') {
                 const multiplier = item.getAttribute('data-multiplier');
-                text += `\n*${multiplier} sets of:*\n`;
                 const segments = item.querySelectorAll('.segment-data');
-                segments.forEach(seg => {
-                    text += ` - ${formatSegment(seg)}\n`;
-                });
+                const formattedSegments = Array.from(segments).map(formatSegment).filter(Boolean);
+                if (formattedSegments.length) {
+                    text += `\n*${multiplier} sets of:*\n`;
+                    formattedSegments.forEach(line => {
+                        text += ` - ${line}\n`;
+                    });
+                }
             } else {
-                text += `${formatSegment(item)}\n`;
+                const line = formatSegment(item);
+                if (line) {
+                    text += `${line}\n`;
+                }
             }
         });
         return text;
@@ -347,13 +359,16 @@
 
     function formatSegment(el) {
         const reps = el.getAttribute('data-reps');
+        if (reps === '0') {
+            return null;
+        }
         const dist = el.getAttribute('data-dist');
         const intensity = el.getAttribute('data-intensity');
         const pace = el.getAttribute('data-pace');
         const lap = el.getAttribute('data-lap-time');
         const split100 = el.getAttribute('data-split-100m');
         const rest = el.getAttribute('data-rest');
-        
+
         return `${reps}x${dist}m @ ${intensity} (${pace} - Lap: ${lap} - 100m: ${split100}) [${rest}s rest]`;
     }
 </script>
