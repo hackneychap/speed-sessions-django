@@ -256,7 +256,8 @@ def _extract_workout_structure(post_data, prefix=''):
             current_block = None
         elif item == 'segment':
             try:
-                reps = int(reps_list[seg_idx]) if seg_idx < len(reps_list) and reps_list[seg_idx] else 1
+                raw_reps = reps_list[seg_idx] if seg_idx < len(reps_list) else ''
+                reps = int(raw_reps) if raw_reps != '' else 1
                 dist = int(float(distances_list[seg_idx])) if seg_idx < len(distances_list) and distances_list[seg_idx] else 400
                 intensity = intensities_list[seg_idx] if seg_idx < len(intensities_list) else 'Threshold'
                 rest = int(rests_list[seg_idx]) if seg_idx < len(rests_list) and rests_list[seg_idx] else 0
