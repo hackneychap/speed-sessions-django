@@ -132,3 +132,20 @@ Two build blockers surfaced when deploying this branch; both are fixed and the d
 - The repair step in `build.sh` can be left in place (idempotent no-op) or removed once
   production migrate is confirmed clean.
 
+## Social login removed (2026-09-25)
+Google / Apple / Facebook social login was removed; only email + password signup remains (which
+still requires creating or joining a community via `CustomSignupForm`).
+
+- `settings.py`: dropped `allauth.socialaccount` and the three provider apps from
+  `INSTALLED_APPS`, and removed `SOCIALACCOUNT_PROVIDERS`.
+- Templates: removed the provider list + "or" divider from `account/login.html` and
+  `account/signup.html`, dropped `{% load socialaccount %}` from all account templates, and
+  deleted `templates/socialaccount/`.
+- `requirements.txt`: `django-allauth[socialaccount,mfa]` -> `django-allauth[mfa]`
+  (`requests` is still required by `django-anymail`, so nothing else breaks).
+- `django.contrib.sites` / `SITE_ID` are retained (harmless; the Site admin remains available).
+- Existing `socialaccount_*` tables/rows stay in the database but are inert; no migration is
+  needed. The `sites` history repair in `build.sh` is now a no-op (kept as a safety net).
+- Verified: `manage.py check` clean, edited templates compile, existing test suite **53 passed**.
+
+
