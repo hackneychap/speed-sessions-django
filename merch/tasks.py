@@ -1,4 +1,5 @@
 from django.tasks import task
+from django.conf import settings
 from django.core.mail import send_mail
 from .models import Order
 
@@ -14,7 +15,7 @@ def send_order_status_email(order_id):
         send_mail(
             subject,
             message,
-            'noreply@speedsessions.com',
+            settings.DEFAULT_FROM_EMAIL,
             [order.customer_email],
             fail_silently=False,
         )

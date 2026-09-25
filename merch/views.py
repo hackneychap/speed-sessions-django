@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.http import require_POST
+from django.conf import settings
+from django.utils.http import url_has_allowed_host_and_scheme
 from .models import MerchItem, Order, OrderItem, MerchImage
 from .forms import OrderForm, MerchItemForm
 from django.contrib import messages
@@ -10,12 +12,32 @@ from django.contrib.auth.decorators import login_required
 def add_to_cart_view(request):
     if request.method == 'POST':
         item_id = request.POST.get('item_id')
-        size = request.POST.get('size')
-        color = request.POST.get('color')
+        size = (request.POST.get('size') or '').strip()
+        color = (request.POST.get('color') or '').strip()
+        try:
+            item = MerchItem.objects.get(id=item_id, is_listed=True)
+        except (MerchItem.DoesNotExist, ValueError, TypeError):
+            messages.error(request, "That item is not available.")
+            return redirect('community-list')
+
+        valid_sizes = [s.strip() for s in item.available_sizes.split(',') if s.strip()]
+        valid_colors = [c.strip() for c in item.available_colors.split(',') if c.strip()]
+        if (valid_sizes and size not in valid_sizes) or (
+            valid_colors and color not in valid_colors
+        ):
+            messages.error(request, "Please choose a valid size and colour.")
+            return redirect('community-detail', slug=item.community.slug)
+
         cart = request.session.get('cart', [])
-        cart.append({'item_id': item_id, 'size': size, 'color': color})
+        cart.append({'item_id': item.id, 'size': size, 'color': color})
         request.session['cart'] = cart
-        referer = request.META.get('HTTP_REFERER', 'home')
+        referer = request.META.get('HTTP_REFERER', '')
+        if not referer or not url_has_allowed_host_and_scheme(
+            referer,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            referer = 'home'
         return redirect(referer)
     return redirect('home')
 
@@ -41,7 +63,7 @@ def checkout_view(request):
     
     for item_data in cart:
         try:
-            item = MerchItem.objects.get(id=item_data['item_id'])
+            item = MerchItem.objects.get(id=item_data['item_id'], is_listed=True)
             items.append({'item': item, 'size': item_data['size'], 'color': item_data['color']})
             total_price += item.price
         except (MerchItem.DoesNotExist, KeyError):
@@ -170,8 +192,13 @@ def release_orders_view(request, slug):
     num_orders = pending_orders.count()
     if num_orders > 0:
         import stripe
-        from django.conf import settings
-        stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+        stripe.api_key = settings.STRIPE_ACTIVE_SECRET_KEY
+        if not stripe.api_key:
+            messages.error(
+                request,
+                "Stripe is not configured (missing secret key). No invoices sent.",
+            )
+            return redirect('manage-orders', slug=slug)
         
         split_cost = round(total_shipping_cost / num_orders, 2)
         released_count = 0

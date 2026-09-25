@@ -1,128 +1,97 @@
 import pytest
-from unittest.mock import Mock, MagicMock
-from django.contrib.auth.models import User
-from communities.models import Community, UserProfile
-from speed_sessions.adapter import CustomAccountAdapter
+from django.contrib.sessions.middleware import SessionMiddleware
+from django.test import RequestFactory
+
+from communities.models import Community
+from speed_sessions.forms import CustomSignupForm
+
+STRONG_PASSWORD = "V3ry-Str0ng-Passphrase!"
 
 
-class MockRequest:
-    """Minimal mock for request object used in adapter.save_user."""
-    def __init__(self, POST=None):
-        self.POST = POST or {}
-        self.method = 'POST'
+def make_form(**overrides):
+    data = {
+        "email": "runner@example.com",
+        "password1": STRONG_PASSWORD,
+        "password2": STRONG_PASSWORD,
+        "community_name": "",
+        "join_code": "",
+    }
+    data.update(overrides)
+    return CustomSignupForm(data=data)
 
 
-class MockForm:
-    """Minimal mock for the allauth signup form."""
-
-    def __init__(self):
-        self._errors = {}
-
-    def add_error(self, field, error):
-        if field is None:
-            self._errors.setdefault(None, []).append(error)
-        else:
-            self._errors.setdefault(field, []).append(error)
-
-    @property
-    def non_field_errors(self):
-        errors = self._errors.get(None, [])
-        return Mock(__iter__=lambda: iter(errors))
+def make_request():
+    request = RequestFactory().post("/accounts/signup/")
+    # allauth's account setup reads request.session, which RequestFactory omits.
+    SessionMiddleware(lambda r: None).process_request(request)
+    return request
 
 
 @pytest.mark.django_db
-class TestCustomAccountAdapter:
-    """Tests for CustomAccountAdapter.save_user community assignment logic."""
+class TestCustomSignupForm:
+    """Tests for community create/join validation during signup.
 
-    def test_save_user_no_community_choice_adds_error(self):
-        """When neither join_code nor community_name is given, a non-field error is added."""
-        adapter = CustomAccountAdapter()
-        user = User.objects.create_user(username='nocomm', password='pass123')
-        form = MockForm()
-        request = MockRequest(POST={'community_name': '', 'join_code': ''})
+    Validation must happen at form-validation time (``clean``), not during
+    ``save``, otherwise the user is created before the error is surfaced.
+    """
 
-        adapter.save_user(request, user, form, commit=False)
+    def _save(self, form, email):
+        form.data["email"] = email
+        return form.save(make_request())
 
-        assert len(form.non_field_errors) == 1
-        assert 'must either create a new community' in form.non_field_errors[0]
+    def test_no_community_choice_is_rejected(self):
+        form = make_form(email="noc@example.com")
+        assert not form.is_valid()
+        assert "must either create a new community" in " ".join(form.non_field_errors())
 
-    def test_save_user_valid_join_code_assigns_community(self):
-        """When a valid join_code is provided, the user is assigned to that community."""
-        community = Community.objects.create(name='Existing Crew', slug='existing-crew')
-        user = User.objects.create_user(username='joiner', password='pass123')
-        form = MockForm()
-        request = MockRequest(POST={
-            'community_name': '',
-            'join_code': community.join_code,
-        })
+    def test_whitespace_community_name_is_treated_as_missing(self):
+        form = make_form(email="wsp@example.com", community_name="   ")
+        assert not form.is_valid()
+        assert "must either create a new community" in " ".join(form.non_field_errors())
 
-        adapter = CustomAccountAdapter()
-        adapter.save_user(request, user, form, commit=False)
+    def test_invalid_join_code_is_rejected(self):
+        form = make_form(email="bad@example.com", join_code="NOPE99")
+        assert not form.is_valid()
+        assert "doesn't exist" in " ".join(form.non_field_errors())
 
-        user.profile.refresh_from_db()
+    def test_valid_join_code_assigns_community(self):
+        community = Community.objects.create(name="Existing Crew")
+        form = make_form(email="joiner@example.com", join_code=community.join_code)
+        assert form.is_valid(), form.errors
+
+        user = self._save(form, "joiner@example.com")
+        user.refresh_from_db()
         assert user.profile.community == community
+        assert user not in community.managers.all()
 
-    def test_save_user_invalid_join_code_adds_error(self):
-        """When an invalid join_code is given, a non-field error is added."""
-        user = User.objects.create_user(username='badcode', password='pass123')
-        form = MockForm()
-        request = MockRequest(POST={
-            'community_name': '',
-            'join_code': 'NOTEXIST',
-        })
+    def test_community_name_creates_community_and_manager(self):
+        form = make_form(email="new@example.com", community_name="My New Crew")
+        assert form.is_valid(), form.errors
 
-        adapter = CustomAccountAdapter()
-        adapter.save_user(request, user, form, commit=False)
-
-        assert len(form.non_field_errors) == 1
-        assert "doesn't exist" in form.non_field_errors[0]
-
-    def test_save_user_community_name_creates_community(self):
-        """When a community_name is given, a new community is created and user is made manager."""
-        user = User.objects.create_user(username='newcrew', password='pass123')
-        form = MockForm()
-        request = MockRequest(POST={
-            'community_name': 'My New Crew',
-            'join_code': '',
-        })
-
-        adapter = CustomAccountAdapter()
-        adapter.save_user(request, user, form, commit=False)
-
-        user.profile.refresh_from_db()
+        user = self._save(form, "new@example.com")
+        user.refresh_from_db()
         assert user.profile.community is not None
-        assert user.profile.community.name == 'My New Crew'
+        assert user.profile.community.name == "My New Crew"
         assert user in user.profile.community.managers.all()
 
-    def test_save_user_community_name_with_whitespace_is_stripped(self):
-        """Whitespace-only community_name is treated as missing."""
-        user = User.objects.create_user(username='wspcrew', password='pass123')
-        form = MockForm()
-        request = MockRequest(POST={
-            'community_name': '   ',
-            'join_code': '',
-        })
+    def test_join_code_takes_precedence_over_community_name(self):
+        community = Community.objects.create(name="Already Joined")
+        form = make_form(
+            email="both@example.com",
+            community_name="My New Crew",
+            join_code=community.join_code,
+        )
+        assert form.is_valid(), form.errors
 
-        adapter = CustomAccountAdapter()
-        adapter.save_user(request, user, form, commit=False)
+        user = self._save(form, "both@example.com")
+        user.refresh_from_db()
+        assert user.profile.community == community
+        assert not Community.objects.filter(name="My New Crew").exists()
 
-        assert len(form.non_field_errors) == 1
 
-    def test_save_user_community_name_takes_precedence_over_join_code(self):
-        """When both are given, community_name takes precedence (existing behaviour)."""
-        community = Community.objects.create(name='Already Joined', slug='already-joined')
-        user = User.objects.create_user(username='bothcrew', password='pass123')
-        form = MockForm()
-        # Allauth puts join_code in POST regardless; adapter checks join_code first
-        request = MockRequest(POST={
-            'community_name': 'My New Crew',
-            'join_code': community.join_code,
-        })
-
-        adapter = CustomAccountAdapter()
-        adapter.save_user(request, user, form, commit=False)
-
-        # community_name branch runs, join_code branch skipped
-        user.profile.refresh_from_db()
-        assert user.profile.community.name == 'My New Crew'
-        assert user in user.profile.community.managers.all()
+@pytest.mark.django_db
+def test_duplicate_community_name_gets_unique_slug():
+    first = Community.objects.create(name="Run Club")
+    second = Community.objects.create(name="Run Club")
+    assert first.slug == "run-club"
+    assert second.slug == "run-club-2"

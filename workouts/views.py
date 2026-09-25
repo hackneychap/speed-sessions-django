@@ -1,17 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserChangeForm
 from django.contrib import messages
-from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from django import forms
 import json
 import logging
 
 from communities.models import Community
+from .forms import ProfileForm
 from .utils import calculate_vdot, calculate_pace_from_vdot, TRAINING_ZONES
 
 logger = logging.getLogger(__name__)
@@ -71,11 +67,11 @@ def home_view(request):
 @login_required
 def profile_view(request):
     if request.method == 'POST':
-        form = UserChangeForm(request.POST, instance=request.user)
+        form = ProfileForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Your profile has been updated.')
             return redirect('profile')
     else:
-        form = UserChangeForm(instance=request.user)
+        form = ProfileForm(instance=request.user)
     return render(request, 'registration/profile.html', {'form': form})
