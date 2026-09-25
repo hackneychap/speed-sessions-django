@@ -99,10 +99,6 @@ INSTALLED_APPS = [
     # allauth
     'allauth',
     'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.apple',
-    'allauth.socialaccount.providers.facebook',
     'allauth.mfa',
     # My Apps
     'workouts.apps.WorkoutsConfig',
@@ -182,24 +178,6 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 # although only email verification is strictly required for signup.
 MFA_SUPPORTED_TYPES = ['totp', 'recovery_codes']
 MFA_PASSKEY_LOGIN_ENABLED = False
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
-    },
-    'apple': {},
-    'facebook': {
-        'METHOD': 'oauth2',
-        'SCOPE': ['email', 'public_profile'],
-        'INIT_PARAMS': {'cookie': True},
-        'FIELDS': ['id', 'email', 'name', 'first_name', 'last_name', 'verified', 'link'],
-        'EXCHANGE_TOKEN': True,
-        'LOCALE_FUNC': lambda request: 'en_US',
-        'VERIFIED_EMAIL': False,
-        'VERSION': 'v13.0',
-    }
-}
 
 WSGI_APPLICATION = 'speed_sessions.wsgi.application'
 

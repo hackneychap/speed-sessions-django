@@ -3,6 +3,9 @@
 Branch: `review-fixes`
 Scope: security, deployment correctness, and test health for the Django/Vercel + Postgres app.
 
+**Status: deployed to production and verified live on 2026-09-25** (branch `review-fixes`,
+commits `d137b3c`, `bb8cc34`, `e1b0bf8`).
+
 Full test suite after changes: **53 passed** (was 41 passed / 7 failed).
 `python manage.py check --deploy`: only the dummy-key warning (all HSTS/SSL/cookie warnings resolved).
 
@@ -86,7 +89,8 @@ Full test suite after changes: **53 passed** (was 41 passed / 7 failed).
    `AWS_SECRET_ACCESS_KEY`, `AWS_S3_REGION_NAME` (+ `AWS_S3_ENDPOINT_URL` /
    `AWS_S3_CUSTOM_DOMAIN` for non-AWS providers).
 2. Stripe: `STRIPE_LIVE_MODE=True` with live keys and a real `DJSTRIPE_WEBHOOK_SECRET`.
-3. Deploy must run migrations (adds `django.contrib.sites`).
+3. Migrations for `django.contrib.sites` — **done**: ran during the production build, including
+   the one-off history repair below.
 
 ## Still open (needs product/deployment decisions)
 - `vercel.json` still uses legacy `routes`; `build.sh` is not referenced there, and running
@@ -94,8 +98,8 @@ Full test suite after changes: **53 passed** (was 41 passed / 7 failed).
 - `update_order_status_view` authorises via the first order item only (multi-community orders).
 - Django Tasks email has no worker configured for serverless; it may not run on Vercel.
 
-## Vercel deploy repair (follow-up, 2026-09-25)
-Two build blockers surfaced when deploying this branch:
+## Vercel deploy repair (follow-up, 2026-09-25) — RESOLVED / LIVE
+Two build blockers surfaced when deploying this branch; both are fixed and the deploy is live.
 
 1. **`SECRET_KEY` required at build time.** `settings.py` hard-failed when the key was
    missing and `DEBUG=False`, but the Vercel build runs `collectstatic`/`migrate` (which
@@ -118,4 +122,30 @@ Two build blockers surfaced when deploying this branch:
    `InconsistentMigrationHistory`, the repair applied `sites.0001`/`sites.0002`, and the
    subsequent normal `migrate` reported no pending migrations. The default
    `Site(id=1, domain='example.com')` is created (used by `SITE_ID = 1`).
+
+   **Outcome:** the production build ran the repair and completed; the deployment is live
+   (2026-09-25).
+
+### Post-deploy follow-ups
+- Update the `Site` domain (Admin → Sites) from `example.com` to the production domain, and
+  configure a `SocialApp` per provider if social login is used.
+- The repair step in `build.sh` can be left in place (idempotent no-op) or removed once
+  production migrate is confirmed clean.
+
+## Social login removed (2026-09-25)
+Google / Apple / Facebook social login was removed; only email + password signup remains (which
+still requires creating or joining a community via `CustomSignupForm`).
+
+- `settings.py`: dropped `allauth.socialaccount` and the three provider apps from
+  `INSTALLED_APPS`, and removed `SOCIALACCOUNT_PROVIDERS`.
+- Templates: removed the provider list + "or" divider from `account/login.html` and
+  `account/signup.html`, dropped `{% load socialaccount %}` from all account templates, and
+  deleted `templates/socialaccount/`.
+- `requirements.txt`: `django-allauth[socialaccount,mfa]` -> `django-allauth[mfa]`
+  (`requests` is still required by `django-anymail`, so nothing else breaks).
+- `django.contrib.sites` / `SITE_ID` are retained (harmless; the Site admin remains available).
+- Existing `socialaccount_*` tables/rows stay in the database but are inert; no migration is
+  needed. The `sites` history repair in `build.sh` is now a no-op (kept as a safety net).
+- Verified: `manage.py check` clean, edited templates compile, existing test suite **53 passed**.
+
 

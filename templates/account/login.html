@@ -1,6 +1,6 @@
 {% extends "account/base_entrance.html" %}
 {% load i18n %}
-{% load account socialaccount %}
+{% load account %}
 
 {% block entrance_title %}{% trans "Sign In" %}{% endblock %}
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
@@ -9,18 +9,6 @@
     <p class="mb-4 text-center text-sm font-bold text-black uppercase">
         {% blocktrans %}Don't have an account? <a href="{{ signup_url }}" class="underline hover:text-gray-600">Sign Up</a>{% endblocktrans %}
     </p>
-
-    {% get_providers as socialaccount_providers %}
-    {% if socialaccount_providers %}
-        {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-        {% include "account/snippets/login_extra.html" %}
-
-        <div class="my-6 border-t border-black border-2 pt-4 relative">
-            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-white px-2 text-xs font-black text-black uppercase italic">
-                {% trans "or" %}
-            </div>
-        </div>
-    {% endif %}
 
     <form class="space-y-6" method="post" action="{% url 'account_login' %}">
         {% csrf_token %}
