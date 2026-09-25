@@ -26,6 +26,13 @@ IS_VERCEL = os.environ.get('VERCEL') == '1'
 # redirects or HSTS breaking the test client).
 TESTING = 'pytest' in sys.modules or any('pytest' in arg for arg in sys.argv)
 
+# Management commands that legitimately run at build/CI time and do not need a
+# real secret key (collectstatic, migrate...). This keeps `bash build.sh`
+# working even if the build environment does not expose SECRET_KEY, while the
+# running server still requires one.
+_BUILD_COMMANDS = {'collectstatic', 'migrate', 'makemigrations', 'showmigrations', 'check'}
+IS_BUILD_COMMAND = any(arg in _BUILD_COMMANDS for arg in sys.argv)
+
 env_path = BASE_DIR / '.env'
 # override=False so real environment variables (Vercel, CI) always win over a
 # stray local .env file.
@@ -41,11 +48,12 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
 if not SECRET_KEY:
-    if DEBUG or TESTING:
-        SECRET_KEY = 'django-insecure-local-development-key-do-not-use-in-prod'
+    if DEBUG or TESTING or IS_BUILD_COMMAND:
+        SECRET_KEY = 'django-insecure-build-time-key-do-not-use-in-prod'
     else:
         raise ImproperlyConfigured(
-            "SECRET_KEY environment variable is required when DEBUG is False."
+            "SECRET_KEY environment variable is required when DEBUG is False. "
+            "Set it in your environment (e.g. Vercel project settings)."
         )
 
 ALLOWED_HOSTS = [h for h in os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(',') if h]
