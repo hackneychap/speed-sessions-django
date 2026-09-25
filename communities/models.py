@@ -28,7 +28,14 @@ class Community(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base = slugify(self.name) or "community"
+            slug = base
+            taken = Community.objects.exclude(pk=self.pk)
+            suffix = 2
+            while taken.filter(slug=slug).exists():
+                slug = f"{base}-{suffix}"
+                suffix += 1
+            self.slug = slug
         if not self.join_code:
             self.join_code = generate_join_code()
             # Ensure it's unique

@@ -20,20 +20,25 @@ def community_detail_view(request, slug):
         item.color_list = [c.strip() for c in item.available_colors.split(',')]
         
     is_manager = request.user in community.managers.all()
-    
-    # Get the next scheduled workout
-    next_session = community.sessions.filter(date__gte=timezone.now().date()).order_by('date').first()
-    
+
+    # Check if visitor is a member of this community
+    is_member = False
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+        is_member = request.user.profile.community == community
+
+    # Scheduled workouts are only visible to members and managers of this
+    # community; other authenticated visitors must not see them.
+    next_session = None
+    if is_member or is_manager:
+        next_session = community.sessions.filter(
+            date__gte=timezone.now().date()
+        ).order_by('date').first()
+
     # Get the next calendar event
     event_qs = community.calendar_events.filter(date__gte=timezone.now().date()).order_by('date')
     if not is_manager:
         event_qs = event_qs.filter(is_public=True)
     next_event = event_qs.first()
-    
-    # Check if visitor is a member of this community
-    is_member = False
-    if request.user.is_authenticated and hasattr(request.user, 'profile'):
-        is_member = request.user.profile.community == community
 
     # Check if visitor is a manager of *another* community
     is_visitor_manager = False

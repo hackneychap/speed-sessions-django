@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from django.http import QueryDict, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.http import QueryDict, HttpResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from workouts.utils import calculate_vdot, calculate_pace_from_vdot, calculate_tss, TRAINING_ZONES
@@ -56,6 +55,21 @@ def parse_group_value(metric, value):
         return None
     res = calculate_vdot(5000, minutes)
     return res["vdot_score"] if isinstance(res, dict) else res
+
+
+def _user_can_access_block(user, block):
+    """A user may use a block they created, a tradeable block, or one owned by
+    their own community. Everything else is forbidden."""
+    if block.created_by_id == user.id:
+        return True
+    if block.is_tradeable:
+        return True
+    profile = getattr(user, 'profile', None)
+    return bool(
+        profile
+        and block.community_id
+        and profile.community_id == block.community_id
+    )
 
 
 @login_required
@@ -123,7 +137,6 @@ def block_list_view(request):
 def copy_training_block_view(request, block_id):
     """View to copy a training block to the user's community instantly."""
     original_block = get_object_or_404(TrainingBlock, id=block_id, is_tradeable=True)
-
     community = None
     if hasattr(request.user, 'profile'):
         community = request.user.profile.community
@@ -183,7 +196,10 @@ def create_training_block_view(request):
 def get_schedule_form_view(request, block_id):
     """HTMX view to return the scheduling form for a specific block."""
     block = get_object_or_404(TrainingBlock, id=block_id)
+    if not _user_can_access_block(request.user, block):
+        return HttpResponseForbidden("You are not allowed to use this block.")
     return render(request, 'session_planner/partials/_schedule_form.html', {'block': block})
+
 
 @require_http_methods(["POST"])
 @login_required
@@ -196,6 +212,8 @@ def apply_block_to_calendar_view(request):
         return HttpResponse("Missing data", status=400)
     
     block = get_object_or_404(TrainingBlock, id=block_id)
+    if not _user_can_access_block(request.user, block):
+        return HttpResponseForbidden("You are not allowed to use this block.")
     try:
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
     except ValueError:
@@ -244,9 +262,18 @@ def _extract_workout_structure(post_data, prefix=''):
 
     for item in item_types:
         if item == 'block_start':
+            raw_mult = (
+                block_multipliers[block_idx]
+                if block_idx < len(block_multipliers)
+                else ''
+            )
+            try:
+                multiplier = int(raw_mult) if raw_mult not in (None, '') else 1
+            except (TypeError, ValueError):
+                multiplier = 1
             current_block = {
                 'type': 'block',
-                'multiplier': int(block_multipliers[block_idx] if block_idx < len(block_multipliers) and block_multipliers[block_idx] and block_multipliers[block_idx] != '' else 1),
+                'multiplier': max(1, multiplier),
                 'segments': []
             }
             block_idx += 1
@@ -473,7 +500,10 @@ def recalculate_group_plan_view(request):
     Recalculate a single group's plan based on changed inputs within the group card.
     """
     name = request.POST.get('group_name')
-    vdot = float(request.POST.get('group_vdot', 0))
+    try:
+        vdot = float(request.POST.get('group_vdot') or 0)
+    except (TypeError, ValueError):
+        vdot = 0
     forloop_counter = request.POST.get('forloop_counter')
     prefix = request.POST.get('group_prefix')
     

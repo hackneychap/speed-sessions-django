@@ -10,8 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+import sys
 import dj_database_url
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,32 +22,66 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Detect if running on Vercel
 IS_VERCEL = os.environ.get('VERCEL') == '1'
 
+# Detect a test run (pytest-django forces DEBUG=False; we don't want HTTPS
+# redirects or HSTS breaking the test client).
+TESTING = 'pytest' in sys.modules or any('pytest' in arg for arg in sys.argv)
+
+# Management commands that legitimately run at build/CI time and do not need a
+# real secret key (collectstatic, migrate...). This keeps `bash build.sh`
+# working even if the build environment does not expose SECRET_KEY, while the
+# running server still requires one.
+_BUILD_COMMANDS = {'collectstatic', 'migrate', 'makemigrations', 'showmigrations', 'check'}
+IS_BUILD_COMMAND = any(arg in _BUILD_COMMANDS for arg in sys.argv)
+
 env_path = BASE_DIR / '.env'
-load_dotenv(dotenv_path=env_path, override=True)
+# override=False so real environment variables (Vercel, CI) always win over a
+# stray local .env file.
+load_dotenv(dotenv_path=env_path, override=False)
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(',')
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG or TESTING or IS_BUILD_COMMAND:
+        SECRET_KEY = 'django-insecure-build-time-key-do-not-use-in-prod'
+    else:
+        raise ImproperlyConfigured(
+            "SECRET_KEY environment variable is required when DEBUG is False. "
+            "Set it in your environment (e.g. Vercel project settings)."
+        )
+
+ALLOWED_HOSTS = [h for h in os.environ.get('ALLOWED_HOSTS', '127.0.0.1').split(',') if h]
 if IS_VERCEL:
     ALLOWED_HOSTS.append('.vercel.app')
 
-if IS_VERCEL:
-    # Vercel handles SSL termination at the proxy level
+# Security settings are applied whenever we are not running DEBUG, not only on
+# Vercel, so Docker/other hosts get the same hardening.
+if not DEBUG and not TESTING:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True').lower() == 'true'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    
-    # Trust Vercel's domain for CSRF
-    CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS if host and host != '127.0.0.1']
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+
+    # Trust configured hosts (and Vercel preview subdomains) for CSRF.
+    csrf_origins = [
+        f"https://{host}"
+        for host in ALLOWED_HOSTS
+        if host and not host.startswith('.') and host not in ('127.0.0.1', 'localhost')
+    ]
+    if IS_VERCEL:
+        csrf_origins.append('https://*.vercel.app')
+    CSRF_TRUSTED_ORIGINS = csrf_origins
 
 
 
@@ -59,6 +95,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     # allauth
     'allauth',
     'allauth.account',
@@ -74,14 +111,27 @@ INSTALLED_APPS = [
     'merch.apps.MerchConfig',
     'djstripe',
     'anymail',
+    'storages',
 ]
 
 STRIPE_LIVE_PUBLIC_KEY = os.getenv("STRIPE_LIVE_PUBLIC_KEY", "")
 STRIPE_LIVE_SECRET_KEY = os.getenv("STRIPE_LIVE_SECRET_KEY", "")
-STRIPE_TEST_PUBLIC_KEY = os.getenv("STRIPE_TEST_PUBLIC_KEY", "pk_test_...")
-STRIPE_TEST_SECRET_KEY = os.getenv("STRIPE_TEST_SECRET_KEY", "sk_test_...")
-STRIPE_LIVE_MODE = False  # Change to True in production
-DJSTRIPE_WEBHOOK_SECRET = os.getenv("DJSTRIPE_WEBHOOK_SECRET", "whsec_...")
+STRIPE_TEST_PUBLIC_KEY = os.getenv("STRIPE_TEST_PUBLIC_KEY", "")
+STRIPE_TEST_SECRET_KEY = os.getenv("STRIPE_TEST_SECRET_KEY", "")
+# Controlled by env so production can switch to live without a code change.
+STRIPE_LIVE_MODE = os.getenv("STRIPE_LIVE_MODE", "False").lower() == "true"
+# The single key the app should use for API calls (views/admin must use this).
+STRIPE_ACTIVE_SECRET_KEY = (
+    STRIPE_LIVE_SECRET_KEY if STRIPE_LIVE_MODE else STRIPE_TEST_SECRET_KEY
+)
+DJSTRIPE_WEBHOOK_SECRET = os.getenv("DJSTRIPE_WEBHOOK_SECRET", "")
+if not DJSTRIPE_WEBHOOK_SECRET and not DEBUG and not TESTING:
+    # Without this, Stripe webhooks cannot be verified and orders never advance.
+    import warnings
+    warnings.warn(
+        "DJSTRIPE_WEBHOOK_SECRET is not set. Stripe webhooks will not update orders.",
+        UserWarning,
+    )
 DJSTRIPE_USE_NATIVE_JSONFIELD = True # Standard for newer Django
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 
@@ -123,6 +173,7 @@ AUTHENTICATION_BACKENDS = [
 SITE_ID = 1
 
 ACCOUNT_ADAPTER = 'speed_sessions.adapter.CustomAccountAdapter'
+ACCOUNT_FORMS = {'signup': 'speed_sessions.forms.CustomSignupForm'}
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
@@ -176,7 +227,13 @@ DATABASES = {
 #overwrite on render
 db_url = os.getenv('DATABASE_URL')
 if db_url and (db_url.startswith('postgresql://') or db_url.startswith('postgres://')):
-    DATABASES['default'] = dj_database_url.config(conn_max_age=600)
+    # conn_max_age defaults to 0: persistent connections are a poor fit for
+    # serverless (Vercel). Set DB_CONN_MAX_AGE>0 only behind a connection pooler.
+    conn_max_age = int(os.getenv('DB_CONN_MAX_AGE', '0'))
+    DATABASES['default'] = dj_database_url.config(
+        conn_max_age=conn_max_age,
+        conn_health_checks=True,
+    )
 
 
 # Password validation
@@ -209,8 +266,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-USE_L10N = True
-
 DATE_FORMAT = 'd/m/Y'
 SHORT_DATE_FORMAT = 'd/m/Y'
 
@@ -220,11 +275,20 @@ SHORT_DATE_FORMAT = 'd/m/Y'
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles' # Directory where collectstatic will gather files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+# Django 5.1+ removed STATICFILES_STORAGE; storages must be configured here.
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    },
+}
+# Degrade gracefully instead of raising if the manifest is stale/missing.
+WHITENOISE_MANIFEST_STRICT = False
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -250,14 +314,41 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 FORMS_URLFIELD_ASSUME_HTTPS = True
 
-if IS_VERCEL:
-    # Vercel filesystem is ephemeral. Media uploads will be lost on redeploy.
-    # Consider using django-storages with S3 or Cloudinary.
+# --- Media storage ---------------------------------------------------------
+# Vercel/Docker filesystems are ephemeral, so uploaded media must live in
+# object storage. Any S3-compatible provider works (AWS S3, Cloudflare R2,
+# Backblaze B2, DigitalOcean Spaces, Supabase Storage, MinIO...). Set
+# AWS_STORAGE_BUCKET_NAME to enable it; otherwise local FileSystemStorage is
+# used (fine for development, data-lossy in production).
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+if AWS_STORAGE_BUCKET_NAME:
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")  # required by R2/MinIO
+    AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN")  # CDN domain
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = False
+    STORAGES["default"] = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    }
+    if AWS_S3_CUSTOM_DOMAIN:
+        MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+    elif AWS_S3_ENDPOINT_URL:
+        MEDIA_URL = f"{AWS_S3_ENDPOINT_URL.rstrip('/')}/{AWS_STORAGE_BUCKET_NAME}/"
+    else:
+        MEDIA_URL = (
+            f"https://{AWS_STORAGE_BUCKET_NAME}.s3."
+            f"{AWS_S3_REGION_NAME or 'us-east-1'}.amazonaws.com/"
+        )
+elif IS_VERCEL:
     import warnings
     warnings.warn(
-        "Running on Vercel with local FileSystemStorage. Media uploads will NOT persist. "
-        "Set up a cloud storage provider (e.g., S3, Cloudinary) for production.",
-        UserWarning
+        "Running on Vercel without object storage. Media uploads will NOT persist "
+        "and will 404. Set AWS_STORAGE_BUCKET_NAME (and credentials) to enable "
+        "S3-compatible storage.",
+        UserWarning,
     )
 
 # Email Settings

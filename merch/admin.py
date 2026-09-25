@@ -7,8 +7,6 @@ import stripe
 from django.conf import settings
 from djstripe.models import Customer
 
-stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
-
 class ShippingCostForm(forms.Form):
     estimated_total_shipping_cost = forms.DecimalField(max_digits=10, decimal_places=2)
 
@@ -30,6 +28,10 @@ class OrderAdmin(admin.ModelAdmin):
     actions = ['generate_draft_invoices']
 
     def generate_draft_invoices(self, request, queryset):
+        stripe.api_key = settings.STRIPE_ACTIVE_SECRET_KEY
+        if not stripe.api_key:
+            self.message_user(request, "Stripe secret key is not configured.", level='error')
+            return HttpResponseRedirect(request.get_full_path())
         if 'apply' in request.POST:
             form = ShippingCostForm(request.POST)
             if form.is_valid():
@@ -47,13 +49,13 @@ class OrderAdmin(admin.ModelAdmin):
                     stripe.InvoiceItem.create(
                         customer=stripe_customer_id,
                         amount=int(order.base_cost * 100),
-                        currency="usd",
+                        currency="gbp",
                         description=f"Merchandise for Order #{order.id}"
                     )
                     stripe.InvoiceItem.create(
                         customer=stripe_customer_id,
                         amount=int(split_shipping * 100),
-                        currency="usd",
+                        currency="gbp",
                         description="Split Batch Shipping"
                     )
 
@@ -69,7 +71,7 @@ class OrderAdmin(admin.ModelAdmin):
                     order.status = 'DRAFT_GENERATED'
                     order.save()
 
-                self.message_user(request, f"Generated {count} draft invoices with ${split_shipping} shipping each.")
+                self.message_user(request, f"Generated {count} draft invoices with £{split_shipping} shipping each.")
                 return HttpResponseRedirect(request.get_full_path())
         else:
             form = ShippingCostForm()
