@@ -93,3 +93,29 @@ Full test suite after changes: **53 passed** (was 41 passed / 7 failed).
   `migrate` at build time is racy. Review the actual Vercel build settings.
 - `update_order_status_view` authorises via the first order item only (multi-community orders).
 - Django Tasks email has no worker configured for serverless; it may not run on Vercel.
+
+## Vercel deploy repair (follow-up, 2026-09-25)
+Two build blockers surfaced when deploying this branch:
+
+1. **`SECRET_KEY` required at build time.** `settings.py` hard-failed when the key was
+   missing and `DEBUG=False`, but the Vercel build runs `collectstatic`/`migrate` (which
+   don't need a key). Fixed: build-time management commands
+   (`collectstatic`, `migrate`, `makemigrations`, `showmigrations`, `check`) use a throwaway
+   key; the running server still requires a real `SECRET_KEY`.
+
+2. **`InconsistentMigrationHistory: Migration socialaccount.0001_initial is applied before
+   its dependency sites.0001_initial`.** The production database had allauth's
+   `socialaccount` migrations applied while `django.contrib.sites` was absent. Adding
+   `sites` (required by allauth social login) made Django's consistency check refuse to run
+   any `migrate`.
+   Fixed with:
+   - `speed_sessions/settings_repair.py` — same settings minus the `allauth.socialaccount*`
+     apps, so its already-applied rows are treated as unknown and skipped by the check.
+   - `build.sh` — runs `migrate sites --settings=speed_sessions.settings_repair` before the
+     normal `migrate`. Idempotent; a no-op once `sites` is applied.
+
+   Verified end-to-end against a simulated database: normal `migrate` raised
+   `InconsistentMigrationHistory`, the repair applied `sites.0001`/`sites.0002`, and the
+   subsequent normal `migrate` reported no pending migrations. The default
+   `Site(id=1, domain='example.com')` is created (used by `SITE_ID = 1`).
+
