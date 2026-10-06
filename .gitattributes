@@ -1,0 +1,25 @@
+# Normalise line endings so Windows tooling doesn't register phantom diffs.
+# Committed blobs are LF; keep it that way regardless of editor/OS.
+* text=auto eol=lf
+
+# Never mangle binary assets in the repo or working tree.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.sqlite3 binary
+*.db binary
+
+# Windows-only scripts legitimately want CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
