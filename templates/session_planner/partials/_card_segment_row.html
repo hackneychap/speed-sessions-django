@@ -37,6 +37,7 @@
             <!-- Intensity and Rest -->
             <div class="flex items-center gap-1">
                 <select name="{{ prefix }}intensity" class="bg-white text-black border-black border-2 recalc-trigger w-auto min-w-[85px] text-[10px] p-1 focus:outline-none uppercase font-black">
+                    <option {% if segment.intensity == 'Marathon' %}selected{% endif %}>Marathon</option>
                     <option {% if segment.intensity == 'Threshold' or not segment.intensity %}selected{% endif %}>Threshold</option>
                     <option {% if segment.intensity == 'Interval' %}selected{% endif %}>Interval</option>
                     <option {% if segment.intensity == 'Repetition' %}selected{% endif %}>Repetition</option>

@@ -23,7 +23,9 @@ COMMON_INTERVALS = {
     "1000m Interval": {"distance": 1000, "zone": "Interval"},
     "1000m Threshold": {"distance": 1000, "zone": "Threshold"},
     "1600m Interval": {"distance": 1600, "zone": "Interval"},
-    "1600m Threshold": {"distance": 1600, "zone": "Threshold"}
+    "1600m Threshold": {"distance": 1600, "zone": "Threshold"},
+    "1000m Marathon": {"distance": 1000, "zone": "Marathon"},
+    "1600m Marathon": {"distance": 1600, "zone": "Marathon"}
 }
 
 

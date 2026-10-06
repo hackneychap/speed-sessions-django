@@ -60,3 +60,31 @@ class WorkoutUtilsTest(TestCase):
         time_minutes_high = _solve_for_time(85, 5000)
         self.assertIsNotNone(time_minutes_high)
         self.assertAlmostEqual(time_minutes_high, 12.62, places=2)
+
+    def test_calculate_vdot_includes_marathon_interval_rows(self):
+        """The 1000m/1600m Marathon interval targets must be computed."""
+        vdot_data = calculate_vdot(5000, 18.5)
+        interval_times = vdot_data['target_interval_times']
+        self.assertIn('1000m Marathon', interval_times)
+        self.assertIn('1600m Marathon', interval_times)
+        # Must be a real time range with a lap time, not an empty string
+        self.assertIn(' - ', interval_times['1000m Marathon'])
+        self.assertIn('(Lap:', interval_times['1000m Marathon'])
+
+    def test_marathon_interval_rows_actually_render(self):
+        """Computed is not the same as displayed.
+
+        _vdot_results.html filters target_interval_times by name into sections,
+        so without a Marathon section the new rows would be computed and then
+        rendered nowhere at all.
+        """
+        from django.template.loader import render_to_string
+        vdot_data = calculate_vdot(5000, 18.5)
+
+        html = render_to_string('workouts/_vdot_results.html', vdot_data)
+        self.assertIn('Marathon (Race Pace)', html)
+
+        # Scope the check to the Marathon section itself
+        section = html.split('Marathon (Race Pace)')[1]
+        self.assertIn('1000m', section)
+        self.assertIn('1600m', section)
