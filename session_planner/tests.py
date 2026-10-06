@@ -1,8 +1,13 @@
-from django.test import TestCase, Client
+import re
+from pathlib import Path
+
+from django.conf import settings
+from django.test import TestCase, Client, SimpleTestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 from communities.models import Community
 from session_planner.models import Session, SessionGroup
+from workouts.utils import TRAINING_ZONES
 
 class SessionPlannerViewTest(TestCase):
     def setUp(self):
@@ -40,6 +45,61 @@ class SessionPlannerViewTest(TestCase):
         self.assertContains(response, '1:25.76')
         # Check if it contains the 100m split label
         self.assertContains(response, '100m:')
+
+    def test_recalculate_group_plan_with_marathon_intensity(self):
+        """A Marathon segment must produce a pace, not be silently dropped.
+
+        process_segment() returns None for an intensity missing from
+        TRAINING_ZONES, which would make the segment vanish from the card.
+        """
+        data = {
+            'group_name': 'Group A',
+            'group_vdot': '40',
+            'forloop_counter': '1',
+            'item_type': ['segment'],
+            'reps': ['6'],
+            'distance': ['1000'],
+            'intensity': ['Marathon'],
+            'rest': ['60'],
+            'block_multiplier': ['1'],
+        }
+
+        url = reverse('recalculate-plan')
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Group A')
+        self.assertContains(response, '5:17.17')   # target pace @ VDOT 40 / 84%
+        self.assertContains(response, '2:06.87')   # 400m lap
+        self.assertContains(response, '0:31.72')   # 100m split
+
+    def test_planner_surfaces_marathon_in_served_html(self):
+        """Both dropdowns must actually reach the browser with Marathon in them.
+
+        The template-source guard proves the option was written; this proves it
+        is rendered by the real views.
+        """
+        # 1. Base structure builder on the planner page
+        page = self.client.get(reverse('planner-page'))
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, '>Marathon</option>')
+
+        # 2. Per-group override dropdown, rendered into a group card
+        plan = self.client.post(reverse('generate-plan'), {
+            'groups_count': '1',
+            'group_1_name': 'A',
+            'group_1_metric': 'vdot',
+            'group_1_value': '40',
+            'item_type': ['segment'],
+            'reps': ['6'],
+            'distance': ['1000'],
+            'intensity': ['Marathon'],
+            'rest': ['60'],
+            'block_multiplier': ['1'],
+        })
+        self.assertEqual(plan.status_code, 200)
+        self.assertContains(plan, '>Marathon</option>')
+        self.assertContains(plan, '5:17.17')       # Marathon pace rendered into the card
 
     def test_generate_plan_view(self):
         # Prepare POST data for all groups
@@ -178,3 +238,68 @@ class TrainingBlockViewTest(TestCase):
         self.assertEqual(copied_block.community, self.community)
         self.assertFalse(copied_block.is_tradeable)
         self.assertEqual(copied_block.templates.count(), 1)
+
+
+class IntensityZoneConsistencyTest(SimpleTestCase):
+    """Guard: every intensity the planner offers must exist in TRAINING_ZONES.
+
+    process_segment() (session_planner/views.py) returns None for an intensity
+    that is not a TRAINING_ZONES key, so a dropdown option with no matching zone
+    makes the segment vanish from every group card AND every WhatsApp copy with
+    no error at all. This test fails loudly at that boundary instead.
+    """
+
+    INTENSITY_TEMPLATES = [
+        'session_planner/partials/_workout_segment.html',
+        'session_planner/partials/_card_segment_row.html',
+    ]
+
+    def _options(self, rel_path):
+        html = (Path(settings.BASE_DIR) / 'templates' / rel_path).read_text(encoding='utf-8')
+        select = re.search(r'name="[^"]*intensity".*?</select>', html, re.S)
+        self.assertIsNotNone(select, f'no intensity <select> found in {rel_path}')
+        return [o.strip() for o in re.findall(r'<option[^>]*>([^<]+)</option>', select.group(0))]
+
+    def test_dropdown_options_are_real_training_zones(self):
+        for rel_path in self.INTENSITY_TEMPLATES:
+            with self.subTest(template=rel_path):
+                options = self._options(rel_path)
+                self.assertTrue(options, f'no <option> tags found in {rel_path}')
+                for opt in options:
+                    self.assertIn(
+                        opt, TRAINING_ZONES,
+                        f'{rel_path} offers intensity "{opt}", which is not a '
+                        f'TRAINING_ZONES key — segments using it would be silently dropped',
+                    )
+
+    def test_option_order_matches_locked_decision(self):
+        """Marathon is selectable in both dropdowns, in the agreed order."""
+        for rel_path in self.INTENSITY_TEMPLATES:
+            with self.subTest(template=rel_path):
+                options = self._options(rel_path)
+                self.assertIn('Marathon', options)
+                self.assertEqual(
+                    options,
+                    ['Marathon', 'Threshold', 'Interval', 'Repetition'],
+                    f'{rel_path} option order changed',
+                )
+
+    def test_threshold_remains_the_default_option(self):
+        """Threshold keeps the `or not segment.intensity` guard; Marathon must not.
+
+        That guard is what makes a brand-new segment default to Threshold rather
+        than Marathon. The `selected` keyword alone is not the signal — every
+        option carries an `{% if ... %}selected{% endif %}` conditional.
+        """
+        for rel_path in self.INTENSITY_TEMPLATES:
+            with self.subTest(template=rel_path):
+                html = (Path(settings.BASE_DIR) / 'templates' / rel_path).read_text(encoding='utf-8')
+                select = re.search(r'name="[^"]*intensity".*?</select>', html, re.S).group(0)
+
+                marathon_line = next(l for l in select.splitlines() if '>Marathon</option>' in l)
+                threshold_line = next(l for l in select.splitlines() if '>Threshold</option>' in l)
+
+                # Marathon is opt-in only — it has no "blank means me" guard
+                self.assertNotIn('or not segment.intensity', marathon_line)
+                # Threshold is the fallback default
+                self.assertIn('or not segment.intensity', threshold_line)
