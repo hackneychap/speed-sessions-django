@@ -62,6 +62,15 @@
 </div>
 
 <!-- SortableJS (pinned — `@latest` could break this page on a future release) -->
+<style>
+    /* Single class token only: SortableJS passes ghostClass straight to
+       classList.add(), which throws InvalidCharacterError on a space-separated
+       string -- and that throw aborts the drag. */
+    .sortable-ghost {
+        background-color: #e5e7eb !important;
+        opacity: 0.5;
+    }
+</style>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -69,7 +78,7 @@
         if (el) {
             new Sortable(el, {
                 animation: 150,
-                ghostClass: 'bg-gray-200 opacity-50'
+                ghostClass: 'sortable-ghost'
             });
         }
         
