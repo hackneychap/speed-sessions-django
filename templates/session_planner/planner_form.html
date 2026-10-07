@@ -211,6 +211,15 @@
         text-transform: uppercase;
         letter-spacing: 0.1em;
     }
+
+    /* The drag ghost. This MUST be a single class token: SortableJS passes the
+       option straight to classList.add(), which throws InvalidCharacterError on
+       a space-separated string -- and that throw aborts the drag outright.
+       !important is needed because the rows carry bg-white from Tailwind. */
+    .sortable-ghost {
+        background-color: #e5e7eb !important;
+        opacity: 0.5;
+    }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <script>
@@ -222,7 +231,13 @@
     var SHARED = {
         animation: 150,
         filter: NO_DRAG,
-        ghostClass: 'bg-gray-200 opacity-50',
+        // Must be false. With the default (true) SortableJS calls
+        // preventDefault() on the mousedown of anything matching `filter`,
+        // which stops the inputs ever receiving focus -- they look dead.
+        // `filter` still excludes them as drag sources.
+        preventOnFilter: false,
+        // Single class token only -- see the .sortable-ghost rule above.
+        ghostClass: 'sortable-ghost',
         // Nested lists + animation: without this an ancestor with overflow or a
         // transform clips the dragged element and the drag appears to vanish.
         fallbackOnBody: true,
