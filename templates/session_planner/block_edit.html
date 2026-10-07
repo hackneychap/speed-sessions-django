@@ -61,15 +61,15 @@
     </form>
 </div>
 
-<!-- SortableJS -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<!-- SortableJS (pinned — `@latest` could break this page on a future release) -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var el = document.getElementById('sortable-list');
         if (el) {
             new Sortable(el, {
                 animation: 150,
-                ghostClass: 'bg-white'
+                ghostClass: 'bg-gray-200 opacity-50'
             });
         }
         
