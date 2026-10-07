@@ -2,11 +2,13 @@ import re
 from pathlib import Path
 
 from django.conf import settings
+from django.http import QueryDict
 from django.test import TestCase, Client, SimpleTestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 from communities.models import Community
 from session_planner.models import Session, SessionGroup
+from session_planner.views import _extract_workout_structure
 from workouts.utils import TRAINING_ZONES
 
 class SessionPlannerViewTest(TestCase):
@@ -303,3 +305,125 @@ class IntensityZoneConsistencyTest(SimpleTestCase):
                 self.assertNotIn('or not segment.intensity', marathon_line)
                 # Threshold is the fallback default
                 self.assertIn('or not segment.intensity', threshold_line)
+
+
+def _seg(reps, distance, intensity, rest):
+    """One segment spec for WorkoutStructureParsingTest._post_from()."""
+    return {'reps': reps, 'distance': distance, 'intensity': intensity, 'rest': rest}
+
+
+class WorkoutStructureParsingTest(SimpleTestCase):
+    """Pins the parser contract that Step 1's drag-and-drop depends on.
+
+    `_extract_workout_structure` consumes the POST *positionally*, so the order
+    of the markup in the planner IS the order of the saved workout. That is the
+    whole reason drag-and-drop needs no hidden order field and no server change
+    -- if this contract ever breaks, the drag silently reorders nothing.
+    """
+
+    @staticmethod
+    def _post_from(spec):
+        """Build a QueryDict from a declarative sequence.
+
+        Entries are either ('single', seg) or ('block', multiplier, [seg, ...]).
+        """
+        item_types, reps, dists, intens, rests, mults = [], [], [], [], [], []
+
+        def add_segment(seg):
+            item_types.append('segment')
+            reps.append(seg['reps'])
+            dists.append(seg['distance'])
+            intens.append(seg['intensity'])
+            rests.append(seg['rest'])
+
+        for entry in spec:
+            if entry[0] == 'single':
+                add_segment(entry[1])
+            else:
+                _, multiplier, segments = entry
+                item_types.append('block_start')
+                mults.append(multiplier)
+                for seg in segments:
+                    add_segment(seg)
+                item_types.append('block_end')
+
+        qd = QueryDict(mutable=True)
+        qd.setlist('item_type', item_types)
+        qd.setlist('reps', [str(v) for v in reps])
+        qd.setlist('distance', [str(v) for v in dists])
+        qd.setlist('intensity', intens)
+        qd.setlist('rest', [str(v) for v in rests])
+        qd.setlist('block_multiplier', [str(v) for v in mults])
+        return qd
+
+    def test_order_follows_the_markup(self):
+        """Reordering the DOM is reordering the workout -- the basis for the drag."""
+        structure = _extract_workout_structure(self._post_from([
+            ('block', 3, [_seg(4, 400, 'Interval', 90), _seg(4, 200, 'Repetition', 90)]),
+            ('single', _seg(1, 400, 'Threshold', 60)),
+            ('single', _seg(8, 200, 'Interval', 60)),
+        ]))
+
+        self.assertEqual([i['type'] for i in structure], ['block', 'single', 'single'])
+        self.assertEqual(structure[0]['multiplier'], 3)
+        self.assertEqual(len(structure[0]['segments']), 2)
+        self.assertEqual(structure[1]['segment']['reps'], 1)
+        self.assertEqual(structure[2]['segment']['intensity'], 'Interval')
+
+    def test_segment_dragged_out_of_a_block_becomes_a_top_level_single(self):
+        structure = _extract_workout_structure(self._post_from([
+            ('single', _seg(4, 400, 'Interval', 90)),
+            ('block', 3, [_seg(4, 200, 'Repetition', 90)]),
+        ]))
+
+        self.assertEqual([i['type'] for i in structure], ['single', 'block'])
+        self.assertEqual(structure[0]['segment']['reps'], 4)
+        self.assertEqual(
+            structure[1]['segments'],
+            [{'reps': 4, 'distance': 200, 'intensity': 'Repetition', 'rest': 90}],
+        )
+
+    def test_segment_dragged_into_a_block_joins_it(self):
+        structure = _extract_workout_structure(self._post_from([
+            ('block', 3, [
+                _seg(4, 400, 'Interval', 90),
+                _seg(1, 200, 'Threshold', 60),
+                _seg(8, 200, 'Interval', 60),
+            ]),
+        ]))
+
+        self.assertEqual(len(structure), 1)
+        self.assertEqual(len(structure[0]['segments']), 3)
+
+    def test_emptied_block_parses_as_an_empty_block(self):
+        """Q1: an emptied block is still a valid block, so it is kept, not rejected."""
+        structure = _extract_workout_structure(self._post_from([
+            ('block', 3, []),
+            ('single', _seg(1, 400, 'Threshold', 60)),
+        ]))
+
+        self.assertEqual(structure[0], {'type': 'block', 'multiplier': 3, 'segments': []})
+
+    def test_nested_block_is_a_known_lossy_hazard(self):
+        """Documents WHY a block must never be droppable inside another block.
+
+        The parser tracks a single `current_block`, so a second block_start
+        overwrites the first: the outer block is silently discarded -- no
+        exception, no log, the user just loses a block. The SortableJS
+        `put: '.segment-row'` guard is what stops anyone reaching this state;
+        this test exists so the hazard stays visible if the parser changes.
+        """
+        qd = QueryDict(mutable=True)
+        qd.setlist('item_type', ['block_start', 'block_start', 'segment', 'block_end', 'block_end'])
+        qd.setlist('reps', ['4'])
+        qd.setlist('distance', ['400'])
+        qd.setlist('intensity', ['Interval'])
+        qd.setlist('rest', ['90'])
+        qd.setlist('block_multiplier', ['3', '2'])
+
+        structure = _extract_workout_structure(qd)
+
+        # Only ONE block survives, and it is the INNER one. The outer block
+        # (multiplier 3) is gone, along with its own block_end.
+        self.assertEqual(len(structure), 1)
+        self.assertEqual(structure[0]['multiplier'], 2)

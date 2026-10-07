@@ -186,4 +186,86 @@
         {% endif %}
     </div>
 </div>
+
+<!-- ===== Step 1 drag-and-drop reordering =====================================
+     Reordering here is purely DOM order: _extract_workout_structure consumes
+     the POST positionally, so nothing is persisted until Save. See the ticket
+     "Run Trash - Drag and drop reordering in Step 1" for the reasoning.
+     ========================================================================= -->
+<style>
+    /* A nested .block-segments with no height is not a drop target, so a block
+       emptied by dragging could never be refilled. Give it a floor. */
+    #workout-items .block-segments { min-height: 2.75rem; }
+
+    /* "Drop a segment here" while a repeat block is empty. Pure CSS, so there
+       is no placeholder element for SortableJS to treat as a draggable. */
+    #workout-items .block-segments:not(:has(.segment-row))::after {
+        content: "Drop a segment here";
+        display: block;
+        padding: 0.75rem;
+        border: 2px dashed #000;
+        text-align: center;
+        color: #4b5563;
+        font-size: 0.625rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+(function () {
+    // Form controls and links must never start a drag, or you could not click
+    // into a reps field. SortableJS refuses the drag on mousedown for these.
+    var NO_DRAG = 'input, select, textarea, button, a, label';
+
+    var SHARED = {
+        animation: 150,
+        filter: NO_DRAG,
+        ghostClass: 'bg-gray-200 opacity-50',
+        // Nested lists + animation: without this an ancestor with overflow or a
+        // transform clips the dragged element and the drag appears to vanish.
+        fallbackOnBody: true,
+        // Nested drop targets overlap, and the default threshold is twitchy
+        // enough that items jump between lists.
+        swapThreshold: 0.65,
+        // Touch only: a tap still lands on the input instead of starting a drag.
+        delay: 150,
+        delayOnTouchOnly: true
+    };
+
+    function initSortables(root) {
+        var scope = root || document;
+
+        // Outer list: simple segments and whole repeat blocks both live here.
+        var outer = document.getElementById('workout-items');
+        if (outer && !outer._sortable) {
+            outer._sortable = new Sortable(outer, Object.assign({}, SHARED, {
+                group: { name: 'workout', pull: true, put: true }
+            }));
+        }
+
+        // Inner lists, scoped to Step 1 by the id (the group cards use a
+        // `workout-items` CLASS, not this id, and must not be caught here).
+        //
+        // `put: '.segment-row'` is a hard requirement, not a preference:
+        // _extract_workout_structure tracks a single `current_block`, so a
+        // block dropped inside a block SILENTLY DESTROYS the outer one.
+        scope.querySelectorAll('#workout-items .block-segments').forEach(function (list) {
+            if (list._sortable) return;
+            list._sortable = new Sortable(list, Object.assign({}, SHARED, {
+                group: { name: 'workout', pull: true, put: '.segment-row' }
+            }));
+        });
+    }
+
+    // Step 1 adds segments and blocks via htmx beforeend swaps, so initialise
+    // on every htmx load rather than once on DOMContentLoaded. The _sortable
+    // guard makes a double-init harmless.
+    if (window.htmx) {
+        htmx.onLoad(function (content) { initSortables(content); });
+    }
+    document.addEventListener('DOMContentLoaded', function () { initSortables(document); });
+})();
+</script>
 {% endblock %}
