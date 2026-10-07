@@ -427,3 +427,65 @@ class WorkoutStructureParsingTest(SimpleTestCase):
         # (multiplier 3) is gone, along with its own block_end.
         self.assertEqual(len(structure), 1)
         self.assertEqual(structure[0]['multiplier'], 2)
+
+
+class DragDropConfigTest(TestCase):
+    """Guard the SortableJS config against the two faults that reached master.
+
+    Neither fault is a Python error, so nothing in this suite could see them,
+    and both present in the browser as "the whole feature is broken":
+
+      1. a space-separated ``ghostClass`` -> classList.add() throws
+         InvalidCharacterError, which aborts the drag at the moment it starts
+         (cursor says "move", nothing moves);
+      2. ``preventOnFilter`` left at its default ``true`` -> SortableJS calls
+         preventDefault() on the mousedown of anything matching ``filter``,
+         and ``filter`` deliberately matches the inputs, so they can never be
+         focused.
+
+    Pin both in the SERVED html, because that is what the browser actually gets.
+    """
+
+    # Any `fooClass: 'a b'` in a SortableJS option is invalid.
+    CLASS_OPTION = re.compile(r"(\w+Class)\s*:\s*'([^']*)'")
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='draguser', password='password123')
+        self.community = Community.objects.create(name='Drag Community', slug='drag-community')
+        self.user.profile.community = self.community
+        self.user.profile.save()
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def _assert_class_options_are_single_tokens(self, html, where):
+        found = self.CLASS_OPTION.findall(html)
+        self.assertTrue(
+            found,
+            f'no SortableJS *Class options found in {where} -- did the drag-drop '
+            f'config get removed or renamed?',
+        )
+        for name, value in found:
+            self.assertNotIn(
+                ' ', value,
+                f"{where}: SortableJS {name}: '{value}' is not a single class "
+                f"token. classList.add() throws InvalidCharacterError on a "
+                f"space-separated string, and that throw aborts the drag.",
+            )
+
+    def test_planner_sortable_config(self):
+        page = self.client.get(reverse('planner-page'))
+        self.assertEqual(page.status_code, 200)
+        html = page.content.decode()
+
+        self.assertIn('preventOnFilter: false', html)
+        # With the default (true), preventDefault() fires on mousedown over any
+        # `filter` match -- i.e. every input in Step 1 -- so nothing is clickable.
+        self.assertNotIn('preventOnFilter: true', html)
+        self._assert_class_options_are_single_tokens(html, 'planner_form.html')
+
+    def test_block_edit_sortable_config(self):
+        where = 'block_edit.html'
+        path = Path(settings.BASE_DIR) / 'templates/session_planner/block_edit.html'
+        self._assert_class_options_are_single_tokens(
+            path.read_text(encoding='utf-8'), where,
+        )
