@@ -13,7 +13,7 @@
             Confirm
         </button>
         <button type="button" 
-                onclick="this.closest('form').outerHTML = '<button hx-get=\'{% url 'get-schedule-form' block.id %}\' hx-target=\'#schedule-container-{{ block.id }}\' hx-swap=\'innerHTML\' class=\'w-full py-3 bg-white hover:bg-white text-black font-bold rounded-none uppercase tracking-wider transition-colors border border-black border-2\'>Schedule Block</button>'"
+                onclick="this.closest('form').outerHTML = '<button hx-get=\'{% url 'get-schedule-form' block.id %}\' hx-target=\'#schedule-container-{{ block.id|escapejs }}\' hx-swap=\'innerHTML\' class=\'w-full py-3 bg-white hover:bg-white text-black font-bold rounded-none uppercase tracking-wider transition-colors border border-black border-2\'>Schedule Block</button>'"
                 class="px-3 py-2 bg-white hover:bg-white text-black rounded-none uppercase text-xs font-bold">
             Cancel
         </button>
