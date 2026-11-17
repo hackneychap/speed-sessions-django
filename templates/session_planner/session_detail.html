@@ -38,7 +38,7 @@
             ↔️ Expand All
         </button>
         <button class="px-6 py-3 bg-white text-black font-black rounded-none uppercase tracking-widest text-xs border-2 border-black hover:bg-black hover:text-white transition-all shadow-none"
-                onclick="copyAllWorkoutsToWhatsApp('{{ session.title }}', '{{ session.date|date:'l, M d' }}')">
+                onclick="copyAllWorkoutsToWhatsApp('{{ session.title|escapejs }}', '{{ session.date|date:'l, M d'|escapejs }}')">
             📋 Copy WhatsApp
         </button>
         <button class="px-6 py-3 bg-black text-white font-black rounded-none uppercase tracking-widest text-xs border-2 border-black hover:bg-white hover:text-black transition-all shadow-none"
@@ -58,11 +58,11 @@
                     
                     <div class="no-print pointer-events-auto flex gap-2 mt-3 relative z-30">
                         <button class="px-2 py-1 border-2 border-white text-white bg-black hover:bg-white hover:text-black rounded-none text-[10px] font-black uppercase transition-all" title="Copy to WhatsApp" 
-                                onclick="event.preventDefault(); event.stopPropagation(); copyWorkoutToWhatsApp('{{ group.name }}', {{ forloop.counter }})">
+                                onclick="event.preventDefault(); event.stopPropagation(); copyWorkoutToWhatsApp('{{ group.name|escapejs }}', {{ forloop.counter|escapejs }})">
                             📋 COPY
                         </button>
                         <button class="px-2 py-1 border-2 border-white text-white bg-black hover:bg-white hover:text-black rounded-none text-[10px] font-black uppercase transition-all" title="Download Image"
-                                onclick="event.preventDefault(); event.stopPropagation(); downloadCardAsImage('group-card-{{ forloop.counter }}', '{{ session.title|slugify }}_{{ group.name|slugify }}')">
+                                onclick="event.preventDefault(); event.stopPropagation(); downloadCardAsImage('group-card-{{ forloop.counter|escapejs }}', '{{ session.title|slugify }}_{{ group.name|slugify }}')">
                             🖼️ IMG
                         </button>
                     </div>
